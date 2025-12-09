@@ -23,7 +23,6 @@ services:
     name: attieke-frontend
     env: static
     rootDir: client
-    region: frankfurt
     plan: free
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
