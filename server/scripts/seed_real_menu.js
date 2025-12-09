@@ -210,6 +210,7 @@ const seedMenu = async () => {
 
     } catch (error) {
         console.error('Error seeding menu:', error);
+        throw error; // Re-throw to handle it in controller
     }
     // Do NOT close connection when running as module
     // finally {
