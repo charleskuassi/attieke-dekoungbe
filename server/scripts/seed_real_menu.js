@@ -210,9 +210,11 @@ const seedMenu = async () => {
 
     } catch (error) {
         console.error('Error seeding menu:', error);
-    } finally {
-        await sequelize.close();
     }
+    // Do NOT close connection when running as module
+    // finally {
+    //     await sequelize.close();
+    // }
 };
 
 // seedMenu();
