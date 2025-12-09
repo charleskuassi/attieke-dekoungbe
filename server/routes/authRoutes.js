@@ -24,40 +24,22 @@ if (process.env.GOOGLE_CLIENT_ID) {
     router.get('/google', passport.authenticate('google', { session: false, scope: ['profile', 'email'] }));
 
     router.get('/google/callback',
-        passport.authenticate('google', { session: false, failureRedirect: 'http://localhost:5173/login?error=google_failed' }),
+        passport.authenticate('google', { session: false, failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=google_failed` }),
         (req, res) => {
-            // Successful authentication
             const token = jwt.sign(
                 { id: req.user.id, role: req.user.role },
                 process.env.JWT_SECRET || 'your_super_secret_key',
                 { expiresIn: '1d' }
             );
 
-            // Redirect to Frontend with token
-            // TODO: Use env var for frontend URL
-            res.redirect(`http://localhost:5173/google-callback?token=${token}`);
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+            res.redirect(`${frontendUrl}/google-callback?token=${token}`);
         }
     );
 } else {
-    // Fallback if Google Auth is not configured
     router.get('/google', (req, res) => {
         res.status(503).send('Google Login is not configured on this server.');
     });
 }
-
-router.get('/google/callback',
-    passport.authenticate('google', { session: false, failureRedirect: 'http://localhost:5173/login?error=google_failed' }),
-    (req, res) => {
-        // Successful authentication
-        const token = jwt.sign(
-            { id: req.user.id, role: req.user.role },
-            process.env.JWT_SECRET || 'your_super_secret_key',
-            { expiresIn: '1d' }
-        );
-
-        // Redirect to Frontend with token
-        res.redirect(`http://localhost:5173/google-callback?token=${token}`);
-    }
-);
 
 module.exports = router;

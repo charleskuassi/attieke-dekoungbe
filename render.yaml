@@ -17,7 +17,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        value: https://attieke-dekoungbe.vercel.app
+        value: https://attieke-frontend.onrender.com
 
   - type: web
     name: attieke-frontend
