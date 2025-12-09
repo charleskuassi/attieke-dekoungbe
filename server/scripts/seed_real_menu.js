@@ -158,10 +158,20 @@ const seedMenu = async () => {
 
         const productsToCreate = [];
 
+        const imageMapping = require('./image_mapping.json');
+
         for (const item of menuData) {
             item.prices.forEach((price, index) => {
                 const name = getVariantName(item.name, index, item.prices.length);
-                const imageUrl = getImageUrl(item.name, item.category);
+
+                // 1. Try to find the user's manual image from local mapping
+                // The mapping returns paths like "/images/foo.jpg" which are correct for frontend
+                let imageUrl = imageMapping[name];
+
+                // 2. If not found, use the logic/placeholder
+                if (!imageUrl) {
+                    imageUrl = getImageUrl(item.name, item.category);
+                }
 
                 productsToCreate.push({
                     name: name,
