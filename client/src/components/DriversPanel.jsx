@@ -1,0 +1,137 @@
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Truck, Plus, Trash2, User, Phone } from 'lucide-react';
+
+const DriversPanel = () => {
+    const [drivers, setDrivers] = useState([]);
+    const [newDriver, setNewDriver] = useState({ name: '', phone: '' });
+
+    useEffect(() => {
+        fetchDrivers();
+    }, []);
+
+    const fetchDrivers = async () => {
+        try {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/drivers`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            setDrivers(res.data);
+        } catch (error) {
+            console.error("Error fetching drivers:", error);
+        }
+    };
+
+    const handleAdd = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/drivers`, newDriver, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            setNewDriver({ name: '', phone: '' });
+            fetchDrivers();
+            alert("Livreur ajouté !");
+        } catch (error) {
+            console.error("Error adding driver:", error);
+            alert("Erreur ajout livreur");
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!confirm("Supprimer ce livreur ?")) return;
+        try {
+            await axios.delete(`${import.meta.env.VITE_API_URL}/api/drivers/${id}`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            fetchDrivers();
+        } catch (error) {
+            console.error("Error deleting driver:", error);
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+                <Truck className="text-primary" /> Gestion des Livreurs
+            </h2>
+
+            {/* Form */}
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+                <h3 className="font-bold mb-4">Ajouter un livreur</h3>
+                <form onSubmit={handleAdd} className="flex gap-4">
+                    <div className="flex-1">
+                        <input
+                            type="text"
+                            placeholder="Nom complet"
+                            className="w-full border rounded-lg p-3"
+                            value={newDriver.name}
+                            onChange={e => setNewDriver({ ...newDriver, name: e.target.value })}
+                            required
+                        />
+                    </div>
+                    <div className="flex-1">
+                        <input
+                            type="text"
+                            placeholder="Téléphone"
+                            className="w-full border rounded-lg p-3"
+                            value={newDriver.phone}
+                            onChange={e => setNewDriver({ ...newDriver, phone: e.target.value })}
+                            required
+                        />
+                    </div>
+                    <button type="submit" className="bg-primary text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2">
+                        <Plus size={20} /> Ajouter
+                    </button>
+                </form>
+            </div>
+
+            {/* List */}
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+                <table className="w-full text-left">
+                    <thead className="bg-gray-50 border-b">
+                        <tr>
+                            <th className="p-4">Nom</th>
+                            <th className="p-4">Téléphone</th>
+                            <th className="p-4">Statut</th>
+                            <th className="p-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                        {drivers.map(driver => (
+                            <tr key={driver.id} className="hover:bg-gray-50">
+                                <td className="p-4 flex items-center gap-3">
+                                    <div className="bg-orange-100 p-2 rounded-full">
+                                        <User size={16} className="text-orange-600" />
+                                    </div>
+                                    <span className="font-bold">{driver.name}</span>
+                                </td>
+                                <td className="p-4 text-gray-600 flex items-center gap-2">
+                                    <Phone size={14} /> {driver.phone}
+                                </td>
+                                <td className="p-4">
+                                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold uppercase">
+                                        {driver.status}
+                                    </span>
+                                </td>
+                                <td className="p-4">
+                                    <button
+                                        onClick={() => handleDelete(driver.id)}
+                                        className="text-red-500 hover:bg-red-50 p-2 rounded transition"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                        {drivers.length === 0 && (
+                            <tr>
+                                <td colSpan="4" className="p-8 text-center text-gray-500">Aucun livreur enregistré</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+export default DriversPanel;
