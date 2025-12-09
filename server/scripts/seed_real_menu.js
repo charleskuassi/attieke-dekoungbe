@@ -77,8 +77,8 @@ const menuData = [
     { name: "Yaourt", prices: [1500], category: "boissons" },
     { name: "Vin de palme", prices: [500], category: "boissons" },
     { name: "LEGEND", prices: [600], category: "boissons" },
-    { name: "Orca + Sprit Grand", prices: [500], category: "boissons" },
-    { name: "Orca + Sprit petit", prices: [500], category: "boissons" },
+    { name: "Coca + Sprite Grand", prices: [500], category: "boissons" },
+    { name: "Coca + Sprite petit", prices: [500], category: "boissons" },
 
     // --- VINS ---
     { name: "Journée spécial", prices: [4000], category: "vins" },
