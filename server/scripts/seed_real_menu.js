@@ -164,8 +164,8 @@ const seedMenu = async () => {
         await sequelize.sync();
         console.log('Database synced.');
 
-        // Clear existing products to avoid duplicates
-        await Product.destroy({ where: {}, truncate: true });
+        // Clear existing products (using DELETE instead of TRUNCATE to avoid FK constraint errors)
+        await Product.destroy({ where: {} });
         console.log('Existing products cleared.');
 
         const productsToCreate = [];
