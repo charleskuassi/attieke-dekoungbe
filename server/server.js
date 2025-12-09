@@ -7,6 +7,7 @@ const { sequelize } = require('./models');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
+app.set('trust proxy', 1); // Trust Render Proxy for HTTPS
 const PORT = process.env.PORT || 5000;
 
 // Security Middleware: Helmet

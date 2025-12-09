@@ -199,11 +199,16 @@ const seedMenu = async () => {
                 password: hashedPassword,
                 phone: '0000000000',
                 address: 'Admin HQ',
-                role: 'admin'
+                role: 'admin',
+                isVerified: true // FORCE VERIFIED
             });
             console.log('Admin user seeded successfully!');
         } else {
-            console.log('Admin user already exists.');
+            // Force update verification if exists
+            existingAdmin.isVerified = true;
+            existingAdmin.role = 'admin';
+            await existingAdmin.save();
+            console.log('Admin user updated (Verified).');
         }
 
     } catch (error) {
