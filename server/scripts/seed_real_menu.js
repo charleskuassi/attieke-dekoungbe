@@ -138,21 +138,9 @@ const getVariantName = (baseName, index, totalVariants) => {
 
 // Returns a relevant image based on name/category
 const getImageUrl = (name, category) => {
-    const lowerName = name.toLowerCase();
-    const lowerCategory = category.toLowerCase();
-
-    if (lowerName.includes('attiéké') && lowerName.includes('poisson')) return "https://img.freepik.com/photos-gratuite/vue-dessus-delicieux-repas-au-poulet-riz_23-2148757041.jpg";
-    if (lowerName.includes('attiéké') && lowerName.includes('poulet')) return "https://img.freepik.com/photos-gratuite/poulet-riz-vue-dessus-assiette_23-2148757041.jpg";
-    if (lowerName.includes('alloco')) return "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Alloco_et_poisson.jpg/800px-Alloco_et_poisson.jpg";
-    if (lowerName.includes('akassa')) return "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Akassa_au_B%C3%A9nin.jpg/640px-Akassa_au_B%C3%A9nin.jpg";
-    if (lowerName.includes('pâte rouge') || lowerName.includes('amiwo')) return "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Amiwo_au_poulet.jpg/640px-Amiwo_au_poulet.jpg";
-
-    if (lowerCategory === 'boissons') return "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/La_B%C3%A9ninoise.jpg/388px-La_B%C3%A9ninoise.jpg";
-    if (lowerCategory === 'vins') return "https://www.publicdomainpictures.net/pictures/320000/velka/red-wine-bottle-157460747441Z.jpg";
-    if (lowerCategory === 'champagnes') return "https://upload.wikimedia.org/wikipedia/commons/e/e0/Glass_of_Champagne.jpg";
-    if (lowerCategory === 'whiskys') return "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/La_B%C3%A9ninoise.jpg/388px-La_B%C3%A9ninoise.jpg"; // Fallback for whiskys
-
-    return "https://via.placeholder.com/300";
+    // Use reliable placeholders for demo to avoid 403/Broken images
+    const encodedText = encodeURIComponent(name);
+    return `https://placehold.co/400x300/e2e8f0/1e293b?text=${encodedText}`;
 };
 
 const seedMenu = async () => {
