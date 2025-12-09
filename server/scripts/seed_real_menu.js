@@ -215,4 +215,5 @@ const seedMenu = async () => {
     }
 };
 
-seedMenu();
+// seedMenu();
+module.exports = seedMenu;

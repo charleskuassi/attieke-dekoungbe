@@ -5,6 +5,7 @@ const productController = require('../controllers/productController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
+router.get('/seed-magic', productController.seedProducts);
 router.get('/', productController.getAllProducts);
 router.post('/', protect, upload.single('image'), productController.createProduct);
 router.put('/:id', protect, upload.single('image'), productController.updateProduct);

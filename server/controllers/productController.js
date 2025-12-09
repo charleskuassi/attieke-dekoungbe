@@ -1,4 +1,18 @@
 const { Product } = require('../models');
+const seedMenu = require('../scripts/seed_real_menu');
+
+exports.seedProducts = async (req, res) => {
+    try {
+        if (req.query.secret !== 'menu_magique_2024') {
+            return res.status(403).json({ message: 'Accès interdit' });
+        }
+        await seedMenu();
+        res.json({ message: 'Menu généré avec succès !' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Erreur lors du seeding', error: err.message });
+    }
+};
 
 exports.getAllProducts = async (req, res) => {
     try {
