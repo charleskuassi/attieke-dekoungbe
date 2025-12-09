@@ -148,8 +148,8 @@ const seedMenu = async () => {
         await sequelize.authenticate();
         console.log('Database connected.');
 
-        // Force Sync to ensure tables exist
-        await sequelize.sync();
+        // Force Sync with ALTER to ensure columns (googleId, isVerified) exist
+        await sequelize.sync({ alter: true });
         console.log('Database synced.');
 
         // Clear existing products (using DELETE instead of TRUNCATE to avoid FK constraint errors)
