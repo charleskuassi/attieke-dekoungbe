@@ -25,3 +25,18 @@ databases:
     user: attieke_user
     region: frankfurt
     plan: free
+
+staticSites:
+  - name: attieke-frontend
+    rootDir: client
+    region: frankfurt
+    plan: free
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://attieke-api.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
