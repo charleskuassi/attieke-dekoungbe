@@ -46,17 +46,17 @@ const Menu = () => {
     });
 
     if (loading) return (
-        <div className="flex flex-col justify-center items-center h-screen">
-            <Loader2 className="animate-spin text-primary mb-4" size={48} />
-            <p className="text-gray-500 animate-pulse">On coupe les oignons...</p>
+        <div className="flex flex-col justify-center items-center h-screen dark:bg-gray-900 transition-colors duration-300">
+            <Loader2 className="animate-spin text-primary dark:text-orange-500 mb-4" size={48} />
+            <p className="text-gray-500 dark:text-gray-400 animate-pulse">On coupe les oignons...</p>
         </div>
     );
 
     if (error) return <div className="text-center text-red-500 mt-10">{error}</div>;
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <h1 className="text-4xl font-serif font-bold text-center mb-8 text-primary">Notre Carte</h1>
+        <div className="container mx-auto px-4 py-8 dark:bg-gray-900 transition-colors duration-300 min-h-screen">
+            <h1 className="text-4xl font-serif font-bold text-center mb-8 text-primary dark:text-orange-500">Notre Carte</h1>
 
             {/* Search Bar */}
             <div className="max-w-md mx-auto mb-8 relative">
@@ -66,7 +66,7 @@ const Menu = () => {
                     placeholder="Rechercher un plat (ex: Garba, Poulet...)"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 rounded-full border border-gray-200 shadow-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                    className="w-full pl-10 pr-4 py-3 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition bg-white dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
                 />
             </div>
 
@@ -77,8 +77,8 @@ const Menu = () => {
                         key={cat}
                         onClick={() => setCategory(cat)}
                         className={`px-6 py-2 rounded-full font-medium transition whitespace-nowrap ${category === cat
-                            ? 'bg-primary text-white shadow-lg scale-105'
-                            : 'bg-white text-gray-600 hover:bg-orange-50 border border-gray-200'
+                            ? 'bg-primary dark:bg-orange-600 text-white shadow-lg scale-105'
+                            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
                             }`}
                     >
                         {cat === 'All' ? 'Tout' : cat}
@@ -106,7 +106,7 @@ const Menu = () => {
             </motion.div>
 
             {filteredProducts.length === 0 && (
-                <div className="text-center text-gray-500 mt-10">
+                <div className="text-center text-gray-500 dark:text-gray-400 mt-10">
                     <p>Aucun plat ne correspond à votre recherche 😔</p>
                 </div>
             )}

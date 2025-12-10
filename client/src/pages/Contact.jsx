@@ -130,14 +130,14 @@ const ContactMap = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-orange-50">
+        <div className="flex flex-col min-h-screen bg-orange-50 dark:bg-gray-900 transition-colors duration-300">
             {/* Header Section */}
-            <div className="bg-white py-12 px-4 shadow-sm text-center">
+            <div className="bg-white dark:bg-gray-800 py-12 px-4 shadow-sm text-center transition-colors">
                 <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-2">
                     ATTIÈKÈ DÉKOUNGBÉ
                 </h1>
-                <h2 className="text-xl text-gray-700 font-medium mb-4">Contactez-nous</h2>
-                <p className="text-gray-500 max-w-lg mx-auto italic">
+                <h2 className="text-xl text-gray-700 dark:text-gray-300 font-medium mb-4">Contactez-nous</h2>
+                <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto italic">
                     "Une question ? Une envie ? Nous sommes là pour vous répondre et vous accueillir."
                 </p>
             </div>
@@ -146,24 +146,24 @@ const ContactMap = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
 
                     {/* Left Section: Info */}
-                    <div className="bg-white p-8 rounded-2xl shadow-lg space-y-8 h-full">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg space-y-8 h-full transition-colors">
                         <div className="flex items-start space-x-4">
-                            <div className="bg-orange-100 p-3 rounded-full text-primary">
+                            <div className="bg-orange-100 dark:bg-orange-900/30 p-3 rounded-full text-primary">
                                 <MapPin size={28} />
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg text-gray-800">Adresse</h3>
-                                <p className="text-gray-600">Rue de la pharmacie Dekoungbé,<br />Godomey, Abomey Calavi, Bénin.</p>
+                                <h3 className="font-bold text-lg text-gray-800 dark:text-white">Adresse</h3>
+                                <p className="text-gray-600 dark:text-gray-300">Rue de la pharmacie Dekoungbé,<br />Godomey, Abomey Calavi, Bénin.</p>
                             </div>
                         </div>
 
                         <div className="flex items-start space-x-4">
-                            <div className="bg-orange-100 p-3 rounded-full text-primary">
+                            <div className="bg-orange-100 dark:bg-orange-900/30 p-3 rounded-full text-primary">
                                 <Phone size={28} />
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg text-gray-800">Téléphone</h3>
-                                <p className="text-gray-600">
+                                <h3 className="font-bold text-lg text-gray-800 dark:text-white">Téléphone</h3>
+                                <p className="text-gray-600 dark:text-gray-300">
                                     <a href="tel:+22991042162" className="hover:text-primary transition">
                                         +229 91 04 21 62
                                     </a>
@@ -172,12 +172,12 @@ const ContactMap = () => {
                         </div>
 
                         <div className="flex items-start space-x-4">
-                            <div className="bg-orange-100 p-3 rounded-full text-primary">
+                            <div className="bg-orange-100 dark:bg-orange-900/30 p-3 rounded-full text-primary">
                                 <Mail size={28} />
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg text-gray-800">Email</h3>
-                                <p className="text-gray-600">
+                                <h3 className="font-bold text-lg text-gray-800 dark:text-white">Email</h3>
+                                <p className="text-gray-600 dark:text-gray-300">
                                     <a href="mailto:infos@attieke-dekoungbe.com" className="hover:text-primary transition">
                                         infos@attieke-dekoungbe.com
                                     </a>
@@ -187,15 +187,15 @@ const ContactMap = () => {
                     </div>
 
                     {/* Right Section: Form */}
-                    <div className="bg-white p-8 rounded-2xl shadow-lg">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg transition-colors">
                         {status === 'success' ? (
                             <div className="flex flex-col items-center justify-center text-center h-full py-8 space-y-6 animate-fade-in">
-                                <div className="bg-green-100 p-4 rounded-full text-green-600">
+                                <div className="bg-green-100 dark:bg-green-900/30 p-4 rounded-full text-green-600 dark:text-green-400">
                                     <Send size={48} />
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-serif font-bold text-gray-800 mb-2">Message Envoyé !</h3>
-                                    <p className="text-gray-600">
+                                    <h3 className="text-2xl font-serif font-bold text-gray-800 dark:text-white mb-2">Message Envoyé !</h3>
+                                    <p className="text-gray-600 dark:text-gray-300">
                                         Merci de nous avoir contactés. Nous avons bien reçu votre message et nous vous répondrons dans les plus brefs délais.
                                     </p>
                                 </div>
@@ -208,40 +208,40 @@ const ContactMap = () => {
                             </div>
                         ) : (
                             <>
-                                <h3 className="text-2xl font-serif font-bold mb-6 text-gray-800">Envoyez-nous un message</h3>
+                                <h3 className="text-2xl font-serif font-bold mb-6 text-gray-800 dark:text-white">Envoyez-nous un message</h3>
                                 <form className="space-y-4" onSubmit={handleSubmit}>
                                     <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-1">Nom Complet</label>
+                                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Nom Complet</label>
                                         <input
                                             type="text"
                                             name="name"
                                             value={formData.name}
                                             onChange={handleChange}
-                                            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-primary/50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                             placeholder="Votre nom"
                                             required
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-1">Email</label>
+                                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Email</label>
                                         <input
                                             type="email"
                                             name="email"
                                             value={formData.email}
                                             onChange={handleChange}
-                                            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-primary/50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                             placeholder="votre@email.com"
                                             required
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-1">Message</label>
+                                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Message</label>
                                         <textarea
                                             name="message"
                                             value={formData.message}
                                             onChange={handleChange}
                                             rows="4"
-                                            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-primary/50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                             placeholder="Comment pouvons-nous vous aider ?"
                                             required
                                         ></textarea>
@@ -275,7 +275,7 @@ const ContactMap = () => {
                 </div>
 
                 {/* Map Section */}
-                <div className="mt-12 bg-white p-2 rounded-2xl shadow-lg overflow-hidden h-96 relative">
+                <div className="mt-12 bg-white dark:bg-gray-800 p-2 rounded-2xl shadow-lg overflow-hidden h-96 relative transition-colors">
                     <iframe
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3965.176882298642!2d2.3283846!3d6.379367!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x10235677e5c76db7%3A0xe64a4e3e431f4a9b!2sLa%20Salsa!5e0!3m2!1sfr!2sbj!4v1701960000000!5m2!1sfr!2sbj"
                         width="100%"

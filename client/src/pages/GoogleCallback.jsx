@@ -41,9 +41,9 @@ const GoogleCallback = () => {
     }, [searchParams, navigate]);
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-orange-50">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-            <h2 className="text-xl font-serif text-primary">Connexion avec Google...</h2>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-orange-50 dark:bg-gray-900 transition-colors duration-300">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary dark:border-orange-500 mb-4"></div>
+            <h2 className="text-xl font-serif text-primary dark:text-orange-500">Connexion avec Google...</h2>
         </div>
     );
 };

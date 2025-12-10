@@ -20,6 +20,7 @@ import SplashScreen from './components/SplashScreen';
 import Contact from './pages/Contact';
 import FloatingContact from './components/FloatingContact';
 import Reservation from './pages/Reservation';
+import Reviews from './pages/Reviews';
 import { useAuth } from './context/AuthContext';
 
 function App() {
@@ -46,7 +47,7 @@ function App() {
     }, [loading]);
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
+        <div className="min-h-screen bg-background dark:bg-gray-900 dark:text-white transition-colors duration-300 flex flex-col">
             <AnimatePresence mode="wait">
                 {loading && <SplashScreen key="splash" />}
             </AnimatePresence>
@@ -68,6 +69,7 @@ function App() {
                             <Route path="/reset-password/:token" element={<ResetPassword />} />
                             <Route path="/google-callback" element={<GoogleCallback />} />
                             <Route path="/contact" element={<Contact />} />
+                            <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
                             <Route
                                 path="/dashboard"
                                 element={

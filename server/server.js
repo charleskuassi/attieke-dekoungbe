@@ -56,6 +56,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
+app.use('/api/upload', require('./routes/uploadRoutes'));
 
 // Apply Auth Limiter to Auth Routes
 // app.use('/api/auth', authLimiter, require('./routes/authRoutes'));
@@ -81,6 +82,11 @@ app.use('/api/reservations', require('./routes/reservationRoutes'));
 app.use('/api/messages', require('./routes/messageRoutes'));
 // Driver Routes
 app.use('/api/drivers', require('./routes/driverRoutes'));
+// Review/Complaint Routes
+app.use('/api/reviews', require('./routes/reviewRoutes'));
+
+// Admin Maintenance Routes
+app.use('/api/admin', require('./routes/adminRoutes'));
 
 
 app.get('/', (req, res) => {
@@ -90,9 +96,13 @@ app.get('/', (req, res) => {
 // Start Server
 async function startServer() {
     try {
-        // Back to gentle sync, we will use a script to add the column
-        await sequelize.sync({ alter: false });
-        console.log('Database connected (Sync OK)');
+            // Back to gentle sync, we will use a script to add the column
+            if (process.env.SKIP_DB_SYNC === 'true') {
+                console.log('Skipping DB sync because SKIP_DB_SYNC=true');
+            } else {
+                await sequelize.sync({ alter: true });
+                console.log('Database connected (Sync OK)');
+            }
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });

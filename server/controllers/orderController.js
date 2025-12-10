@@ -52,7 +52,7 @@ exports.createOrder = async (req, res) => {
                         transactionId: transaction_id
                     }, {
                         headers: {
-                            'x-api-key': process.env.KKIAPAY_PUBLIC_KEY,
+                            'x-api-key': process.env.KKIAPAY_PUBLIC_KEY || "eb11d9d0d01d11f09d79fd5b587b7fd7",
                             'Content-Type': 'application/json'
                         }
                     });
@@ -185,7 +185,11 @@ exports.getAllOrders = async (req, res) => {
     try {
         const orders = await Order.findAll({
             include: [
-                { model: Product, through: { attributes: ['quantity', 'price_at_order'] } },
+                {
+                    model: Product,
+                    attributes: ['id', 'name', 'image_url', 'price'], // Explicitly getting image_url
+                    through: { attributes: ['quantity', 'price_at_order'] }
+                },
                 { model: User, attributes: ['id', 'name', 'email'] },
                 { model: DeliveryDriver }
             ],

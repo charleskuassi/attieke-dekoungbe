@@ -74,24 +74,24 @@ const Settings = () => {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-serif font-bold mb-8 text-center">Paramètres du Compte</h1>
+        <div className="container mx-auto px-4 py-8 dark:bg-gray-900 min-h-screen transition-colors duration-300">
+            <h1 className="text-3xl font-serif font-bold mb-8 text-center text-gray-900 dark:text-white">Paramètres du Compte</h1>
 
-            <div className="max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg">
+            <div className="max-w-md mx-auto bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg transition-colors">
                 {message && (
-                    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 flex items-center">
+                    <div className="bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded mb-4 flex items-center">
                         <CheckCircle className="mr-2" size={20} /> {message}
                     </div>
                 )}
                 {error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex items-center">
+                    <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded mb-4 flex items-center">
                         <AlertCircle className="mr-2" size={20} /> {error}
                     </div>
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
                             <User size={16} className="mr-2" /> Nom Complet
                         </label>
                         <input
@@ -99,13 +99,13 @@ const Settings = () => {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
+                            className="w-full px-4 py-2 border dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white"
                             required
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
                             <Phone size={16} className="mr-2" /> Téléphone
                         </label>
                         <input
@@ -113,15 +113,15 @@ const Settings = () => {
                             name="phone"
                             value={formData.phone}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
+                            className="w-full px-4 py-2 border dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white"
                             placeholder="97000000"
                             required
                         />
-                        <p className="text-xs text-gray-500 mt-1">Format : 8 chiffres</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Format : 8 chiffres</p>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
                             <MapPin size={16} className="mr-2" /> Adresse de livraison par défaut
                         </label>
                         <textarea
@@ -129,7 +129,7 @@ const Settings = () => {
                             value={formData.address}
                             onChange={handleChange}
                             rows="3"
-                            className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
+                            className="w-full px-4 py-2 border dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white"
                             required
                         ></textarea>
                     </div>

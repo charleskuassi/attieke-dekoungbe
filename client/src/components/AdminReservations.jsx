@@ -24,7 +24,7 @@ const AdminReservations = () => {
 
     const handleStatusUpdate = async (id, newStatus) => {
         try {
-            await axios.put(`${import.meta.env.VITE_API_URL}/api/reservations/${id}`, 
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/reservations/${id}`,
                 { status: newStatus },
                 { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
             );
@@ -44,15 +44,15 @@ const AdminReservations = () => {
     };
 
     return (
-        <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 transition-colors duration-300">
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 dark:text-white">
                 <Calendar className="text-primary" /> Réservations
             </h2>
 
             <div className="overflow-x-auto">
                 <table className="w-full text-left">
                     <thead>
-                        <tr className="bg-gray-50 text-gray-600 text-sm uppercase">
+                        <tr className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm uppercase">
                             <th className="p-4">Date / Heure</th>
                             <th className="p-4">Client</th>
                             <th className="p-4">Couverts</th>
@@ -61,23 +61,23 @@ const AdminReservations = () => {
                             <th className="p-4">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                         {reservations.map((res) => (
-                            <tr key={res.id} className="hover:bg-gray-50">
+                            <tr key={res.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                 <td className="p-4">
-                                    <div className="font-bold text-gray-800">{res.date}</div>
-                                    <div className="text-sm text-gray-500">{res.time}</div>
+                                    <div className="font-bold text-gray-800 dark:text-gray-100">{res.date}</div>
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">{res.time}</div>
                                 </td>
                                 <td className="p-4">
-                                    <div className="font-bold">{res.name}</div>
+                                    <div className="font-bold dark:text-white">{res.name}</div>
                                     <a href={`tel:${res.phone}`} className="text-sm text-primary hover:underline flex items-center gap-1">
                                         <Phone size={12} /> {res.phone}
                                     </a>
                                 </td>
                                 <td className="p-4">
-                                    <span className="font-bold text-lg">{res.guests}</span> pers.
+                                    <span className="font-bold text-lg dark:text-white">{res.guests}</span> <span className="dark:text-gray-400">pers.</span>
                                 </td>
-                                <td className="p-4 text-sm text-gray-600 max-w-xs truncate">
+                                <td className="p-4 text-sm text-gray-600 dark:text-gray-300 max-w-xs truncate">
                                     {res.message || '-'}
                                 </td>
                                 <td className="p-4">
@@ -86,16 +86,16 @@ const AdminReservations = () => {
                                 <td className="p-4">
                                     <div className="flex gap-2">
                                         {res.status !== 'confirmed' && (
-                                            <button 
+                                            <button
                                                 onClick={() => handleStatusUpdate(res.id, 'confirmed')}
-                                                className="bg-green-100 p-2 rounded text-green-600 hover:bg-green-200" title="Confirmer">
+                                                className="bg-green-100 dark:bg-green-900/30 p-2 rounded text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors" title="Confirmer">
                                                 <CheckCircle size={18} />
                                             </button>
                                         )}
                                         {res.status !== 'cancelled' && (
-                                            <button 
+                                            <button
                                                 onClick={() => handleStatusUpdate(res.id, 'cancelled')}
-                                                className="bg-red-100 p-2 rounded text-red-600 hover:bg-red-200" title="Annuler">
+                                                className="bg-red-100 dark:bg-red-900/30 p-2 rounded text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors" title="Annuler">
                                                 <XCircle size={18} />
                                             </button>
                                         )}
@@ -105,7 +105,7 @@ const AdminReservations = () => {
                         ))}
                         {reservations.length === 0 && (
                             <tr>
-                                <td colSpan="6" className="p-8 text-center text-gray-500">Aucune réservation pour le moment.</td>
+                                <td colSpan="6" className="p-8 text-center text-gray-500 dark:text-gray-400">Aucune réservation pour le moment.</td>
                             </tr>
                         )}
                     </tbody>

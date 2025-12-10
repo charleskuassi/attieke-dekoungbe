@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AdminAnnouncement from '../components/AdminAnnouncement';
-import { LayoutDashboard, ShoppingBag, Users, TrendingUp, Package, Search, Filter, ChevronDown, CheckCircle, XCircle, Clock, Truck, Plus, Edit, Trash, Image, Utensils, Percent, Megaphone, FileText } from 'lucide-react';
+import MaintenancePanel from '../components/MaintenancePanel';
+import { LayoutDashboard, ShoppingBag, Users, TrendingUp, Package, Search, Filter, ChevronDown, CheckCircle, XCircle, Clock, Truck, Plus, Edit, Trash, Image, Utensils, Percent, Megaphone, FileText, MessageSquare, Shield, Archive as ArchiveIcon } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import AdminReservations from '../components/AdminReservations';
 import AdminMessages from '../components/AdminMessages';
+import AdminReviews from '../components/AdminReviews';
 import DriversPanel from '../components/DriversPanel';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -105,6 +107,22 @@ const Admin = () => {
         } catch (error) {
             console.error("Error updating status:", error);
             alert("Erreur lors de la mise à jour du statut");
+        }
+
+    };
+
+    const handleArchiveOrder = async (orderId, currentStatus) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/admin/archive/order/${orderId}`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } });
+
+            // Update local state
+            setOrders(orders.map(o => o.id === orderId ? { ...o, isArchived: res.data.isArchived } : o));
+        } catch (error) {
+            console.error("Archive error:", error);
+            alert("Erreur lors de l'archivage");
         }
     };
 
@@ -250,6 +268,38 @@ const Admin = () => {
         }
     };
 
+    // Handle file upload to server
+    const handleImageUpload = async (file) => {
+        if (!file) return;
+
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_URL}/api/upload`,
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
+            );
+
+            if (response.data.success && response.data.imageUrl) {
+                // Update product form with the server URL
+                setProductForm({
+                    ...productForm,
+                    image: response.data.imageUrl // Store the URL string, not the file
+                });
+                return response.data.imageUrl;
+            }
+        } catch (error) {
+            console.error("Image upload failed:", error);
+            alert("Erreur lors de l'upload de l'image: " + (error.response?.data?.error || error.message));
+        }
+    };
+
     const handleProductSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -262,13 +312,9 @@ const Admin = () => {
             formData.append('is_popular', productForm.is_popular);
 
             if (productForm.image) {
-                if (typeof productForm.image === 'string') {
-                    // It's a URL from the library
-                    formData.append('image_url', productForm.image);
-                } else {
-                    // It's a File object
-                    formData.append('image', productForm.image);
-                }
+                // Now productForm.image is always a string (URL) thanks to handleImageUpload
+                // It can be from server upload (/uploads/...) or library
+                formData.append('image_url', productForm.image);
             }
 
             const config = { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } };
@@ -343,43 +389,49 @@ const Admin = () => {
     if (loading) return <div className="flex justify-center items-center h-screen">Chargement...</div>;
 
     return (
-        <div className="flex h-screen bg-gray-100">
+        <div className="flex h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
             {/* Sidebar */}
-            <aside className="w-64 bg-white shadow-md hidden md:block">
+            <aside className="w-64 bg-white dark:bg-gray-800 shadow-md hidden md:block transition-colors duration-300">
                 <div className="p-6">
                     <h1 className="text-2xl font-serif font-bold text-primary">Admin Panel</h1>
                 </div>
                 <nav className="mt-6">
-                    <a onClick={() => setActiveTab('dashboard')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'dashboard' ? 'bg-orange-50 text-primary border-r-4 border-primary' : 'text-gray-600 hover:bg-gray-50'}`}>
+                    <a onClick={() => setActiveTab('dashboard')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'dashboard' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                         <LayoutDashboard size={20} className="mr-3" /> Tableau de bord
                     </a>
-                    <a onClick={() => setActiveTab('orders')} className={`flex items-center justify-between px-6 py-3 cursor-pointer ${activeTab === 'orders' ? 'bg-orange-50 text-primary border-r-4 border-primary' : 'text-gray-600 hover:bg-gray-50'}`}>
+                    <a onClick={() => setActiveTab('orders')} className={`flex items-center justify-between px-6 py-3 cursor-pointer ${activeTab === 'orders' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                         <div className="flex items-center"><ShoppingBag size={20} className="mr-3" /> Commandes</div>
                         {counts.orders > 0 && <span className="bg-red-500 text-white rounded-full text-xs font-bold px-2 py-0.5">{counts.orders}</span>}
                     </a>
-                    <a onClick={() => setActiveTab('menu')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'menu' ? 'bg-orange-50 text-primary border-r-4 border-primary' : 'text-gray-600 hover:bg-gray-50'}`}>
+                    <a onClick={() => setActiveTab('menu')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'menu' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                         <Utensils size={20} className="mr-3" /> Menu
                     </a>
-                    <a onClick={() => setActiveTab('clients')} className={`flex items-center justify-between px-6 py-3 cursor-pointer ${activeTab === 'clients' ? 'bg-orange-50 text-primary border-r-4 border-primary' : 'text-gray-600 hover:bg-gray-50'}`}>
+                    <a onClick={() => setActiveTab('clients')} className={`flex items-center justify-between px-6 py-3 cursor-pointer ${activeTab === 'clients' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                         <div className="flex items-center"><Users size={20} className="mr-3" /> Clients</div>
                         <span className="bg-blue-500 text-white rounded-full text-xs font-bold px-2 py-0.5">{clients.length}</span>
                     </a>
-                    <a onClick={() => setActiveTab('promo')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'promo' ? 'bg-orange-50 text-primary border-r-4 border-primary' : 'text-gray-600 hover:bg-gray-50'}`}>
+                    <a onClick={() => setActiveTab('promo')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'promo' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                         <Percent size={20} className="mr-3" /> Promotions
                     </a>
-                    <a onClick={() => setActiveTab('reservations')} className={`flex items-center justify-between px-6 py-3 cursor-pointer ${activeTab === 'reservations' ? 'bg-orange-50 text-primary border-r-4 border-primary' : 'text-gray-600 hover:bg-gray-50'}`}>
+                    <a onClick={() => setActiveTab('reservations')} className={`flex items-center justify-between px-6 py-3 cursor-pointer ${activeTab === 'reservations' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                         <div className="flex items-center"><Clock size={20} className="mr-3" /> Réservations</div>
                         {counts.reservations > 0 && <span className="bg-red-500 text-white rounded-full text-xs font-bold px-2 py-0.5">{counts.reservations}</span>}
                     </a>
-                    <a onClick={() => setActiveTab('messages')} className={`flex items-center justify-between px-6 py-3 cursor-pointer ${activeTab === 'messages' ? 'bg-orange-50 text-primary border-r-4 border-primary' : 'text-gray-600 hover:bg-gray-50'}`}>
+                    <a onClick={() => setActiveTab('messages')} className={`flex items-center justify-between px-6 py-3 cursor-pointer ${activeTab === 'messages' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                         <div className="flex items-center"><Users size={20} className="mr-3" /> Messages</div>
                         {counts.messages > 0 && <span className="bg-red-500 text-white rounded-full text-xs font-bold px-2 py-0.5">{counts.messages}</span>}
                     </a>
-                    <a onClick={() => setActiveTab('announcement')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'announcement' ? 'bg-orange-50 text-primary border-r-4 border-primary' : 'text-gray-600 hover:bg-gray-50'}`}>
+                    <a onClick={() => setActiveTab('reviews')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'reviews' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
+                        <MessageSquare size={20} className="mr-3" /> Avis & Plaintes
+                    </a>
+                    <a onClick={() => setActiveTab('announcement')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'announcement' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                         <Megaphone size={20} className="mr-3" /> Annonces
                     </a>
-                    <a onClick={() => setActiveTab('drivers')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'drivers' ? 'bg-orange-50 text-primary border-r-4 border-primary' : 'text-gray-600 hover:bg-gray-50'}`}>
+                    <a onClick={() => setActiveTab('drivers')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'drivers' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                         <Truck size={20} className="mr-3" /> Livreurs
+                    </a>
+                    <a onClick={() => setActiveTab('maintenance')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'maintenance' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
+                        <Shield size={20} className="mr-3" /> Maintenance
                     </a>
                 </nav>
             </aside>
@@ -391,36 +443,36 @@ const Admin = () => {
                         <h2 className="text-2xl font-bold">Vue d'ensemble</h2>
                         {/* ... (keep stats section) ... */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="bg-white p-6 rounded-xl shadow-sm">
+                            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm transition-colors duration-300">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-gray-500">Ventes du jour</h3>
+                                    <h3 className="text-gray-500 dark:text-gray-400">Ventes du jour</h3>
                                     <TrendingUp className="text-green-500" />
                                 </div>
-                                <p className="text-3xl font-bold">{stats.dailySales} FCFA</p>
+                                <p className="text-3xl font-bold dark:text-white">{stats.dailySales} FCFA</p>
                             </div>
-                            <div className="bg-white p-6 rounded-xl shadow-sm">
+                            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm transition-colors duration-300">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-gray-500">Commandes en attente</h3>
+                                    <h3 className="text-gray-500 dark:text-gray-400">Commandes en attente</h3>
                                     <Clock className="text-orange-500" />
                                 </div>
-                                <p className="text-3xl font-bold">{orders.filter(o => o.status === 'pending' || o.status === 'paid').length}</p>
+                                <p className="text-3xl font-bold dark:text-white">{orders.filter(o => o.status === 'pending' || o.status === 'paid').length}</p>
                             </div>
-                            <div className="bg-white p-6 rounded-xl shadow-sm">
+                            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm transition-colors duration-300">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-gray-500">Total Clients</h3>
+                                    <h3 className="text-gray-500 dark:text-gray-400">Total Clients</h3>
                                     <Users className="text-blue-500" />
                                 </div>
-                                <p className="text-3xl font-bold">{clients.length}</p>
+                                <p className="text-3xl font-bold dark:text-white">{clients.length}</p>
                             </div>
                         </div>
 
 
                         {/* Reports & Graph Section */}
-                        <div className="bg-white p-6 rounded-xl shadow-sm">
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm transition-colors duration-300">
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-xl font-bold">Rapports & Statistiques</h3>
+                                <h3 className="text-xl font-bold dark:text-white">Rapports & Statistiques</h3>
                                 <div className="flex gap-4 items-center">
-                                    <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+                                    <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                                         <button
                                             onClick={() => setReportFormat('pdf')}
                                             className={`px-3 py-1 rounded-md text-sm font-bold transition ${reportFormat === 'pdf' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
@@ -473,10 +525,10 @@ const Admin = () => {
                         </div>
 
                         {/* Top Products Table */}
-                        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                            <h3 className="text-xl font-bold p-6 border-b">Top Produits</h3>
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden transition-colors duration-300">
+                            <h3 className="text-xl font-bold p-6 border-b dark:border-gray-700 dark:text-white">Top Produits</h3>
                             <table className="w-full text-left">
-                                <thead className="bg-gray-50">
+                                <thead className="bg-gray-50 dark:bg-gray-700 dark:text-gray-200">
                                     <tr>
                                         <th className="p-4">Produit</th>
                                         <th className="p-4">Ventes</th>
@@ -485,7 +537,7 @@ const Admin = () => {
                                 </thead>
                                 <tbody>
                                     {stats.topProducts.map((product, index) => (
-                                        <tr key={index} className="border-t">
+                                        <tr key={index} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                             <td className="p-4">{product.name}</td>
                                             <td className="p-4">{product.count}</td>
                                             <td className="p-4 font-bold">{product.revenue} FCFA</td>
@@ -504,9 +556,9 @@ const Admin = () => {
                     activeTab === 'orders' && (
                         <div className="space-y-6">
                             {/* ... keep headers ... */}
-                            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden transition-colors duration-300">
                                 <table className="w-full text-left">
-                                    <thead className="bg-gray-50 border-b">
+                                    <thead className="bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-700 dark:text-gray-200">
                                         <tr>
                                             <th className="p-4 font-semibold">ID</th>
                                             <th className="p-4 font-semibold">Client</th>
@@ -518,25 +570,40 @@ const Admin = () => {
                                             <th className="p-4 font-semibold">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y">
+                                    <tbody className="divide-y dark:divide-gray-700">
                                         {filteredOrders.length === 0 ? (
                                             <tr>
                                                 <td colSpan="8" className="p-8 text-center text-gray-500">Aucune commande trouvée</td>
                                             </tr>
                                         ) : (
                                             filteredOrders.map(order => (
-                                                <tr key={order.id} className="hover:bg-gray-50">
-                                                    <td className="p-4 font-mono text-sm">#{order.id}</td>
+                                                <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                                    <td className="p-4 font-mono text-sm dark:text-gray-300">#{order.id}</td>
                                                     <td className="p-4">
-                                                        <div className="font-bold">{order.customer_name}</div>
-                                                        <div className="text-xs text-gray-500">{order.phone}</div>
+                                                        <div className="font-bold dark:text-white">{order.customer_name}</div>
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400">{order.phone}</div>
                                                     </td>
                                                     <td className="p-4 text-sm">
                                                         {order.Products && order.Products.map(p => (
-                                                            <div key={p.id}>{p.OrderItem.quantity}x {p.name}</div>
+                                                            <div key={p.id} className="flex items-center gap-2 mb-2">
+                                                                {p.image_url ? (
+                                                                    <img
+                                                                        src={p.image_url}
+                                                                        alt={p.name}
+                                                                        className="w-10 h-10 rounded-md object-cover border border-gray-200"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-400 dark:text-gray-300 border border-gray-200 dark:border-gray-500">
+                                                                        <Utensils size={16} />
+                                                                    </div>
+                                                                )}
+                                                                <div>
+                                                                    <span className="font-bold text-gray-900 dark:text-white">{p.OrderItem.quantity}x</span> {p.name}
+                                                                </div>
+                                                            </div>
                                                         ))}
                                                     </td>
-                                                    <td className="p-4 font-bold">{order.total_price} FCFA</td>
+                                                    <td className="p-4 font-bold dark:text-white">{order.total_price} FCFA</td>
                                                     <td className="p-4">
                                                         <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${getStatusColor(order.status)}`}>
                                                             {order.status}
@@ -565,16 +632,26 @@ const Admin = () => {
                                                                     <Plus size={12} /> Assigner
                                                                 </button>
                                                             ) : <span className="text-gray-400">-</span>
+
                                                         )}
+
+                                                        {/* Archive Button */}
+                                                        <button
+                                                            onClick={() => handleArchiveOrder(order.id, order.isArchived)}
+                                                            className={`ml-2 p-1 rounded-full hover:bg-gray-100 transition ${order.isArchived ? 'text-orange-600 bg-orange-50' : 'text-gray-300'}`}
+                                                            title={order.isArchived ? "Désarchiver" : "Archiver (Protéger)"}
+                                                        >
+                                                            <ArchiveIcon size={16} fill={order.isArchived ? "currentColor" : "none"} />
+                                                        </button>
                                                     </td>
-                                                    <td className="p-4 text-sm text-gray-500">
+                                                    <td className="p-4 text-sm text-gray-500 dark:text-gray-400">
                                                         {new Date(order.createdAt).toLocaleDateString()} {new Date(order.createdAt).toLocaleTimeString()}
                                                     </td>
                                                     <td className="p-4">
                                                         <select
                                                             value={order.status}
                                                             onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
-                                                            className="border rounded px-2 py-1 text-sm bg-white"
+                                                            className="border dark:border-gray-600 rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 dark:text-white"
                                                         >
                                                             <option value="pending">En attente</option>
                                                             <option value="paid">Payé</option>
@@ -611,13 +688,13 @@ const Admin = () => {
                                         placeholder="Rechercher un produit..."
                                         value={menuSearch}
                                         onChange={(e) => setMenuSearch(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     />
                                 </div>
                                 <select
                                     value={menuCategory}
                                     onChange={(e) => setMenuCategory(e.target.value)}
-                                    className="border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary outline-none"
+                                    className="border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                 >
                                     <option value="all">Toutes catégories</option>
                                     <option value="plats">Plats</option>
@@ -630,7 +707,7 @@ const Admin = () => {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {filteredProducts.map(product => (
-                                    <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden group">
+                                    <div key={product.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden group transition-colors duration-300">
                                         <div className="relative h-48">
                                             <img src={product.image_url || "/api/placeholder/400/300"} alt={product.name} className="w-full h-full object-cover" />
                                             <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-4">
@@ -650,12 +727,12 @@ const Admin = () => {
                                         <div className="p-4">
                                             <div className="flex justify-between items-start mb-2">
                                                 <div>
-                                                    <h3 className="font-bold text-lg">{product.name}</h3>
-                                                    <span className="text-xs text-gray-500 uppercase">{product.category}</span>
+                                                    <h3 className="font-bold text-lg dark:text-white">{product.name}</h3>
+                                                    <span className="text-xs text-gray-500 dark:text-gray-400 uppercase">{product.category}</span>
                                                 </div>
                                                 <span className="font-bold text-primary">{product.price} FCFA</span>
                                             </div>
-                                            <p className="text-gray-600 text-sm line-clamp-2">{product.description}</p>
+                                            <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">{product.description}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -668,9 +745,9 @@ const Admin = () => {
                     activeTab === 'clients' && (
                         <div className="space-y-6">
                             <h2 className="text-2xl font-bold">Clients ({clients.length})</h2>
-                            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden transition-colors duration-300">
                                 <table className="w-full text-left">
-                                    <thead className="bg-gray-50 border-b">
+                                    <thead className="bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-700 dark:text-gray-200">
                                         <tr>
                                             <th className="p-4 font-semibold">Nom</th>
                                             <th className="p-4 font-semibold">Email</th>
@@ -678,13 +755,13 @@ const Admin = () => {
                                             <th className="p-4 font-semibold">Inscrit le</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y">
+                                    <tbody className="divide-y dark:divide-gray-700">
                                         {clients.map(client => (
-                                            <tr key={client.id} className="hover:bg-gray-50">
-                                                <td className="p-4 font-bold">{client.name}</td>
-                                                <td className="p-4 text-gray-600">{client.email}</td>
-                                                <td className="p-4 text-gray-600">{client.phone || '-'}</td>
-                                                <td className="p-4 text-gray-500">{new Date(client.createdAt).toLocaleDateString()}</td>
+                                            <tr key={client.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                                <td className="p-4 font-bold dark:text-white">{client.name}</td>
+                                                <td className="p-4 text-gray-600 dark:text-gray-300">{client.email}</td>
+                                                <td className="p-4 text-gray-600 dark:text-gray-300">{client.phone || '-'}</td>
+                                                <td className="p-4 text-gray-500 dark:text-gray-400">{new Date(client.createdAt).toLocaleDateString()}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -697,13 +774,13 @@ const Admin = () => {
                 {
                     activeTab === 'promo' && (
                         <div className="max-w-2xl mx-auto space-y-8">
-                            <h2 className="text-2xl font-bold">Configuration Promotion</h2>
-                            <div className="bg-white rounded-xl shadow-sm p-8">
+                            <h2 className="text-2xl font-bold dark:text-white">Configuration Promotion</h2>
+                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-8 transition-colors duration-300">
                                 <form onSubmit={handlePromoUpdate} className="space-y-6">
-                                    <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg border border-orange-100">
+                                    <div className="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-900/10 rounded-lg border border-orange-100 dark:border-orange-800">
                                         <div>
-                                            <h3 className="font-bold text-lg text-orange-900">Activer la promotion</h3>
-                                            <p className="text-sm text-orange-700">Appliquer automatiquement la réduction au panier</p>
+                                            <h3 className="font-bold text-lg text-orange-900 dark:text-orange-100">Activer la promotion</h3>
+                                            <p className="text-sm text-orange-700 dark:text-orange-200">Appliquer automatiquement la réduction au panier</p>
                                         </div>
                                         <label className="relative inline-flex items-center cursor-pointer">
                                             <input
@@ -717,28 +794,28 @@ const Admin = () => {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Montant Minimum (FCFA)</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Montant Minimum (FCFA)</label>
                                         <div className="relative">
                                             <input
                                                 type="number"
                                                 value={promo.minAmount}
                                                 onChange={e => setPromo({ ...promo, minAmount: parseInt(e.target.value) })}
-                                                className="w-full pl-4 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none text-lg font-bold"
+                                                className="w-full pl-4 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none text-lg font-bold dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                             />
                                             <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 font-bold">FCFA</span>
                                         </div>
-                                        <p className="text-xs text-gray-500 mt-1">Le panier doit dépasser ce montant pour bénéficier de la promo.</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Le panier doit dépasser ce montant pour bénéficier de la promo.</p>
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Pourcentage de réduction (%)</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pourcentage de réduction (%)</label>
                                         <div className="relative">
                                             <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 font-bold">%</span>
                                             <input
                                                 type="number"
                                                 value={promo.discountPercentage}
                                                 onChange={e => setPromo({ ...promo, discountPercentage: parseInt(e.target.value) })}
-                                                className="w-full pl-4 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none text-lg font-bold"
+                                                className="w-full pl-4 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none text-lg font-bold dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                             />
                                         </div>
                                     </div>
@@ -757,40 +834,42 @@ const Admin = () => {
 
                 {activeTab === 'reservations' && <AdminReservations />}
                 {activeTab === 'messages' && <AdminMessages />}
+                {activeTab === 'reviews' && <AdminReviews />}
 
                 {activeTab === 'announcement' && <AdminAnnouncement />}
                 {activeTab === 'drivers' && <DriversPanel />}
+                {activeTab === 'maintenance' && <MaintenancePanel />}
             </main >
 
             {/* Assignment Modal */}
             {
                 showAssignModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6">
-                            <h3 className="text-lg font-bold mb-4">Assigner un livreur</h3>
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-sm w-full p-6 transition-colors duration-300">
+                            <h3 className="text-lg font-bold mb-4 dark:text-white">Assigner un livreur</h3>
                             <div className="space-y-2 max-h-60 overflow-y-auto">
                                 {drivers.filter(d => d.status === 'available').map(driver => (
                                     <button
                                         key={driver.id}
                                         onClick={() => handleAssignDriver(driver.id)}
-                                        className="w-full text-left p-3 border rounded hover:bg-gray-50 flex justify-between items-center"
+                                        className="w-full text-left p-3 border dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700 flex justify-between items-center transition-colors"
                                     >
-                                        <span className="font-bold">{driver.name}</span>
-                                        <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">Dispo</span>
+                                        <span className="font-bold dark:text-white">{driver.name}</span>
+                                        <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full">Dispo</span>
                                     </button>
                                 ))}
                                 {drivers.filter(d => d.status !== 'available').map(driver => (
                                     <button
                                         key={driver.id}
                                         disabled
-                                        className="w-full text-left p-3 border rounded bg-gray-50 opacity-50 flex justify-between items-center cursor-not-allowed"
+                                        className="w-full text-left p-3 border dark:border-gray-700 rounded bg-gray-50 dark:bg-gray-700/50 opacity-50 flex justify-between items-center cursor-not-allowed"
                                     >
-                                        <span>{driver.name}</span>
-                                        <span className="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full">{driver.status}</span>
+                                        <span className="dark:text-gray-400">{driver.name}</span>
+                                        <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 px-2 py-0.5 rounded-full">{driver.status}</span>
                                     </button>
                                 ))}
                             </div>
-                            <button onClick={() => setShowAssignModal(false)} className="mt-4 w-full py-2 bg-gray-200 rounded hover:bg-gray-300">Annuler</button>
+                            <button onClick={() => setShowAssignModal(false)} className="mt-4 w-full py-2 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Annuler</button>
                         </div>
                     </div>
                 )
@@ -801,52 +880,52 @@ const Admin = () => {
             {
                 showProductModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6 max-h-[90vh] transition-colors duration-300 overflow-y-auto">
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-xl font-bold">{editingProduct ? 'Modifier le produit' : 'Nouveau produit'}</h3>
-                                <button onClick={() => setShowProductModal(false)} className="text-gray-500 hover:text-gray-700">
+                                <h3 className="text-xl font-bold dark:text-white">{editingProduct ? 'Modifier le produit' : 'Nouveau produit'}</h3>
+                                <button onClick={() => setShowProductModal(false)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                                     <XCircle size={24} />
                                 </button>
                             </div>
                             <form onSubmit={handleProductSubmit} className="space-y-4">
                                 {/* ... fields ... */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nom du produit</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom du produit</label>
                                     <input
                                         type="text"
                                         required
                                         value={productForm.name}
                                         onChange={e => setProductForm({ ...productForm, name: e.target.value })}
-                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                                     <textarea
                                         required
                                         value={productForm.description}
                                         onChange={e => setProductForm({ ...productForm, description: e.target.value })}
                                         rows="3"
-                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     ></textarea>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Prix (FCFA)</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prix (FCFA)</label>
                                         <input
                                             type="number"
                                             required
                                             value={productForm.price}
                                             onChange={e => setProductForm({ ...productForm, price: e.target.value })}
-                                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Catégorie</label>
                                         <select
                                             value={productForm.category}
                                             onChange={e => setProductForm({ ...productForm, category: e.target.value })}
-                                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                         >
                                             <option value="plats">Plats</option>
                                             <option value="boissons">Boissons</option>
@@ -864,51 +943,56 @@ const Admin = () => {
                                         onChange={e => setProductForm({ ...productForm, is_popular: e.target.checked })}
                                         className="rounded text-primary focus:ring-primary"
                                     />
-                                    <label htmlFor="is_popular" className="text-sm font-medium text-gray-700">Marquer comme populaire</label>
+                                    <label htmlFor="is_popular" className="text-sm font-medium text-gray-700 dark:text-gray-300">Marquer comme populaire</label>
                                 </div>
 
                                 {/* Image Selection Section */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Image</label>
 
                                     {/* Tab Selection: Upload vs Library */}
                                     <div className="flex space-x-4 mb-2">
                                         <button
                                             type="button"
                                             onClick={() => setImageMode('upload')}
-                                            className={`text-sm pb-1 ${imageMode === 'upload' ? 'border-b-2 border-primary font-bold' : 'text-gray-500'}`}
+                                            className={`text-sm pb-1 ${imageMode === 'upload' ? 'border-b-2 border-primary font-bold dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}
                                         >
                                             Upload
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => { setImageMode('library'); fetchLibraryImages(); }}
-                                            className={`text-sm pb-1 ${imageMode === 'library' ? 'border-b-2 border-primary font-bold' : 'text-gray-500'}`}
+                                            className={`text-sm pb-1 ${imageMode === 'library' ? 'border-b-2 border-primary font-bold dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}
                                         >
                                             Bibliothèque ({libraryImages.length})
                                         </button>
                                     </div>
 
                                     {imageMode === 'upload' ? (
-                                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:bg-gray-50 cursor-pointer relative">
+                                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer relative bg-gray-50 dark:bg-gray-700/50">
                                             <input
                                                 type="file"
                                                 accept="image/*"
-                                                onChange={e => setProductForm({ ...productForm, image: e.target.files[0] })}
+                                                onChange={e => {
+                                                    const file = e.target.files[0];
+                                                    if (file) {
+                                                        handleImageUpload(file);
+                                                    }
+                                                }}
                                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                             />
-                                            <div className="flex flex-col items-center text-gray-500">
+                                            <div className="flex flex-col items-center text-gray-500 dark:text-gray-400">
                                                 <Image size={24} className="mb-2" />
-                                                <span className="text-sm">{productForm.image instanceof File ? productForm.image.name : 'Cliquez pour uploader'}</span>
+                                                <span className="text-sm">{typeof productForm.image === 'string' && productForm.image ? 'Image uploadée ✓' : 'Cliquez pour uploader'}</span>
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto border p-2 rounded-lg">
+                                        <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                                             {libraryImages.map((imgUrl, idx) => (
                                                 <div
                                                     key={idx}
                                                     onClick={() => setProductForm({ ...productForm, image: imgUrl })} // Set string URL directly
-                                                    className={`cursor-pointer border-2 rounded overflow-hidden aspect-square ${productForm.image === imgUrl ? 'border-primary ring-2 ring-primary ring-opacity-50' : 'border-transparent hover:border-gray-300'}`}
+                                                    className={`cursor-pointer border-2 rounded overflow-hidden aspect-square ${productForm.image === imgUrl ? 'border-primary ring-2 ring-primary ring-opacity-50' : 'border-transparent hover:border-gray-300 dark:hover:border-gray-500'}`}
                                                 >
                                                     <img src={imgUrl} alt="Library" className="w-full h-full object-cover" />
                                                 </div>
@@ -918,7 +1002,22 @@ const Admin = () => {
 
                                     {/* Preview of selected/existing image */}
                                     {(typeof productForm.image === 'string' && productForm.image) && (
-                                        <p className="text-xs text-green-600 mt-1 truncate">Sélectionné : {productForm.image}</p>
+                                        <div className="mt-3 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded">
+                                            <img 
+                                                src={productForm.image} 
+                                                alt="Preview" 
+                                                className="max-h-32 max-w-full mx-auto rounded"
+                                                onError={(e) => {
+                                                    console.error('Image failed to load:', productForm.image);
+                                                    e.target.alt = 'Image non accessible';
+                                                    e.target.style.display = 'none';
+                                                }}
+                                                onLoad={(e) => {
+                                                    console.log('Image loaded successfully:', productForm.image);
+                                                }}
+                                            />
+                                            <p className="text-xs text-green-600 dark:text-green-400 mt-1 truncate">✓ {productForm.image}</p>
+                                        </div>
                                     )}
                                 </div>
 

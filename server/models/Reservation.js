@@ -33,6 +33,10 @@ const Reservation = sequelize.define('Reservation', {
     status: {
         type: DataTypes.ENUM('pending', 'confirmed', 'cancelled'),
         defaultValue: 'pending'
+    },
+    isArchived: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
 });
 

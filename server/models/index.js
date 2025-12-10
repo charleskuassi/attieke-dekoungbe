@@ -8,6 +8,7 @@ const Announcement = require('./Announcement');
 const Reservation = require('./Reservation');
 const ContactMessage = require('./ContactMessage');
 const DeliveryDriver = require('./DeliveryDriver');
+const Review = require('./Review');
 
 // Associations
 Order.belongsToMany(Product, { through: OrderItem });
@@ -22,6 +23,9 @@ Order.belongsTo(User);
 User.hasMany(Reservation);
 Reservation.belongsTo(User);
 
+User.hasMany(Review);
+Review.belongsTo(User);
+
 DeliveryDriver.hasMany(Order, { foreignKey: 'deliveryDriverId' });
 Order.belongsTo(DeliveryDriver, { foreignKey: 'deliveryDriverId' });
 
@@ -35,5 +39,6 @@ module.exports = {
     Announcement,
     Reservation,
     ContactMessage,
-    DeliveryDriver
+    DeliveryDriver,
+    Review
 };

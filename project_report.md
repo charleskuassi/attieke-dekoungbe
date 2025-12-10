@@ -30,7 +30,26 @@ Le projet **Attièkè Dékoungbé** est une plateforme e-commerce moderne dédi�
   - Mise à jour du statut en un clic (Payé -> En cuisine -> Livré).
 - **Gestion Clients** : Vue d'ensemble de la base utilisateurs.
 
-## 4. État d'Avancement et Correctifs Récents
+## 4. Structure du Projet
+
+### Arborescence Client (`/client/src`)
+- **Pages Principales** :
+  - `Home.jsx` : Page d'accueil (Vitrine).
+  - `Menu.jsx` : Catalogue des produits.
+  - `Checkout.jsx` : Processus de paiement (Multi-étapes).
+  - `Admin.jsx` : Dashboard administrateur (Gestion complète).
+  - `ClientDashboard.jsx` : Espace client.
+  - `Reviews.jsx` : Page des avis clients.
+  - `Reservation.jsx` : Réservation de tables/événements.
+
+### Scripts Serveur Utilitaires (`/server/scripts`)
+Le backend dispose de nombreux scripts de maintenance et de débogage :
+- `seed_real_menu.js` : Initialisation de la base avec le menu réel.
+- `debug_orders*.js` : Outils d'analyse des commandes et transactions.
+- `fix_db_bug.js`, `remove_orderitems_orderid_unique.js` : Correctifs de structure BDD.
+- `create_admin.js` : Création rapide d'un compte admin.
+
+## 5. État d'Avancement et Correctifs Récents
 Le projet est en phase **"Production Ready"** (Prêt pour la production).
 
 ### Correctifs Apportés (Dernière Session)
@@ -44,7 +63,7 @@ Le projet est en phase **"Production Ready"** (Prêt pour la production).
     - Transactions atomiques pour la création de commande (garantit l'intégrité des données).
     - Logs détaillés pour le débogage.
 
-## 5. Prochaines Étapes
+## 6. Prochaines Étapes
 - **Déploiement** : Mise en ligne sur un serveur VPS ou une plateforme Cloud (Render, Vercel + Railway).
 - **Notifications SMS** : Intégration d'une API SMS pour notifier les clients en temps réel.
 

@@ -221,5 +221,13 @@ const seedMenu = async () => {
     // }
 };
 
-// seedMenu();
+if (require.main === module) {
+    seedMenu().then(() => {
+        console.log('Seed completed.');
+        process.exit(0);
+    }).catch(err => {
+        console.error('Seed failed:', err);
+        process.exit(1);
+    });
+}
 module.exports = seedMenu;

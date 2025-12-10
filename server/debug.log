@@ -8437,3 +8437,91 @@
   "exp": 1765365003
 }
 [2025-12-09T11:10:41.065Z] ✅ Commande créée avec succès ID: 18
+[2025-12-09T18:52:17.136Z] createOrder called. User: {
+  "id": 5,
+  "role": "customer",
+  "iat": 1765298553,
+  "exp": 1765384953
+}
+[2025-12-09T18:52:17.810Z] ✅ Commande créée avec succès ID: 19
+[2025-12-09T22:12:42.796Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765314842,
+  "exp": 1765401242
+}
+[2025-12-09T22:12:43.471Z] ✅ Commande créée avec succès ID: 20
+[2025-12-10T10:49:32.541Z] createOrder called. User: {
+  "id": 5,
+  "role": "customer",
+  "iat": 1765363095,
+  "exp": 1765449495
+}
+[2025-12-10T10:49:33.814Z] ✅ Commande créée avec succès ID: 21
+[2025-12-10T12:35:27.558Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765370041,
+  "exp": 1765456441
+}
+[2025-12-10T12:35:58.608Z] Update Profile called: {
+  "name": "Légérol TCHOGBE",
+  "phone": "97000000",
+  "address": "B2NIN"
+}
+[2025-12-10T12:36:15.941Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765370041,
+  "exp": 1765456441
+}
+[2025-12-10T13:16:00.709Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765371864,
+  "exp": 1765458264
+}
+[2025-12-10T13:30:52.996Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765371864,
+  "exp": 1765458264
+}
+[2025-12-10T13:31:12.717Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765371864,
+  "exp": 1765458264
+}
+[2025-12-10T13:53:23.006Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765371864,
+  "exp": 1765458264
+}
+[2025-12-10T14:05:11.402Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765371864,
+  "exp": 1765458264
+}
+[2025-12-10T14:09:46.299Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765375728,
+  "exp": 1765462128
+}
+[2025-12-10T14:16:24.391Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765375728,
+  "exp": 1765462128
+}
+[2025-12-10T14:16:25.805Z] ✅ Commande créée avec succès ID: 1
+[2025-12-10T14:17:32.509Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765375728,
+  "exp": 1765462128
+}
+[2025-12-10T14:17:33.010Z] ✅ Commande créée avec succès ID: 2

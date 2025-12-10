@@ -34,6 +34,10 @@ const Order = sequelize.define('Order', {
     UserId: {
         type: DataTypes.INTEGER,
         allowNull: true // Allow null for guest orders if we still wanted them, but V2 enforces login. Let's keep true for safety or migration.
+    },
+    isArchived: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
 });
 

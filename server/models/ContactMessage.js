@@ -22,6 +22,10 @@ const ContactMessage = sequelize.define('ContactMessage', {
     isRead: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
+    },
+    isArchived: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
 });
 
