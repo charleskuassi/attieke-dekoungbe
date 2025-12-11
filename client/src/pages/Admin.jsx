@@ -11,7 +11,7 @@ import DriversPanel from '../components/DriversPanel';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-import ImageLibrary from '../components/ImageLibrary';
+import ImageLibrary from './admin/ImageLibrary';
 
 const Admin = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -22,7 +22,7 @@ const Admin = () => {
     const [drivers, setDrivers] = useState([]); // Shared drivers list for assignment
     const [promo, setPromo] = useState({ isActive: false, minAmount: 15000, discountPercentage: 5 });
     const [loading, setLoading] = useState(true);
-    const [counts, setCounts] = useState({ orders: 0, reservations: 0, messages: 0, clients: 0 });
+    const [counts, setCounts] = useState({ orders: 0, reservations: 0, messages: 0, reviews: 0, clients: 0 });
     const [reportFormat, setReportFormat] = useState('pdf'); // 'pdf' or 'excel'
 
     // Search and Filter State
@@ -44,6 +44,10 @@ const Admin = () => {
     const [showAssignModal, setShowAssignModal] = useState(false);
     const [selectedOrderForAssign, setSelectedOrderForAssign] = useState(null);
 
+    // Library Modal State
+    const [showLibraryModal, setShowLibraryModal] = useState(false);
+    const [libraryImages, setLibraryImages] = useState([]);
+
     useEffect(() => {
         fetchData();
         const interval = setInterval(fetchData, 30000); // Auto-refresh every 30s
@@ -52,7 +56,7 @@ const Admin = () => {
 
     const getImageUrl = (url) => {
         if (!url) return '';
-        if (url.startsWith('http') || url.startsWith('/images/')) return url;
+        if (url.startsWith('http')) return url;
         return `${import.meta.env.VITE_API_URL}${url}`;
     };
 
@@ -299,6 +303,21 @@ const Admin = () => {
         }
     };
 
+    const openLibraryModal = async () => {
+        setShowLibraryModal(true);
+        try {
+            const res = await axios.get('http://localhost:5000/api/admin/library');
+            setLibraryImages(res.data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const selectImageFromLibrary = (url) => {
+        setProductForm({ ...productForm, image: url });
+        setShowLibraryModal(false);
+    };
+
     const handleDeleteProduct = async (id) => {
         if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) return;
         try {
@@ -385,8 +404,9 @@ const Admin = () => {
                         <div className="flex items-center"><Users size={20} className="mr-3" /> Messages</div>
                         {counts.messages > 0 && <span className="bg-red-500 text-white rounded-full text-xs font-bold px-2 py-0.5">{counts.messages}</span>}
                     </a>
-                    <a onClick={() => setActiveTab('reviews')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'reviews' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
-                        <MessageSquare size={20} className="mr-3" /> Avis & Plaintes
+                    <a onClick={() => setActiveTab('reviews')} className={`flex items-center justify-between px-6 py-3 cursor-pointer ${activeTab === 'reviews' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
+                        <div className="flex items-center"><MessageSquare size={20} className="mr-3" /> Avis & Plaintes</div>
+                        {counts.reviews > 0 && <span className="bg-red-500 text-white rounded-full text-xs font-bold px-2 py-0.5">{counts.reviews}</span>}
                     </a>
                     <a onClick={() => setActiveTab('announcement')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'announcement' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                         <Megaphone size={20} className="mr-3" /> Annonces
@@ -914,47 +934,65 @@ const Admin = () => {
                                     <label htmlFor="is_popular" className="text-sm font-medium text-gray-700 dark:text-gray-300">Marquer comme populaire</label>
                                 </div>
 
-                                {/* Images: Image Library Selector ONLY */}
+                                {/* SELECTION IMAGE */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Choisir une image pour ce produit</label>
+                                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Image du produit</label>
 
-                                    <div className="border rounded-xl p-4 bg-gray-50 dark:bg-gray-700/50">
-                                        {productForm.image ? (
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-20 h-20 rounded-lg overflow-hidden border">
-                                                    <img
-                                                        src={getImageUrl(productForm.image)}
-                                                        alt="Selected"
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <p className="text-sm font-mono truncate mb-2">{productForm.image}</p>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setProductForm({ ...productForm, image: null })}
-                                                        className="text-red-500 hover:text-red-700 text-sm font-bold flex items-center"
-                                                    >
-                                                        <Trash size={16} className="mr-1" /> Retirer
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="text-center py-4 text-gray-500 italic">
-                                                Aucune image sélectionnée
-                                            </div>
-                                        )}
-
-                                        <hr className="my-4 border-gray-200 dark:border-gray-600" />
-
-                                        <div className="h-64 overflow-y-auto">
-                                            <ImageLibrary
-                                                selectionMode={true}
-                                                onSelect={(url) => setProductForm({ ...productForm, image: url })}
-                                            />
+                                    <div className="flex gap-4 items-start">
+                                        {/* Prévisualisation */}
+                                        <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-gray-50 dark:bg-gray-700 overflow-hidden relative">
+                                            {productForm.image ? (
+                                                <img src={getImageUrl(productForm.image)} alt="Aperçu" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <Image size={32} className="text-gray-400" />
+                                            )}
                                         </div>
+
+                                        {/* Bouton pour choisir */}
+                                        <button
+                                            type="button"
+                                            onClick={openLibraryModal}
+                                            className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg transition flex items-center gap-2 border border-gray-200 dark:border-gray-600"
+                                        >
+                                            <Image size={18} />
+                                            Choisir depuis la bibliothèque
+                                        </button>
                                     </div>
                                 </div>
+
+                                {/* MODALE BIBLIOTHÈQUE (Popup) */}
+                                {showLibraryModal && (
+                                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4">
+                                        <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-4xl max-h-[80vh] flex flex-col shadow-2xl overflow-hidden">
+                                            <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center bg-white dark:bg-gray-800">
+                                                <h3 className="font-bold text-lg dark:text-white">Choisir une image</h3>
+                                                <button type="button" onClick={() => setShowLibraryModal(false)} className="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white font-bold text-xl">&times;</button>
+                                            </div>
+
+                                            <div className="p-6 overflow-y-auto grid grid-cols-3 md:grid-cols-5 gap-4 bg-gray-50 dark:bg-gray-900">
+                                                {libraryImages.map((img) => (
+                                                    <div
+                                                        key={img.name}
+                                                        onClick={() => selectImageFromLibrary(img.url)}
+                                                        className={`cursor-pointer rounded-lg overflow-hidden border-2 transition relative group aspect-square ${productForm.image === img.url ? 'border-orange-500 ring-2 ring-orange-200' : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'}`}
+                                                    >
+                                                        <img src={getImageUrl(img.url)} alt={img.name} className="w-full h-full object-cover" />
+                                                        {/* Indicateur si sélectionné */}
+                                                        {productForm.image === img.url && (
+                                                            <div className="absolute inset-0 bg-orange-500/20 flex items-center justify-center">
+                                                                <div className="bg-white rounded-full p-1"><CheckCircle className="text-orange-600" size={16} /></div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-b-2xl text-right">
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">Astuce : Ajoutez de nouvelles images via le menu "Médiathèque"</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <button type="submit" className="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-orange-700 transition">
                                     {editingProduct ? 'Mettre à jour' : 'Créer le produit'}

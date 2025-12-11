@@ -1,4 +1,4 @@
-const { Order, OrderItem, Product, User, sequelize, Reservation, ContactMessage } = require('../models');
+const { Order, OrderItem, Product, User, sequelize, Reservation, ContactMessage, Review } = require('../models');
 const { Op } = require('sequelize');
 
 exports.getStats = async (req, res) => {
@@ -89,10 +89,11 @@ exports.getNotificationCounts = async (req, res) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const [pendingOrders, pendingReservations, unreadMessages, newClients, totalClients] = await Promise.all([
+        const [pendingOrders, pendingReservations, unreadMessages, unreadReviews, newClients, totalClients] = await Promise.all([
             Order.count({ where: { status: 'paid' } }),
             Reservation.count({ where: { status: 'pending' } }),
             ContactMessage.count({ where: { isRead: false } }),
+            Review.count({ where: { status: 'new' } }),
             User.count({ where: { role: 'customer', createdAt: { [Op.gte]: today }, isVerified: true } }),
             User.count({ where: { role: 'customer', isVerified: true } })
         ]);
@@ -101,6 +102,7 @@ exports.getNotificationCounts = async (req, res) => {
             orders: pendingOrders,
             reservations: pendingReservations,
             messages: unreadMessages,
+            reviews: unreadReviews,
             clients: newClients,
             totalClients // Return total for dashboard card
         });

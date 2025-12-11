@@ -8532,3 +8532,54 @@
   "exp": 1765497900
 }
 [2025-12-11T00:05:33.414Z] ✅ Commande créée avec succès ID: 3
+[2025-12-11T08:30:16.741Z] Update Profile called: {
+  "name": "Légérol TCHOGBE",
+  "phone": "97000000",
+  "address": "Cotonou Dêkoungbé\n\nTogbin"
+}
+[2025-12-11T08:30:35.280Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765441757,
+  "exp": 1765528157
+}
+[2025-12-11T08:37:48.051Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765441757,
+  "exp": 1765528157
+}
+[2025-12-11T08:37:48.549Z] ✅ Commande créée avec succès ID: 1
+[2025-12-11T08:42:56.841Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765442464,
+  "exp": 1765528864
+}
+[2025-12-11T08:42:57.363Z] ✅ Commande créée avec succès ID: 2
+[2025-12-11T08:43:47.649Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765442464,
+  "exp": 1765528864
+}
+[2025-12-11T08:43:48.169Z] ✅ Commande créée avec succès ID: 3
+[2025-12-11T08:58:44.064Z] Update Profile called: {
+  "name": "Charles KUASSI",
+  "phone": "97000000",
+  "address": "Cotonou Dêkoungbé\n\nTogbin"
+}
+[2025-12-11T08:59:16.540Z] createOrder called. User: {
+  "id": 3,
+  "role": "customer",
+  "iat": 1765443301,
+  "exp": 1765529701
+}
+[2025-12-11T08:59:17.055Z] ✅ Commande créée avec succès ID: 4
+[2025-12-11T09:05:32.436Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765443884,
+  "exp": 1765530284
+}
+[2025-12-11T09:05:32.946Z] ✅ Commande créée avec succès ID: 5
