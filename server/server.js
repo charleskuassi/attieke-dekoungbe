@@ -31,22 +31,31 @@ const authLimiter = rateLimit({
 // Middleware
 // CORS Security: Allow only frontend domain (and localhost for dev)
 // CORS Security: Allow all for debugging
-app.use(cors());
-// const allowedOrigins = [
-//     'http://localhost:5173',
-//     'http://localhost:3000',
-// ];
-// app.use(cors({
-//     origin: function (origin, callback) {
-//         if (!origin) return callback(null, true);
-//         if (allowedOrigins.indexOf(origin) === -1) {
-//             const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-//             return callback(new Error(msg), false);
-//         }
-//         return callback(null, true);
-//     },
-//     credentials: true
-// }));
+// CORS Configuration
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    process.env.FRONTEND_URL // Production URL from env
+].filter(Boolean); // Remove undefined/null if env var is missing
+
+app.use(cors({
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+            // In dev, or if origin is in whitelist, allow it
+            // Note: checking NODE_ENV !== 'production' allows all limits in dev, simplify if needed to strict allowedOrigins check
+            return callback(null, true);
+        } else {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
 
 app.use(express.json());
 const passport = require('./config/passport');
