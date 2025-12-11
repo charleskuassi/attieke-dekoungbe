@@ -56,7 +56,7 @@ const Admin = () => {
 
     const getImageUrl = (url) => {
         if (!url) return '';
-        if (url.startsWith('http')) return url;
+        if (url.startsWith('http') || url.startsWith('/images/')) return url;
         return `${import.meta.env.VITE_API_URL}${url}`;
     };
 

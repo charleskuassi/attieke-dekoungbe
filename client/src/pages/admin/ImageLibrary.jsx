@@ -73,7 +73,7 @@ const ImageLibrary = ({ selectionMode = false, onSelect }) => {
                             className={`group relative bg-white p-2 rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 ${selectionMode ? 'cursor-pointer hover:ring-2 hover:ring-orange-500' : ''}`}
                         >
                             <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-2">
-                                <img src={`http://localhost:5000${img.url}`} alt={img.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
+                                <img src={img.url} alt={img.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
                             </div>
                             <p className="text-xs text-gray-500 truncate px-1">{img.name}</p>
 
