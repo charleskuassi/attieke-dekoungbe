@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AdminAnnouncement from '../components/AdminAnnouncement';
 import MaintenancePanel from '../components/MaintenancePanel';
-import { LayoutDashboard, ShoppingBag, Users, TrendingUp, Package, Search, Filter, ChevronDown, CheckCircle, XCircle, Clock, Truck, Plus, Edit, Trash, Image, Utensils, Percent, Megaphone, FileText, MessageSquare, Shield, Archive as ArchiveIcon, Bell } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, TrendingUp, Package, Search, Filter, ChevronDown, CheckCircle, XCircle, Clock, Truck, Plus, Edit, Trash, Trash2, Image, Utensils, Percent, Megaphone, FileText, MessageSquare, Shield, Archive as ArchiveIcon, Bell } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import AdminReservations from '../components/AdminReservations';
 import AdminMessages from '../components/AdminMessages';
@@ -141,6 +141,21 @@ const Admin = () => {
         } catch (error) {
             console.error("Assign error:", error);
             alert("Erreur assignation");
+        }
+    };
+
+    const handleDeleteClient = async (clientId) => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`${import.meta.env.VITE_API_URL}/api/admin/users/${clientId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            // Update UI immediately
+            setClients(clients.filter(c => c.id !== clientId));
+            alert("Utilisateur supprimé avec succès.");
+        } catch (error) {
+            console.error("Delete client error:", error);
+            alert("Erreur lors de la suppression de l'utilisateur : " + (error.response?.data?.message || "Erreur serveur"));
         }
     };
 
@@ -868,6 +883,7 @@ const Admin = () => {
                                             <th className="p-4 font-semibold">Email</th>
                                             <th className="p-4 font-semibold">Téléphone</th>
                                             <th className="p-4 font-semibold">Inscrit le</th>
+                                            <th className="p-4 font-semibold">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y dark:divide-gray-700">
@@ -877,6 +893,19 @@ const Admin = () => {
                                                 <td className="p-4 text-gray-600 dark:text-gray-300">{client.email}</td>
                                                 <td className="p-4 text-gray-600 dark:text-gray-300">{client.phone || '-'}</td>
                                                 <td className="p-4 text-gray-500 dark:text-gray-400">{new Date(client.createdAt).toLocaleDateString()}</td>
+                                                <td className="p-4">
+                                                    <button
+                                                        onClick={() => {
+                                                            if (window.confirm(`⚠️ DANGER: Êtes-vous sûr de vouloir supprimer définitivement ${client.name} ? Cette action est irréversible et supprimera tout l'historique associé.`)) {
+                                                                handleDeleteClient(client.id);
+                                                            }
+                                                        }}
+                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-lg transition"
+                                                        title="Supprimer définitivement"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>

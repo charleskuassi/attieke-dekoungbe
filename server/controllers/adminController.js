@@ -111,3 +111,32 @@ exports.getNotificationCounts = async (req, res) => {
         res.status(500).json({ message: 'Server Error' });
     }
 };
+
+exports.deleteUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        // 1. Sécurité : Empêcher l'admin de se suicider (numériquement)
+        if (req.user.id == userId) {
+            return res.status(403).json({ message: "Vous ne pouvez pas supprimer votre propre compte admin." });
+        }
+
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ message: "Utilisateur introuvable." });
+        }
+
+        // 2. Suppression (Cascade gérée par Sequelize si configurée, sinon on le fait manuellement pour être sûr)
+        // Optionnel : Suppression des commandes liées manuellement si cascade n'est pas activée en BDD
+        // await Order.destroy({ where: { UserId: userId } }); 
+
+        await user.destroy();
+
+        console.log(`🗑️ [ADMIN] Utilisateur ${userId} supprimé par ${req.user.id}`);
+        res.json({ message: "Utilisateur et ses données supprimés avec succès." });
+
+    } catch (err) {
+        console.error("Erreur suppression user:", err);
+        res.status(500).json({ message: "Erreur serveur lors de la suppression." });
+    }
+};

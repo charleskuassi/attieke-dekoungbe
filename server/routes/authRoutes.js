@@ -6,12 +6,15 @@ const { protect } = require('../middleware/authMiddleware');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 
+const validate = require('../middleware/validate');
+const { registerSchema, loginSchema } = require('../utils/validationSchemas');
+
 router.get('/test', (req, res) => {
     res.send('Auth Routes Working');
 });
 
-router.post('/register', authController.register);
-router.post('/login', authController.login);
+router.post('/register', validate(registerSchema), authController.register);
+router.post('/login', validate(loginSchema), authController.login);
 router.post('/verify-email', authController.verifyEmail);
 router.post('/forgot-password', authController.forgotPassword);
 router.put('/reset-password/:token', authController.resetPassword);

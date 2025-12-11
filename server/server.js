@@ -10,44 +10,50 @@ const app = express();
 app.set('trust proxy', 1); // Trust Render Proxy for HTTPS
 const PORT = process.env.PORT || 5000;
 
-// Security Middleware: Helmet
+const hpp = require('hpp');
+
+// Security Middleware: Helmet (Headers Protection)
 app.use(helmet());
+
+// Security Middleware: HPP (Parameter Pollution Protection)
+app.use(hpp());
 
 // Security Middleware: Rate Limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5000, // Limit each IP to 5000 requests per windowMs (Dev Mode)
-    message: "Too many requests from this IP, please try again later."
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: "Too many requests from this IP, please try again later.",
+    standardHeaders: true, // Legacy header
+    legacyHeaders: false, // Legacy header
 });
 app.use(limiter);
 
 // Specific Auth Limiter
 const authLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
-    max: 1000, // Increased for development/testing
+    max: 20, // Strict limit for login/register
     message: "Too many login attempts, please try again later."
 });
 
 // Middleware
-// CORS Security: Allow only frontend domain (and localhost for dev)
-// CORS Security: Allow all for debugging
 // CORS Configuration
 const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:3000',
     process.env.FRONTEND_URL // Production URL from env
-].filter(Boolean); // Remove undefined/null if env var is missing
+].filter(Boolean);
 
 app.use(cors({
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
+        // SECURITY NOTE: In strictly secured production, you might want to block no-origin requests,
+        // but for now we allow them to permit server-to-server calls or tools like Postman if needed.
         if (!origin) return callback(null, true);
 
-        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
-            // In dev, or if origin is in whitelist, allow it
-            // Note: checking NODE_ENV !== 'production' allows all limits in dev, simplify if needed to strict allowedOrigins check
+        if (allowedOrigins.indexOf(origin) !== -1) {
             return callback(null, true);
         } else {
+            console.warn(`Blocked CORS request from: ${origin}`);
             const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
             return callback(new Error(msg), false);
         }
