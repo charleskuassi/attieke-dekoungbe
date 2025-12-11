@@ -16,6 +16,12 @@ exports.createReview = async (req, res) => {
             message,
             status: 'new'
         });
+
+        // Admin Notification
+        const { createNotification } = require('./notificationController');
+        const notifType = type === 'avis' ? 'review' : 'complaint';
+        createNotification('review', `Nouveau ${type} de ${req.user.name || 'Client'}`, review.id);
+
         res.status(201).json(review);
     } catch (err) {
         console.error("Create Review Error:", err);

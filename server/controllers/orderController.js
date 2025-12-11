@@ -139,6 +139,10 @@ exports.createOrder = async (req, res) => {
         // Notification Async
         sendOrderNotification(order, items).catch(err => console.error('Email error:', err));
 
+        // Admin Notification
+        const { createNotification } = require('./notificationController');
+        createNotification('order', `Nouvelle commande #${order.id} de ${customer_name}`, order.id);
+
         log("✅ Commande créée avec succès ID:", order.id);
         res.status(201).json({ message: 'Commande validée et créée avec succès', orderId: order.id });
 

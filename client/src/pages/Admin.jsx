@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AdminAnnouncement from '../components/AdminAnnouncement';
 import MaintenancePanel from '../components/MaintenancePanel';
-import { LayoutDashboard, ShoppingBag, Users, TrendingUp, Package, Search, Filter, ChevronDown, CheckCircle, XCircle, Clock, Truck, Plus, Edit, Trash, Image, Utensils, Percent, Megaphone, FileText, MessageSquare, Shield, Archive as ArchiveIcon } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, TrendingUp, Package, Search, Filter, ChevronDown, CheckCircle, XCircle, Clock, Truck, Plus, Edit, Trash, Image, Utensils, Percent, Megaphone, FileText, MessageSquare, Shield, Archive as ArchiveIcon, Bell } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import AdminReservations from '../components/AdminReservations';
 import AdminMessages from '../components/AdminMessages';
@@ -14,6 +15,7 @@ import * as XLSX from 'xlsx';
 import ImageLibrary from './admin/ImageLibrary';
 
 const Admin = () => {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('dashboard');
     const [stats, setStats] = useState({ dailySales: 0, monthlyData: [], topProducts: [] });
     const [orders, setOrders] = useState([]);
@@ -24,6 +26,11 @@ const Admin = () => {
     const [loading, setLoading] = useState(true);
     const [counts, setCounts] = useState({ orders: 0, reservations: 0, messages: 0, reviews: 0, clients: 0 });
     const [reportFormat, setReportFormat] = useState('pdf'); // 'pdf' or 'excel'
+
+    // Notifications State
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [showNotifications, setShowNotifications] = useState(false);
 
     // Search and Filter State
     const [searchTerm, setSearchTerm] = useState('');
@@ -50,9 +57,39 @@ const Admin = () => {
 
     useEffect(() => {
         fetchData();
-        const interval = setInterval(fetchData, 30000); // Auto-refresh every 30s
+        fetchNotifications(); // Initial fetch
+        const interval = setInterval(() => {
+            fetchData();
+            fetchNotifications(); // Poll notifications
+        }, 30000); // 30s polling
         return () => clearInterval(interval);
     }, []);
+
+    const fetchNotifications = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/notifications`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setNotifications(res.data.notifications);
+            setUnreadCount(res.data.unreadCount);
+        } catch (err) {
+            console.error("Error fetching notifications", err);
+        }
+    };
+
+    const markNotificationAsRead = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/admin/notifications/read/${id}`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchNotifications(); // Refresh
+        } catch (err) {
+            console.error("Error marking read", err);
+        }
+    };
 
     const getImageUrl = (url) => {
         if (!url) return '';
@@ -120,6 +157,11 @@ const Admin = () => {
             alert("Erreur lors de la mise à jour du statut");
         }
 
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        navigate('/login');
     };
 
     const handleArchiveOrder = async (orderId, currentStatus) => {
@@ -424,7 +466,93 @@ const Admin = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 overflow-y-auto p-8">
+            <main className="flex-1 overflow-y-auto p-8 relative">
+                {/* Global Header */}
+                <header className="flex justify-between items-center mb-8 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm sticky top-0 z-40">
+                    <h2 className="text-xl font-bold capitalize text-primary">{activeTab}</h2>
+
+                    <div className="flex items-center space-x-6">
+                        {/* Notifications */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowNotifications(!showNotifications)}
+                                className="p-2 text-gray-500 hover:text-orange-600 relative transition-colors"
+                            >
+                                <Bell size={24} />
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-600 rounded-full text-xs flex items-center justify-center font-bold text-white animate-bounce border-2 border-white dark:border-gray-800">
+                                        {unreadCount}
+                                    </span>
+                                )}
+                            </button>
+
+                            {/* Dropdown */}
+                            {showNotifications && (
+                                <div className="absolute right-0 mt-4 w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden z-50 border border-gray-100 dark:border-gray-700 ring-4 ring-black/5">
+                                    <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900">
+                                        <h3 className="font-bold text-sm dark:text-gray-200 uppercase tracking-wider text-gray-500">Notifications</h3>
+                                        <div className="flex gap-3">
+                                            {unreadCount > 0 && (
+                                                <button
+                                                    onClick={() => markNotificationAsRead('all')}
+                                                    className="text-xs text-primary hover:text-orange-700 font-bold uppercase"
+                                                >
+                                                    Tout lire
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => setShowNotifications(false)}
+                                                className="text-gray-400 hover:text-gray-600"
+                                            >
+                                                <XCircle size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="max-h-[400px] overflow-y-auto">
+                                        {notifications.length === 0 ? (
+                                            <div className="p-8 text-center flex flex-col items-center text-gray-400">
+                                                <Bell size={40} className="mb-2 opacity-20" />
+                                                <p className="text-sm">Aucune notification pour le moment</p>
+                                            </div>
+                                        ) : (
+                                            notifications.map(notif => (
+                                                <div
+                                                    key={notif.id}
+                                                    onClick={() => {
+                                                        if (!notif.isRead) markNotificationAsRead(notif.id);
+                                                    }}
+                                                    className={`p-4 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-200 flex gap-4 ${!notif.isRead ? 'bg-orange-50/60 dark:bg-orange-900/10' : ''}`}
+                                                >
+                                                    <div className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${!notif.isRead ? 'bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.5)]' : 'bg-transparent'}`} />
+                                                    <div className="flex-1">
+                                                        <p className={`text-sm leading-snug ${!notif.isRead ? 'font-bold text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>
+                                                            {notif.message}
+                                                        </p>
+                                                        <div className="flex justify-between items-center mt-2">
+                                                            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
+                                                                {notif.type}
+                                                            </span>
+                                                            <span className="text-[11px] text-gray-400">
+                                                                {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {new Date(notif.createdAt).toLocaleDateString()}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="h-8 w-px bg-gray-200 dark:bg-gray-700"></div>
+
+                        <button onClick={handleLogout} className="text-red-500 hover:text-red-700 font-semibold text-sm transition-colors flex items-center gap-2 hover:bg-red-50 px-3 py-2 rounded-lg">
+                            Déconnexion
+                        </button>
+                    </div>
+                </header>
+
                 {activeTab === 'dashboard' && (
                     <div className="space-y-8">
                         <h2 className="text-2xl font-bold">Vue d'ensemble</h2>

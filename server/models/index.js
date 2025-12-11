@@ -9,6 +9,7 @@ const Reservation = require('./Reservation');
 const ContactMessage = require('./ContactMessage');
 const DeliveryDriver = require('./DeliveryDriver');
 const Review = require('./Review');
+const Notification = require('./Notification');
 
 // Associations
 Order.belongsToMany(Product, { through: OrderItem });
@@ -40,5 +41,6 @@ module.exports = {
     Reservation,
     ContactMessage,
     DeliveryDriver,
-    Review
+    Review,
+    Notification
 };

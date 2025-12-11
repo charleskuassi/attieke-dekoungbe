@@ -89,7 +89,7 @@ const Register = () => {
                         </div>
                     </div>
                     <h2 className="text-2xl font-serif font-bold text-gray-800 dark:text-white mb-2">Compte vérifié !</h2>
-                    <p className="text-gray-600 dark:text-gray-300 mb-6">Bienvenue sur Attièkè Dékoungbé. Vous êtes connecté.</p>
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">Bienvenue sur Attièkè Dèkoungbé. Vous êtes connecté.</p>
                     <p className="text-sm text-gray-400">Redirection en cours...</p>
                 </div>
             </div>

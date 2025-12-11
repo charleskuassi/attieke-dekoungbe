@@ -8583,3 +8583,17 @@
   "exp": 1765530284
 }
 [2025-12-11T09:05:32.946Z] ✅ Commande créée avec succès ID: 5
+[2025-12-11T19:14:25.566Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765480421,
+  "exp": 1765566821
+}
+[2025-12-11T19:14:26.119Z] ✅ Commande créée avec succès ID: 6
+[2025-12-11T19:23:52.956Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765480995,
+  "exp": 1765567395
+}
+[2025-12-11T19:23:53.431Z] ✅ Commande créée avec succès ID: 7

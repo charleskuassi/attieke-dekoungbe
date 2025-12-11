@@ -65,7 +65,7 @@ const Home = () => {
                 <div className="container mx-auto text-center max-w-4xl">
                     <h2 className="text-3xl md:text-4xl font-serif font-bold text-text dark:text-white mb-6">Une tradition culinaire</h2>
                     <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                        Chez Attièkè Dékoungbé, nous sélectionnons les meilleurs ingrédients pour vous offrir une expérience gustative inoubliable. Nos plats sont préparés à la commande pour garantir une fraîcheur absolue.
+                        Chez Attièkè Dèkoungbé, nous sélectionnons les meilleurs ingrédients pour vous offrir une expérience gustative inoubliable. Nos plats sont préparés à la commande pour garantir une fraîcheur absolue.
                     </p>
                 </div>
             </section>

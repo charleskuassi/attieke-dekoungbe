@@ -51,7 +51,7 @@ const SplashScreen = ({ onComplete }) => {
 
             {/* Title */}
             <h1 className="text-3xl font-serif font-bold text-orange-800 dark:text-orange-500 mb-4 tracking-wider">
-                Attièkè Dékoungbé
+                Attièkè Dèkoungbé
             </h1>
 
             {/* Changing Text */}

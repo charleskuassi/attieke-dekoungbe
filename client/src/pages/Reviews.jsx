@@ -71,7 +71,7 @@ const Reviews = () => {
             <div className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden p-8 transition-colors">
                 <div className="text-center mb-8">
                     <h2 className="text-3xl font-extrabold text-primary dark:text-orange-500">Votre Avis Compte</h2>
-                    <p className="mt-2 text-gray-600 dark:text-gray-300">Aidez-nous à améliorer Attièkè Dékoungbé</p>
+                    <p className="mt-2 text-gray-600 dark:text-gray-300">Aidez-nous à améliorer Attièkè Dèkoungbé</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">

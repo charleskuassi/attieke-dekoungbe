@@ -14,6 +14,11 @@ exports.createReservation = async (req, res) => {
         }
 
         const reservation = await Reservation.create(reservationData);
+
+        // Admin Notification
+        const { createNotification } = require('./notificationController');
+        createNotification('reservation', `Nouvelle réservation de ${name} pour le ${date} à ${time}`, reservation.id);
+
         res.status(201).json({ success: true, data: reservation });
     } catch (err) {
         console.error("Create Reservation Error:", err);

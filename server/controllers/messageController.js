@@ -6,6 +6,11 @@ exports.createMessage = async (req, res) => {
         const contactMessage = await ContactMessage.create({
             name, email, message
         });
+
+        // Admin Notification
+        const { createNotification } = require('./notificationController');
+        createNotification('message', `Nouveau message de ${name}`, contactMessage.id);
+
         res.status(201).json({ success: true, data: contactMessage });
     } catch (err) {
         console.error("Create Message Error:", err);

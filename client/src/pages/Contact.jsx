@@ -8,7 +8,7 @@ const Contact = () => {
             {/* Header Section */}
             <div className="bg-white py-12 px-4 shadow-sm text-center">
                 <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-2">
-                    ATTIÈKÈ DÉKOUNGBÉ
+                    ATTIÈKÈ DÈKOUNGBÉ
                 </h1>
                 <h2 className="text-xl text-gray-700 font-medium mb-4">Contactez-nous</h2>
                 <p className="text-gray-500 max-w-lg mx-auto italic">
@@ -134,7 +134,7 @@ const ContactMap = () => {
             {/* Header Section */}
             <div className="bg-white dark:bg-gray-800 py-12 px-4 shadow-sm text-center transition-colors">
                 <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-2">
-                    ATTIÈKÈ DÉKOUNGBÉ
+                    ATTIÈKÈ DÈKOUNGBÉ
                 </h1>
                 <h2 className="text-xl text-gray-700 dark:text-gray-300 font-medium mb-4">Contactez-nous</h2>
                 <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto italic">
@@ -263,13 +263,13 @@ const ContactMap = () => {
                 <div className="mt-12 rounded-2xl overflow-hidden shadow-xl relative group">
                     <img
                         src="/images/restaurant_bar.jpg"
-                        alt="Bar Restaurant Attiéké Dékoungbé"
+                        alt="Bar Restaurant Attiéké Dèkoungbé"
                         className="w-full h-64 md:h-80 object-cover transform group-hover:scale-105 transition duration-700"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-6">
                         <div className="text-white">
                             <h3 className="text-2xl font-serif font-bold mb-1">Notre Bar</h3>
-                            <p className="opacity-90 font-medium">Venez vivre l'expérience Attiéké Dékoungbé sur place !</p>
+                            <p className="opacity-90 font-medium">Venez vivre l'expérience Attiéké Dèkoungbé sur place !</p>
                         </div>
                     </div>
                 </div>

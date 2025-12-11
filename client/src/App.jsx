@@ -97,7 +97,7 @@ function App() {
                         </Routes>
                     </main>
                     <footer className="bg-primary text-white py-6 text-center">
-                        <p>&copy; 2023 Attièkè Dékoungbé. Le goût authentique.</p>
+                        <p>&copy; 2023 Attièkè Dèkoungbé. Le goût authentique.</p>
                     </footer>
                     <FloatingContact />
                 </>

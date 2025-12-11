@@ -101,6 +101,10 @@ exports.verifyEmail = async (req, res) => {
         user.verificationCodeExpires = null;
         await user.save();
 
+        // Admin Notification
+        const { createNotification } = require('./notificationController');
+        createNotification('user', `Nouveau client vérifié : ${user.name}`, user.id);
+
         // Auto login
         const token = jwt.sign(
             { id: user.id, role: user.role },

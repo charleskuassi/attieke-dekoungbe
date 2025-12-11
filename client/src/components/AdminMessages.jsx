@@ -83,8 +83,8 @@ const AdminMessages = ({ refreshCounts }) => {
                         key={msg.id}
                         onClick={() => handleMarkAsRead(msg)}
                         className={`border rounded-lg p-4 transition cursor-pointer ${!msg.isRead
-                                ? 'bg-orange-50 border-orange-200 shadow-sm dark:bg-orange-900/20 dark:border-orange-800'
-                                : 'bg-white border-gray-200 hover:shadow-md dark:bg-gray-750 dark:border-gray-700 dark:hover:shadow-gray-900/50'
+                            ? 'bg-orange-50 border-orange-200 shadow-sm dark:bg-orange-900/20 dark:border-orange-800'
+                            : 'bg-white border-gray-200 hover:shadow-md dark:bg-gray-750 dark:border-gray-700 dark:hover:shadow-gray-900/50'
                             } dark:bg-gray-700`}
                     >
                         <div className="flex justify-between items-start mb-2">
@@ -99,14 +99,14 @@ const AdminMessages = ({ refreshCounts }) => {
                             </span>
                         </div>
                         <p className={`p-3 rounded text-sm mb-4 ${!msg.isRead
-                                ? 'bg-white text-gray-800 font-medium dark:bg-gray-800 dark:text-gray-100'
-                                : 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
+                            ? 'bg-white text-gray-800 font-medium dark:bg-gray-800 dark:text-gray-100'
+                            : 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
                             }`}>
                             {msg.message}
                         </p>
                         <div className="flex gap-3 justify-end mt-4">
                             <a
-                                href={`mailto:${msg.email}?subject=Réponse Attièkè Dékoungbé`}
+                                href={`mailto:${msg.email}?subject=Réponse Attièkè Dèkoungbé`}
                                 onClick={(e) => e.stopPropagation()} // Prevent triggering read logic again if just clicking email
                                 className="flex items-center gap-2 text-sm bg-blue-50 text-blue-600 px-3 py-2 rounded hover:bg-blue-100 font-medium dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
                             >
@@ -121,8 +121,8 @@ const AdminMessages = ({ refreshCounts }) => {
                             <button
                                 onClick={(e) => handleArchive(e, msg.id)}
                                 className={`flex items-center gap-2 text-sm px-3 py-2 rounded font-medium transition ${msg.isArchived
-                                        ? 'bg-orange-600 text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
+                                    ? 'bg-orange-600 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
                                     }`}
                                 title={msg.isArchived ? "Protégé (Archivé)" : "Archiver pour protéger"}
                             >

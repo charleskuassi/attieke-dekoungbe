@@ -18,7 +18,7 @@ const Header = () => {
                 {/* Logo */}
                 <Link to="/" className="flex items-center gap-2 text-2xl font-serif font-bold text-primary">
                     <img src="/images/logo.png" alt="Logo" className="h-16 w-auto object-contain" />
-                    <span>Attièkè Dékoungbé</span>
+                    <span>Attièkè Dèkoungbé</span>
                 </Link>
 
                 {/* Desktop Nav */}

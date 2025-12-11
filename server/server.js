@@ -89,10 +89,11 @@ app.use('/api/reviews', require('./routes/reviewRoutes'));
 // Admin Maintenance Routes
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/admin/library', require('./routes/libraryRoutes'));
+app.use('/api/admin/notifications', require('./routes/notificationRoutes'));
 
 
 app.get('/', (req, res) => {
-    res.send('Attièkè Dékoungbé API is running');
+    res.send('Attièkè Dèkoungbé API is running');
 });
 
 // Start Server

@@ -52,7 +52,7 @@ exports.sendOrderNotification = async (order, user) => {
     try {
         const transporter = await getTransporter();
         const mailOptions = {
-            from: '"Attièkè Dékoungbé" <no-reply@attieke-dekoungbe.com>',
+            from: '"Attièkè Dèkoungbé" <no-reply@attieke-dekoungbe.com>',
             to: user.email,
             subject: `Confirmation de commande #${order.id}`,
             html: `
@@ -71,7 +71,7 @@ exports.sendOrderNotification = async (order, user) => {
                     
                     <p>Adresse de livraison : ${order.address}</p>
                     
-                    <p>Bon appétit !<br>L'équipe Attièkè Dékoungbé</p>
+                    <p>Bon appétit !<br>L'équipe Attièkè Dèkoungbé</p>
                 </div>
             `
         };
@@ -92,12 +92,12 @@ exports.sendVerificationEmail = async (user, code) => {
     try {
         const transporter = await getTransporter();
         const mailOptions = {
-            from: '"Attièkè Dékoungbé" <no-reply@attieke-dekoungbe.com>',
+            from: '"Attièkè Dèkoungbé" <no-reply@attieke-dekoungbe.com>',
             to: user.email,
-            subject: 'Vérifiez votre compte - Attièkè Dékoungbé',
+            subject: 'Vérifiez votre compte - Attièkè Dèkoungbé',
             html: `
                 <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-                    <h1 style="color: #ea580c; text-align: center;">Bienvenue chez Attièkè Dékoungbé !</h1>
+                    <h1 style="color: #ea580c; text-align: center;">Bienvenue chez Attièkè Dèkoungbé !</h1>
                     <p>Bonjour ${user.name},</p>
                     <p>Pour activer votre compte, veuillez utiliser le code de vérification ci-dessous :</p>
                     
@@ -126,7 +126,7 @@ exports.sendResetPasswordEmail = async (user, url) => {
     try {
         const transporter = await getTransporter();
         const mailOptions = {
-            from: '"Attièkè Dékoungbé" <security@attieke-dekoungbe.com>',
+            from: '"Attièkè Dèkoungbé" <security@attieke-dekoungbe.com>',
             to: user.email,
             subject: 'Réinitialisation de mot de passe',
             html: `
@@ -174,7 +174,7 @@ exports.sendStatusUpdateEmail = async (order, user, status) => {
         }
 
         const mailOptions = {
-            from: '"Attièkè Dékoungbé" <no-reply@attieke-dekoungbe.com>',
+            from: '"Attièkè Dèkoungbé" <no-reply@attieke-dekoungbe.com>',
             to: user.email,
             subject: subject,
             html: `
@@ -189,7 +189,7 @@ exports.sendStatusUpdateEmail = async (order, user, status) => {
                     </div>
 
                     <p style="text-align: center; color: #888; font-size: 12px; margin-top: 30px;">
-                        Attièkè Dékoungbé - Le goût authentique.<br>
+                        Attièkè Dèkoungbé - Le goût authentique.<br>
                         Ceci est un message automatique, merci de ne pas y répondre.
                     </p>
                 </div>
