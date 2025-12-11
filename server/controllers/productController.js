@@ -26,12 +26,7 @@ exports.getAllProducts = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
     try {
-        const { name, description, price, category, is_popular } = req.body;
-        let image_url = req.body.image_url;
-
-        if (req.file) {
-            image_url = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-        }
+        const { name, description, price, category, is_popular, image_url } = req.body;
 
         const product = await Product.create({
             name, description, price, image_url, category, is_popular: is_popular === 'true'
@@ -46,15 +41,10 @@ exports.createProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, price, category, is_popular } = req.body;
-        let image_url = req.body.image_url;
+        const { name, description, price, category, is_popular, image_url } = req.body;
 
         const product = await Product.findByPk(id);
         if (!product) return res.status(404).json({ message: 'Product not found' });
-
-        if (req.file) {
-            image_url = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-        }
 
         await product.update({
             name, description, price, image_url, category, is_popular: is_popular === 'true'

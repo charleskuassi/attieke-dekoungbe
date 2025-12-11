@@ -11,6 +11,7 @@ import DriversPanel from '../components/DriversPanel';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import ImageLibrary from '../components/ImageLibrary';
 
 const Admin = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -48,6 +49,12 @@ const Admin = () => {
         const interval = setInterval(fetchData, 30000); // Auto-refresh every 30s
         return () => clearInterval(interval);
     }, []);
+
+    const getImageUrl = (url) => {
+        if (!url) return '';
+        if (url.startsWith('http') || url.startsWith('/images/')) return url;
+        return `${import.meta.env.VITE_API_URL}${url}`;
+    };
 
     const fetchData = async () => {
         try {
@@ -255,50 +262,7 @@ const Admin = () => {
         }
     };
 
-    // --- Product Management Handlers ---
-    const [imageMode, setImageMode] = useState('upload'); // 'upload' or 'library'
-    const [libraryImages, setLibraryImages] = useState([]);
 
-    const fetchLibraryImages = async () => {
-        try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/images`);
-            setLibraryImages(res.data);
-        } catch (error) {
-            console.error("Failed to load images", error);
-        }
-    };
-
-    // Handle file upload to server
-    const handleImageUpload = async (file) => {
-        if (!file) return;
-
-        try {
-            const formData = new FormData();
-            formData.append('image', file);
-
-            const response = await axios.post(
-                `${import.meta.env.VITE_API_URL}/api/upload`,
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                }
-            );
-
-            if (response.data.success && response.data.imageUrl) {
-                // Update product form with the server URL
-                setProductForm({
-                    ...productForm,
-                    image: response.data.imageUrl // Store the URL string, not the file
-                });
-                return response.data.imageUrl;
-            }
-        } catch (error) {
-            console.error("Image upload failed:", error);
-            alert("Erreur lors de l'upload de l'image: " + (error.response?.data?.error || error.message));
-        }
-    };
 
     const handleProductSubmit = async (e) => {
         e.preventDefault();
@@ -357,7 +321,7 @@ const Admin = () => {
             price: product.price,
             category: product.category,
             is_popular: product.is_popular,
-            image: null // Don't preload image file
+            image: product.image_url // Preload existing image URL
         });
         setShowProductModal(true);
     };
@@ -429,6 +393,9 @@ const Admin = () => {
                     </a>
                     <a onClick={() => setActiveTab('drivers')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'drivers' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                         <Truck size={20} className="mr-3" /> Livreurs
+                    </a>
+                    <a onClick={() => setActiveTab('library')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'library' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
+                        <Image size={20} className="mr-3" /> Médiathèque
                     </a>
                     <a onClick={() => setActiveTab('maintenance')} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'maintenance' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                         <Shield size={20} className="mr-3" /> Maintenance
@@ -588,7 +555,7 @@ const Admin = () => {
                                                             <div key={p.id} className="flex items-center gap-2 mb-2">
                                                                 {p.image_url ? (
                                                                     <img
-                                                                        src={p.image_url}
+                                                                        src={getImageUrl(p.image_url)}
                                                                         alt={p.name}
                                                                         className="w-10 h-10 rounded-md object-cover border border-gray-200"
                                                                     />
@@ -709,7 +676,7 @@ const Admin = () => {
                                 {filteredProducts.map(product => (
                                     <div key={product.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden group transition-colors duration-300">
                                         <div className="relative h-48">
-                                            <img src={product.image_url || "/api/placeholder/400/300"} alt={product.name} className="w-full h-full object-cover" />
+                                            <img src={getImageUrl(product.image_url) || "/api/placeholder/400/300"} alt={product.name} className="w-full h-full object-cover" />
                                             <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-4">
                                                 <button onClick={() => openEditModal(product)} className="p-2 bg-white rounded-full text-blue-600 hover:bg-blue-50">
                                                     <Edit size={20} />
@@ -838,6 +805,7 @@ const Admin = () => {
 
                 {activeTab === 'announcement' && <AdminAnnouncement />}
                 {activeTab === 'drivers' && <DriversPanel />}
+                {activeTab === 'library' && <div className="max-w-7xl mx-auto"><ImageLibrary /></div>}
                 {activeTab === 'maintenance' && <MaintenancePanel />}
             </main >
 
@@ -946,79 +914,46 @@ const Admin = () => {
                                     <label htmlFor="is_popular" className="text-sm font-medium text-gray-700 dark:text-gray-300">Marquer comme populaire</label>
                                 </div>
 
-                                {/* Image Selection Section */}
+                                {/* Images: Image Library Selector ONLY */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Image</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Choisir une image pour ce produit</label>
 
-                                    {/* Tab Selection: Upload vs Library */}
-                                    <div className="flex space-x-4 mb-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setImageMode('upload')}
-                                            className={`text-sm pb-1 ${imageMode === 'upload' ? 'border-b-2 border-primary font-bold dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}
-                                        >
-                                            Upload
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => { setImageMode('library'); fetchLibraryImages(); }}
-                                            className={`text-sm pb-1 ${imageMode === 'library' ? 'border-b-2 border-primary font-bold dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}
-                                        >
-                                            Bibliothèque ({libraryImages.length})
-                                        </button>
-                                    </div>
-
-                                    {imageMode === 'upload' ? (
-                                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer relative bg-gray-50 dark:bg-gray-700/50">
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={e => {
-                                                    const file = e.target.files[0];
-                                                    if (file) {
-                                                        handleImageUpload(file);
-                                                    }
-                                                }}
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                            />
-                                            <div className="flex flex-col items-center text-gray-500 dark:text-gray-400">
-                                                <Image size={24} className="mb-2" />
-                                                <span className="text-sm">{typeof productForm.image === 'string' && productForm.image ? 'Image uploadée ✓' : 'Cliquez pour uploader'}</span>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                                            {libraryImages.map((imgUrl, idx) => (
-                                                <div
-                                                    key={idx}
-                                                    onClick={() => setProductForm({ ...productForm, image: imgUrl })} // Set string URL directly
-                                                    className={`cursor-pointer border-2 rounded overflow-hidden aspect-square ${productForm.image === imgUrl ? 'border-primary ring-2 ring-primary ring-opacity-50' : 'border-transparent hover:border-gray-300 dark:hover:border-gray-500'}`}
-                                                >
-                                                    <img src={imgUrl} alt="Library" className="w-full h-full object-cover" />
+                                    <div className="border rounded-xl p-4 bg-gray-50 dark:bg-gray-700/50">
+                                        {productForm.image ? (
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-20 h-20 rounded-lg overflow-hidden border">
+                                                    <img
+                                                        src={getImageUrl(productForm.image)}
+                                                        alt="Selected"
+                                                        className="w-full h-full object-cover"
+                                                    />
                                                 </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-mono truncate mb-2">{productForm.image}</p>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setProductForm({ ...productForm, image: null })}
+                                                        className="text-red-500 hover:text-red-700 text-sm font-bold flex items-center"
+                                                    >
+                                                        <Trash size={16} className="mr-1" /> Retirer
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-4 text-gray-500 italic">
+                                                Aucune image sélectionnée
+                                            </div>
+                                        )}
 
-                                    {/* Preview of selected/existing image */}
-                                    {(typeof productForm.image === 'string' && productForm.image) && (
-                                        <div className="mt-3 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded">
-                                            <img 
-                                                src={productForm.image} 
-                                                alt="Preview" 
-                                                className="max-h-32 max-w-full mx-auto rounded"
-                                                onError={(e) => {
-                                                    console.error('Image failed to load:', productForm.image);
-                                                    e.target.alt = 'Image non accessible';
-                                                    e.target.style.display = 'none';
-                                                }}
-                                                onLoad={(e) => {
-                                                    console.log('Image loaded successfully:', productForm.image);
-                                                }}
+                                        <hr className="my-4 border-gray-200 dark:border-gray-600" />
+
+                                        <div className="h-64 overflow-y-auto">
+                                            <ImageLibrary
+                                                selectionMode={true}
+                                                onSelect={(url) => setProductForm({ ...productForm, image: url })}
                                             />
-                                            <p className="text-xs text-green-600 dark:text-green-400 mt-1 truncate">✓ {productForm.image}</p>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
 
                                 <button type="submit" className="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-orange-700 transition">

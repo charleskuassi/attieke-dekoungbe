@@ -52,6 +52,7 @@ app.use(express.json());
 const passport = require('./config/passport');
 app.use(passport.initialize());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/images', express.static(path.join(__dirname, '../client/public/images')));
 
 // Routes
 app.use('/api/products', require('./routes/productRoutes'));

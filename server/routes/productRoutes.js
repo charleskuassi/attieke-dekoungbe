@@ -7,8 +7,8 @@ const upload = require('../middleware/uploadMiddleware');
 
 router.get('/seed-magic', productController.seedProducts);
 router.get('/', productController.getAllProducts);
-router.post('/', protect, upload.single('image'), productController.createProduct);
-router.put('/:id', protect, upload.single('image'), productController.updateProduct);
+router.post('/', protect, upload.none(), productController.createProduct);
+router.put('/:id', protect, upload.none(), productController.updateProduct);
 router.delete('/:id', protect, productController.deleteProduct);
 
 module.exports = router;

@@ -27,16 +27,26 @@ const storage = multer.diskStorage({
 });
 
 // File filter to accept only images
+// File filter to accept only images
 const fileFilter = (req, file, cb) => {
-    const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg'];
-    const allowedExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+    // Log incoming file details for debugging
+    console.log(`Checking file: ${file.originalname}, Mime: ${file.mimetype}`);
+
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg', 'image/svg+xml', 'application/octet-stream'];
+    const allowedExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.jfif'];
 
     const ext = path.extname(file.originalname).toLowerCase();
 
-    if (allowedMimes.includes(file.mimetype) && allowedExts.includes(ext)) {
+    // Check if it's an image mime type OR valid extension
+    // We trust extension if mime is generic/unknown, or trust mime if extension is weird.
+    const isImageMime = file.mimetype.startsWith('image/');
+    const isAllowedExt = allowedExts.includes(ext);
+
+    if (isImageMime || isAllowedExt || allowedMimes.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new Error('Invalid file type. Only image files are allowed.'), false);
+        console.error(`Rejected file: ${file.originalname}, Mime: ${file.mimetype}, Ext: ${ext}`);
+        cb(new Error(`Invalid file type: ${file.mimetype} or ${ext} is not allowed.`), false);
     }
 };
 
@@ -56,16 +66,11 @@ const uploadImage = (req, res) => {
     }
 
     try {
-        // Return the public URL of the uploaded image with full domain
-        // Try to get the full URL from request, fallback to localhost:5000
-        const host = req.get('host') || 'localhost:5000';
-        const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
-        
-        // Build the absolute URL
-        const imageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+        // Return the relative URL of the uploaded image
+        const imageUrl = `/uploads/${req.file.filename}`;
 
         console.log(`✓ Image uploaded: ${req.file.filename}`);
-        console.log(`  URL: ${imageUrl}`);
+        console.log(`  Relative URL: ${imageUrl}`);
 
         res.json({
             success: true,

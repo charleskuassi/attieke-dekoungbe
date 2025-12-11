@@ -12,4 +12,10 @@ router.put('/archive/:type/:id', protect, admin, maintenanceController.toggleArc
 // Bulk Cleanup
 router.delete('/cleanup', protect, admin, maintenanceController.cleanup);
 
+const libraryController = require('../controllers/libraryController');
+
+// Library Routes
+router.get('/library', protect, admin, libraryController.getLibraryImages);
+router.post('/library/upload', protect, admin, libraryController.uploadMiddleware, libraryController.uploadToLibrary);
+
 module.exports = router;

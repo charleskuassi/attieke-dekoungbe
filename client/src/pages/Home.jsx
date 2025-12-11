@@ -93,7 +93,13 @@ const Home = () => {
                                         >
                                             <div className="h-64 overflow-hidden">
                                                 <img
-                                                    src={item.image_url || "https://via.placeholder.com/400"}
+                                                    src={
+                                                        !item.image_url
+                                                            ? "https://via.placeholder.com/400"
+                                                            : item.image_url.startsWith('http') || item.image_url.startsWith('/images/')
+                                                                ? item.image_url
+                                                                : `${import.meta.env.VITE_API_URL}${item.image_url}`
+                                                    }
                                                     alt={item.name}
                                                     className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
                                                 />
