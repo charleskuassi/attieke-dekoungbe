@@ -22,13 +22,13 @@ router.put('/profile', protect, authController.updateProfile);
 router.get('/me', protect, authController.getMe);
 
 // Google Auth Routes
-// Google Auth Routes
 if (process.env.GOOGLE_CLIENT_ID) {
     router.get('/google', passport.authenticate('google', { session: false, scope: ['profile', 'email'] }));
 
     router.get('/google/callback',
         passport.authenticate('google', { session: false, failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=google_failed` }),
         (req, res) => {
+            console.log("GOOGLE CALLBACK SUCCESS - User:", req.user.email);
             const token = jwt.sign(
                 { id: req.user.id, role: req.user.role },
                 process.env.JWT_SECRET || 'your_super_secret_key',
@@ -36,6 +36,9 @@ if (process.env.GOOGLE_CLIENT_ID) {
             );
 
             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+            console.log("Redirecting to Frontend:", `${frontendUrl}/google-callback`);
+
+            // Use explicit HTML redirect for better debugging/compatibility than res.redirect sometimes
             res.redirect(`${frontendUrl}/google-callback?token=${token}`);
         }
     );
