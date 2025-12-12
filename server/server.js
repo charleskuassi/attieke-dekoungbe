@@ -12,33 +12,19 @@ app.set('trust proxy', 1); // Trust Render Proxy for HTTPS
 const PORT = process.env.PORT || 5000;
 
 // --- SECURITY MIDDLEWARES ---
-app.use(helmet()); // Headers Protection
-app.use(hpp()); // Parameter Pollution Protection
-
-// Global Rate Limiter (Anti-DDoS léger) - DISABLED FOR DEBUG
-// const limiter = rateLimit({
-//     windowMs: 15 * 60 * 1000, // 15 minutes
-//     max: 100, // Limit each IP to 100 requests per windowMs
-//     message: "Too many requests from this IP, please try again later.",
-//     standardHeaders: true,
-//     legacyHeaders: false,
-// });
-// app.use(limiter);
-
-// Specific Auth Limiter (Anti-Brute Force) - DISABLED FOR DEBUG
-// const authLimiter = rateLimit({
-//     windowMs: 60 * 60 * 1000, // 1 hour
-//     max: 20, // Max 20 login attempts per hour per IP
-//     message: "Too many login attempts, please try again later."
-// });
-
-// --- CORS CONFIGURATION (DEBUG FORCE) ---
+// 1. CORS FIRST (Critical for Vercel/Render communication)
 app.use(cors({
-    origin: true, // Allow ALL origins temporarily to debug Vercel issue
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 }));
+
+// 2. Helmet (Security Headers)
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" } // Allow cross-origin resources
+}));
+app.use(hpp()); // Parameter Pollution Protection
 
 // --- STANDARD MIDDLEWARES ---
 app.use(express.json());
