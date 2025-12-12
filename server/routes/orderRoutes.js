@@ -5,9 +5,8 @@ const orderController = require('../controllers/orderController');
 const { protect, protectOptional } = require('../middleware/authMiddleware');
 const validate = require('../middleware/validate');
 const { orderSchema } = require('../utils/validationSchemas');
-
+/*test*/ 
 const adminController = require('../controllers/adminController');
-
 router.post('/', protectOptional, validate(orderSchema), orderController.createOrder);
 router.get('/my-orders', protect, orderController.getUserOrders);
 router.get('/stats', protect, adminController.getStats);
