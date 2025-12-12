@@ -32,9 +32,28 @@ app.use(hpp()); // Parameter Pollution Protection
 //     message: "Too many login attempts, please try again later."
 // });
 
-// --- CORS CONFIGURATION (PERMISSIVE DEBUG) ---
+// --- CORS CONFIGURATION (STRICT BUT ALLOWS VERCEL) ---
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://attieke-dekoungbe.vercel.app', // Main Alias
+    'https://attieke-dekoungbe-g4gfoc9ec.vercel.app', // User provided specific deployment
+    process.env.FRONTEND_URL // Dynamic from env
+].filter(Boolean);
+
 app.use(cors({
-    origin: true, // Allow ALL origins
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+
+        // Check if origin is allowed
+        if (allowedOrigins.some(allowed => origin.startsWith(allowed) || allowed === origin)) {
+            return callback(null, true);
+        } else {
+            console.warn(`Blocked CORS request from: ${origin}`);
+            return callback(new Error('CORS Policy: Origin not allowed'), false);
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
