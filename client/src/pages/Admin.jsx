@@ -100,6 +100,14 @@ const Admin = () => {
     const fetchData = async () => {
         try {
             const token = localStorage.getItem('token');
+            if (!token) {
+                console.error("⛔ Pas de token trouvé ! Redirection login...");
+                alert("Session expirée (Pas de token). Veuillez vous reconnecter.");
+                navigate('/login');
+                return;
+            }
+
+            // console.log("Token présent, chargement des données..."); // Debug silencieux
             const headers = { Authorization: `Bearer ${token}` };
 
             const [statsRes, ordersRes, clientsRes, productsRes, promoRes, countsRes, driversRes] = await Promise.all([
@@ -122,6 +130,13 @@ const Admin = () => {
             setLoading(false);
         } catch (error) {
             console.error("Error fetching admin data:", error);
+            if (error.response && error.response.status === 401) {
+                alert("Session invalide (401). Veuillez vous reconnecter.");
+                localStorage.removeItem('token'); // Nettoyage
+                navigate('/login');
+            } else {
+                alert(`Erreur chargement données: ${error.message}`);
+            }
             setLoading(false);
         }
     };

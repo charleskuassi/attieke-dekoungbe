@@ -8597,3 +8597,50 @@
   "exp": 1765567395
 }
 [2025-12-11T19:23:53.431Z] ✅ Commande créée avec succès ID: 7
+[2025-12-11T21:54:55.809Z] Register called: {
+  "email": "admin@attieke.com",
+  "password": "admin123",
+  "name": "Administrateur",
+  "phone": "97000000",
+  "address": "Godomey"
+}
+[2025-12-11T22:02:04.897Z] Register called: {
+  "email": "admin@dekoungbe.com",
+  "password": "admin123",
+  "name": "Super Admin",
+  "phone": "97000000",
+  "address": "Godomey"
+}
+[2025-12-11T22:07:17.736Z] Register called: {
+  "email": "legerolt@gmail.com",
+  "password": "AZERTY123@",
+  "name": "Légérol Akpé Rosam TCHOGBE",
+  "phone": "97000000",
+  "address": "Cotonou Dêkoungbé\n\nTogbin"
+}
+[2025-12-11T22:09:41.517Z] Register called: {
+  "email": "charleskuassi11@gmail.com",
+  "password": "AZERTY1234@",
+  "name": "Charles KUASSI",
+  "phone": "97000000",
+  "address": "Godomey"
+}
+[2025-12-12T00:20:15.127Z] Update Profile called: {
+  "name": "Légérol TCHOGBE",
+  "phone": "97000000",
+  "address": "Cotonou Dêkoungbé\n\nTogbin"
+}
+[2025-12-12T00:20:38.784Z] createOrder called. User: {
+  "id": 1,
+  "role": "customer",
+  "iat": 1765498772,
+  "exp": 1765585172
+}
+[2025-12-12T00:20:41.230Z] ✅ Commande créée avec succès ID: 1
+[2025-12-12T00:26:35.912Z] createOrder called. User: {
+  "id": 4,
+  "role": "customer",
+  "iat": 1765499156,
+  "exp": 1765585556
+}
+[2025-12-12T00:26:38.838Z] ✅ Commande créée avec succès ID: 2

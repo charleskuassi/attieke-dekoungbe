@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 
 exports.getStats = async (req, res) => {
     try {
+        console.log("📊 Récupération des statistiques Admin...");
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -34,29 +35,54 @@ exports.getStats = async (req, res) => {
         });
 
         // Top Products
-        const topProducts = await OrderItem.findAll({
-            attributes: [
-                'ProductId',
-                [sequelize.fn('sum', sequelize.col('quantity')), 'total_sold'],
-                [sequelize.literal('SUM(quantity * price_at_order)'), 'total_revenue']
-            ],
-            include: [{ model: Product, attributes: ['name'] }],
-            group: ['ProductId'],
-            order: [[sequelize.literal('total_sold'), 'DESC']],
-            limit: 5
-        });
+        let topProductsData = [];
+        try {
+            console.log("👉 Calcul Top Products...");
+
+            // Inspectons les colonnes pour être sûrs (Debug)
+            // const attributes = Object.keys(OrderItem.rawAttributes);
+            // console.log("Colonnes OrderItem:", attributes);
+
+            // TENTATIVE 2 : Retour à "ProductId" (PascalCase) qui semblait être la colonne détectée initialement
+            // On groupe par le champ FK de ce modèle uniquement.
+            const topStats = await OrderItem.findAll({
+                attributes: [
+                    ['ProductId', 'pid'], // Modification ici : productId -> ProductId
+                    [sequelize.fn('sum', sequelize.col('quantity')), 'total_sold'],
+                    [sequelize.literal('SUM(quantity * price_at_order)'), 'total_revenue']
+                ],
+                // important : on groupe par le même nom que l'attribut sélectionné
+                group: ['ProductId'],
+                order: [[sequelize.literal('total_sold'), 'DESC']],
+                limit: 5,
+                raw: true // On veut des objets JS simples
+            });
+
+            console.log("✅ TopStats Raw:", topStats);
+
+            // Récupération des noms
+            topProductsData = await Promise.all(topStats.map(async (item) => {
+                // item.pid est le ProductId
+                if (!item.pid) return { name: 'Inconnu', count: 0, revenue: 0 };
+
+                const product = await Product.findByPk(item.pid);
+                return {
+                    name: product ? product.name : 'Produit Supprimé',
+                    count: parseInt(item.total_sold),
+                    revenue: parseInt(item.total_revenue || 0)
+                };
+            }));
+
+        } catch (topErr) {
+            console.error("⚠️ Erreur calcul Top Produits (Non-bloquant):", topErr.message);
+            // On renvoie un tableau vide pour ne pas crasher tout le dashboard
+            topProductsData = [];
+        }
 
         // Format Monthly Data for Chart
         const formattedMonthlyData = monthlyData.map(item => ({
             name: new Date(item.get('date')).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
             sales: parseInt(item.get('total'))
-        }));
-
-        // Top Products with Revenue
-        const topProductsData = topProducts.map(item => ({
-            name: item.Product ? item.Product.name : 'Inconnu',
-            count: parseInt(item.get('total_sold')),
-            revenue: parseInt(item.get('total_revenue') || 0)
         }));
 
         res.json({
@@ -65,21 +91,30 @@ exports.getStats = async (req, res) => {
             topProducts: topProductsData
         });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server Error' });
+        console.error("❌ Erreur Critique getStats:", err);
+        // Log more details if available
+        if (err.parent) console.error("Détails SQL:", err.parent);
+        if (err.original) console.error("Erreur Originale:", err.original);
+
+        res.status(500).json({ message: 'Server Error', error: err.message });
     }
 };
 
 exports.getClients = async (req, res) => {
     try {
         const clients = await User.findAll({
-            where: { role: 'customer', isVerified: true },
-            attributes: ['id', 'name', 'email', 'phone', 'address', 'createdAt'],
+            // where: { role: 'customer' }, // On prend tous les users pour l'instant (décommentez pour filtrer)
+            attributes: { exclude: ['password'] },
             order: [['createdAt', 'DESC']]
         });
+
+        if (!clients || clients.length === 0) {
+            console.log("⚠️ Aucuns clients trouvés dans la base de données.");
+        }
+
         res.json(clients);
     } catch (err) {
-        console.error(err);
+        console.error("Erreur récupération clients:", err);
         res.status(500).json({ message: 'Server Error' });
     }
 };
