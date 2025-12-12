@@ -8644,3 +8644,10 @@
   "exp": 1765585556
 }
 [2025-12-12T00:26:38.838Z] ✅ Commande créée avec succès ID: 2
+[2025-12-12T02:26:35.892Z] createOrder called. User: {
+  "id": 3,
+  "role": "admin",
+  "iat": 1765505600,
+  "exp": 1765592000
+}
+[2025-12-12T02:26:37.975Z] ✅ Commande créée avec succès ID: 3
