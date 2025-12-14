@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const AuthContext = createContext();
 
@@ -14,19 +14,17 @@ export const AuthProvider = ({ children }) => {
         const storedUser = localStorage.getItem('user');
         if (token && storedUser) {
             setUser(JSON.parse(storedUser));
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         }
         setLoading(false);
     }, []);
 
     const login = async (email, password) => {
         try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, { email, password });
+            const res = await api.post('/api/auth/login', { email, password });
             const { token, user } = res.data;
 
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             setUser(user);
             return { success: true };
         } catch (err) {
@@ -39,7 +37,6 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('cart'); // Clear cart on logout
-        delete axios.defaults.headers.common['Authorization'];
         setUser(null);
         window.location.reload(); // Force reload to clear all states
     };
@@ -52,7 +49,6 @@ export const AuthProvider = ({ children }) => {
     const loginWithData = (token, userData) => {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(userData));
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         setUser(userData);
     };
 

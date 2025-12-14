@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const CartContext = createContext();
 
@@ -23,7 +23,7 @@ export const CartProvider = ({ children }) => {
     useEffect(() => {
         const fetchPromo = async () => {
             try {
-                const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/promo`);
+                const { data } = await api.get('/api/promo');
                 setPromoSettings(data);
             } catch (error) {
                 console.error("Failed to fetch promo settings", error);
@@ -98,7 +98,7 @@ export const CartProvider = ({ children }) => {
     // Function to refresh promo settings (called by Admin)
     const refreshPromo = async () => {
         try {
-            const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/promo`);
+            const { data } = await api.get('/api/promo');
             setPromoSettings(data);
         } catch (error) {
             console.error("Failed to refresh promo settings", error);

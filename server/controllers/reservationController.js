@@ -1,28 +1,57 @@
-const { Reservation } = require('../models');
+const { Reservation, User } = require('../models');
+const { sendAdminNewReservation, sendReservationReceived } = require('../services/emailService');
 
 exports.createReservation = async (req, res) => {
     try {
-        const { name, phone, date, time, guests, message } = req.body;
+        console.log("📝 [RESERVATION] Received Body:", req.body);
+        const { name, phone, date, time, guests, message, email } = req.body;
+
+        // Permissive validation for demo
+        if (!name || !date || !time) {
+            console.warn("⚠️ Missing required fields (name, date, time)");
+            // We continue? No, at least these needed. But let's return error gently.
+            return res.status(400).json({ success: false, message: 'Nom, date et heure requis.' });
+        }
 
         const reservationData = {
-            name, phone, date, time, guests, message
+            name, phone, date, time, guests: guests || 1, message, email
         };
 
         // If user is authenticated, link the reservation
+        // Also try to get email from user if not in body
+        let userEmail = email;
         if (req.user) {
             reservationData.UserId = req.user.id;
+            console.log("👤 Linked to User:", req.user.id);
+            if (!userEmail && req.user.email) userEmail = req.user.email;
         }
 
         const reservation = await Reservation.create(reservationData);
+        console.log("✅ Reservation Created:", reservation.id);
 
-        // Admin Notification
-        const { createNotification } = require('./notificationController');
-        createNotification('reservation', `Nouvelle réservation de ${name} pour le ${date} à ${time}`, reservation.id);
+        try {
+            // Admin Notification (Fire & Forget)
+            const { createNotification } = require('./notificationController');
+            createNotification('reservation', `Nouvelle réservation de ${name} pour le ${date} à ${time}`, reservation.id);
+
+            // Emails
+            sendAdminNewReservation(reservation).catch(e => console.error("Admin Email Error", e.message));
+            if (userEmail) {
+                sendReservationReceived(reservation, userEmail).catch(e => console.error("Client Email Error", e.message));
+            }
+
+        } catch (notifErr) {
+            console.error("⚠️ Notification Error (Ignored):", notifErr.message);
+        }
 
         res.status(201).json({ success: true, data: reservation });
     } catch (err) {
-        console.error("Create Reservation Error:", err);
-        res.status(500).json({ success: false, message: 'Server Error' });
+        console.error("❌ Create Reservation Error:", err);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur Serveur lors de la réservation',
+            error: err.message
+        });
     }
 };
 

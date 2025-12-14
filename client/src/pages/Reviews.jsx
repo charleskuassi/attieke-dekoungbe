@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { Star, MessageSquare, AlertTriangle, Send } from 'lucide-react';
 
@@ -24,9 +24,7 @@ const Reviews = () => {
                 return;
             }
 
-            await axios.post(`${import.meta.env.VITE_API_URL}/api/reviews`, formData, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.post('/api/reviews', formData);
 
             setSuccessMessage(formData.type === 'avis' ? "Merci pour votre avis ! 😊" : "Votre plainte a été reçue. Nous vous recontacterons rapidement.");
             setFormData({ type: 'avis', rating: 5, message: '' }); // Reset form

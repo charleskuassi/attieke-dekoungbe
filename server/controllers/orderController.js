@@ -1,10 +1,9 @@
-const { Order, OrderItem, Product, User, sequelize, DeliveryDriver } = require('../models');
-const { sendOrderNotification, sendStatusUpdateEmail } = require('../services/emailService');
+const { Order, OrderItem, Product, User, sequelize, DeliveryDriver, Promotion } = require('../models');
+const { sendOrderNotification, sendStatusUpdateEmail, sendAdminNewOrder, sendDriverAssigned } = require('../services/emailService');
 const log = require('../utils/logger');
 const axios = require('axios');
 
 exports.createOrder = async (req, res) => {
-    // ... code truncated ... (no changes in createOrder)
     console.log("📥 [DEBUG] Body reçu :", JSON.stringify(req.body, null, 2));
 
     const t = await sequelize.transaction();
@@ -97,6 +96,28 @@ exports.createOrder = async (req, res) => {
 
         const cleanPhone = phone.replace(/\s/g, '');
 
+        // --- APPLICATION DE LA PROMOTION (RÈGLE ADMIN) ---
+        // On récupère la seule règle de promotion (supposant une règle unique ou la première active)
+        const promotion = await Promotion.findOne();
+
+        if (promotion && promotion.isActive) {
+            console.log(`🎁 Promotion Active détéctée: Seuil ${promotion.minAmount}, Réduction ${promotion.discountPercentage}%`);
+
+            if (total_price >= promotion.minAmount) {
+                const discountAmount = total_price * (promotion.discountPercentage / 100);
+                const originalPrice = total_price;
+                total_price = total_price - discountAmount;
+
+                console.log(`⚡ PROMOTION APPLIQUÉE !`);
+                console.log(`   - Prix Original: ${originalPrice}`);
+                console.log(`   - Réduction: -${discountAmount} (${promotion.discountPercentage}%)`);
+                console.log(`   - Prix Final: ${total_price}`);
+            } else {
+                console.log(`ℹ️ Promotion non applicable: Montant ${total_price} < Seuil ${promotion.minAmount}`);
+            }
+        }
+        // --------------------------------------------------
+
         // 4. Anti-Replay
         if (transaction_id && payment_method !== 'cash' && transaction_id !== 'TEST_SUCCESS') {
             const existingOrder = await Order.findOne({ where: { transaction_id } });
@@ -117,7 +138,7 @@ exports.createOrder = async (req, res) => {
             customer_name,
             phone: cleanPhone,
             address,
-            total_price, // On utilise le prix calculé serveur
+            total_price, // On utilise le prix calculé serveur (potentiellement réduit)
             payment_method,
             transaction_id: finalTransactionId,
             status: status,
@@ -136,10 +157,21 @@ exports.createOrder = async (req, res) => {
 
         await t.commit();
 
-        // Notification Async
-        sendOrderNotification(order, items).catch(err => console.error('Email error:', err));
+        // Need to refetch order to include Products for the email template
+        const fullOrder = await Order.findByPk(order.id, {
+            include: [{ model: Product }]
+        });
 
-        // Admin Notification
+        // Notifications Async (Fire & Forget)
+        // Client Email
+        if (req.user && req.user.email) {
+            sendOrderNotification(fullOrder, req.user).catch(err => console.error('Client Email error:', err.message));
+        }
+
+        // Admin Email
+        sendAdminNewOrder(fullOrder).catch(err => console.error('Admin Email error:', err.message));
+
+        // Admin Dashboard Notification
         const { createNotification } = require('./notificationController');
         createNotification('order', `Nouvelle commande #${order.id} de ${customer_name}`, order.id);
 
@@ -223,10 +255,12 @@ exports.updateOrderStatus = async (req, res) => {
         // Send Email Notification if status changed to critical steps and user has email
         if (oldStatus !== status && order.User && order.User.email) {
             // Trigger specific emails
-            if (['en_cours', 'delivered', 'cancelled'].includes(status)) {
+            if (['en_cours', 'delivered', 'cancelled', 'preparing'].includes(status)) {
                 console.log(`📧 Sending status update email (${status}) to ${order.User.email}`);
                 sendStatusUpdateEmail(order, order.User, status).catch(err => console.error('Status Email Error:', err));
             }
+            // Using logic: If status becomes shipping (En livraison) without driver initially?
+            // Usually shipping implies driver assigned.
         }
 
         res.json(order);
@@ -239,12 +273,20 @@ exports.updateOrderStatus = async (req, res) => {
 exports.assignDriver = async (req, res) => {
     try {
         const { driverId } = req.body;
-        const order = await Order.findByPk(req.params.id);
+        const order = await Order.findByPk(req.params.id, {
+            include: [{ model: User }]
+        });
         if (!order) return res.status(404).json({ message: 'Order not found' });
 
         order.deliveryDriverId = driverId;
         order.status = 'shipping'; // Update status to shipping
         await order.save();
+
+        // Email Notification for Driver Assignment
+        if (order.User && order.User.email) {
+            sendDriverAssigned(order, order.User).catch(e => console.error("Email Error:", e.message));
+        }
+
         res.json({ message: 'Driver assigned successfully', order });
     } catch (err) {
         console.error("Assign Driver Error:", err);

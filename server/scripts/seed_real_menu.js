@@ -145,16 +145,29 @@ const getImageUrl = (name, category) => {
 
 const seedMenu = async () => {
     try {
+        if (!process.env.DATABASE_URL) {
+            const fs = require('fs');
+            const path = require('path');
+            const dbPath = path.join(__dirname, '../database.sqlite');
+            if (fs.existsSync(dbPath)) {
+                console.log('🗑️ Deleting local SQLite DB to force reset:', dbPath);
+                try {
+                    fs.unlinkSync(dbPath);
+                } catch (e) { console.error("⚠️ Could not delete sqlite file (locked?). Proceeding with sync force."); }
+            }
+        }
+
         await sequelize.authenticate();
         console.log('Database connected.');
 
-        // Force Sync with ALTER to ensure columns (googleId, isVerified) exist
-        await sequelize.sync({ alter: true });
-        console.log('Database synced.');
+        // Force Sync with FORCE: true to DROP ALL TABLES and recreate them
+        // This ensures all Users (clients) and Orders are deleted as requested.
+        console.log('⚠️ DROPPING ALL TABLES & DATA (force: true)...');
+        await sequelize.sync({ force: true });
+        console.log('Database synced (All tables recreated).');
 
-        // Clear existing products (using DELETE instead of TRUNCATE to avoid FK constraint errors)
-        await Product.destroy({ where: {} });
-        console.log('Existing products cleared.');
+        // Products table is now empty, no need to destroy manually
+
 
         const productsToCreate = [];
 

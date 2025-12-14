@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { Megaphone, Save, CheckCircle } from 'lucide-react';
 
 const AdminAnnouncement = () => {
@@ -13,7 +13,7 @@ const AdminAnnouncement = () => {
     useEffect(() => {
         const fetchAnnouncement = async () => {
             try {
-                const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/announcement`);
+                const { data } = await api.get('/api/announcement');
                 setFormData({
                     message: data.message || '',
                     isActive: data.isActive || false
@@ -30,9 +30,7 @@ const AdminAnnouncement = () => {
         setLoading(true);
         setSuccess(false);
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL}/api/announcement`, formData, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-            });
+            await api.post('/api/announcement', formData);
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
         } catch (error) {

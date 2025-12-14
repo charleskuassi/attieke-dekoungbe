@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import { Save, User, Phone, MapPin, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
 const Settings = () => {
@@ -46,11 +46,9 @@ const Settings = () => {
         }
 
         try {
-            const token = localStorage.getItem('token');
-            const res = await axios.put(
-                `${import.meta.env.VITE_API_URL}/api/auth/profile`,
-                { ...formData, phone: cleanPhone },
-                { headers: { Authorization: `Bearer ${token}` } }
+            const res = await api.put(
+                '/api/auth/profile',
+                { ...formData, phone: cleanPhone }
             );
 
             updateUser(res.data.user);

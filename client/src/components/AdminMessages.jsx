@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { Mail, MessageCircle, Reply, Trash2, Archive } from 'lucide-react';
 
 const AdminMessages = ({ refreshCounts }) => {
@@ -7,9 +7,7 @@ const AdminMessages = ({ refreshCounts }) => {
 
     const fetchMessages = async () => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/messages`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-            });
+            const res = await api.get('/api/messages');
             setMessages(res.data);
         } catch (error) {
             console.error("Fetch messages error:", error);
@@ -20,9 +18,7 @@ const AdminMessages = ({ refreshCounts }) => {
         if (msg.isRead) return; // Already read
 
         try {
-            await axios.patch(`${import.meta.env.VITE_API_URL}/api/messages/${msg.id}/read`, {}, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-            });
+            await api.patch(`/api/messages/${msg.id}/read`);
 
             // Update local state
             setMessages(messages.map(m => m.id === msg.id ? { ...m, isRead: true } : m));
@@ -39,9 +35,7 @@ const AdminMessages = ({ refreshCounts }) => {
         if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce message ?")) return;
 
         try {
-            await axios.delete(`${import.meta.env.VITE_API_URL}/api/messages/${id}`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-            });
+            await api.delete(`/api/messages/${id}`);
             // Remove from UI
             setMessages(messages.filter(m => m.id !== id));
             // Update badge count
@@ -55,10 +49,7 @@ const AdminMessages = ({ refreshCounts }) => {
     const handleArchive = async (e, id) => {
         e.stopPropagation();
         try {
-            const token = localStorage.getItem('token');
-            const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/admin/archive/message/${id}`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.put(`/api/admin/archive/message/${id}`, {});
             // Update UI
             setMessages(messages.map(m => m.id === id ? { ...m, isArchived: res.data.isArchived } : m));
         } catch (error) {

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import { useKKiaPay } from 'kkiapay-react';
 import { Loader2, AlertCircle, Plus, Minus, Trash2 } from 'lucide-react';
 
@@ -84,9 +84,8 @@ const Checkout = () => {
 
             console.log("📤 DONNÉES ENVOYÉES AU SERVER:", JSON.stringify(orderData, null, 2));
 
-            const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
             // Envoi au Backend
-            await axios.post(`${apiUrl}/api/orders`, orderData);
+            await api.post('/api/orders', orderData);
 
             console.log("💾 COMMANDE ENREGISTRÉE !");
             clearCart();
@@ -112,12 +111,19 @@ const Checkout = () => {
         return () => removeKkiapayListener('success', onSuccess);
     }, [addKkiapayListener, removeKkiapayListener]);
 
-    // 6. Ouverture du Widget
     const openPayment = () => {
         if (!deliveryInfo.name || !deliveryInfo.phone || !deliveryInfo.address) {
             alert("Veuillez remplir tous les champs de livraison !");
             return;
         }
+
+        // VALIDATION TÉLÉPHONE BÉNIN (Test: 8 chiffres | Prod: 10 chiffres)
+        const phoneRegex = /^[0-9]{8}$|^[0-9]{10}$/;
+        if (!phoneRegex.test(deliveryInfo.phone)) {
+            alert("Le numéro de téléphone doit comporter 8 chiffres (Test/Ancien) ou 10 chiffres (Nouveau).");
+            return;
+        }
+
         openKkiapayWidget({
             amount: finalTotal,
             key: KKIAPAY_PUBLIC_KEY,

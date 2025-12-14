@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { Calendar, Clock, Users, MessageSquare, CheckCircle, Phone, MapPin } from 'lucide-react';
 
 const Reservation = () => {
@@ -44,9 +44,7 @@ const Reservation = () => {
 
         setStatus('loading');
         try {
-            const token = localStorage.getItem('token');
-            const headers = token ? { Authorization: `Bearer ${token}` } : {};
-            await axios.post(`${import.meta.env.VITE_API_URL}/api/reservations`, formData, { headers });
+            await api.post('/api/reservations', formData);
             setStatus('success');
         } catch (error) {
             console.error("Booking failed:", error);

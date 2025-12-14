@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Image, Upload, Check, Loader } from 'lucide-react';
+import api from '../../utils/api';
+import { Image, Upload, Check, Loader, Trash2 } from 'lucide-react';
 
 const ImageLibrary = ({ onSelect, selectionMode = false }) => {
     const [images, setImages] = useState([]);
@@ -8,6 +8,7 @@ const ImageLibrary = ({ onSelect, selectionMode = false }) => {
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState(null);
 
+    // 🔄 CHARGEMENT AU DÉMARRAGE (ESSENTIEL POUR LA PERSISTANCE)
     useEffect(() => {
         fetchImages();
     }, []);
@@ -15,15 +16,13 @@ const ImageLibrary = ({ onSelect, selectionMode = false }) => {
     const fetchImages = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem('token');
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/library`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            // On appelle le backend qui va interroger Cloudinary
+            const res = await api.get('/api/admin/library');
             setImages(res.data);
-            setLoading(false);
         } catch (err) {
-            console.error("Error fetching library:", err);
-            setError("Impossible de charger les images.");
+            console.error("Erreur chargement images:", err);
+            setError("Impossible de charger la médiathèque.");
+        } finally {
             setLoading(false);
         }
     };
@@ -39,38 +38,44 @@ const ImageLibrary = ({ onSelect, selectionMode = false }) => {
             const formData = new FormData();
             formData.append('image', file);
 
-            const token = localStorage.getItem('token');
-            const res = await axios.post(
-                `${import.meta.env.VITE_API_URL}/api/admin/library/upload`,
-                formData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'multipart/form-data'
-                    }
-                }
-            );
+            // Upload vers le backend -> Cloudinary
+            const res = await api.post('/api/admin/library/upload', formData);
 
-            // Add new image to list (res.data contains filename & url)
+            // On ajoute immédiatement la nouvelle image à la liste affichée
             const newImage = {
-                name: res.data.filename,
-                url: res.data.url,
-                path: res.data.filename
+                name: res.data.name,
+                url: res.data.url
             };
 
             setImages([newImage, ...images]);
-            setUploading(false);
         } catch (err) {
             console.error("Upload error:", err);
-            setError("Échec de l'upload. Vérifiez le format (PNG, JPG, WEBP).");
+            setError("Échec de l'upload.");
+        } finally {
             setUploading(false);
+        }
+    };
+
+
+    const handleDeleteImage = async (public_id) => {
+        if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette image ? Cette action est irréversible.")) return;
+
+        try {
+            // Optimistic UI update: Remove immediately
+            setImages(prev => prev.filter(img => img.name !== public_id));
+
+            await api.post('/api/admin/library/delete', { public_id });
+        } catch (err) {
+            console.error("Erreur suppression:", err);
+            alert("Erreur lors de la suppression de l'image.");
+            fetchImages(); // Revert/Reload if failed
         }
     };
 
     const getFullUrl = (url) => {
         if (!url) return '';
-        if (url.startsWith('http')) return url;
-        return `${import.meta.env.VITE_API_URL}${url}`;
+        // Les URLs Cloudinary sont déjà complètes (https://...)
+        return url;
     };
 
     return (
@@ -101,7 +106,7 @@ const ImageLibrary = ({ onSelect, selectionMode = false }) => {
                     >
                         {uploading ? (
                             <>
-                                <Loader className="animate-spin" size={20} /> Traitement...
+                                <Loader className="animate-spin" size={20} /> Upload...
                             </>
                         ) : (
                             <>
@@ -139,20 +144,32 @@ const ImageLibrary = ({ onSelect, selectionMode = false }) => {
                                 className="w-full h-full object-cover transition duration-500 group-hover:scale-110"
                             />
 
-                            {/* Overlay on hover */}
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            {/* Overlay de sélection & suppression */}
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                 {selectionMode && (
-                                    <div className="bg-white text-primary p-2 rounded-full shadow-lg">
+                                    <div className="bg-white text-primary p-2 rounded-full shadow-lg" title="Sélectionner">
                                         <Check size={20} strokeWidth={3} />
                                     </div>
                                 )}
+
+                                {/* Bouton Suppression */}
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // Empêcher la sélection
+                                        handleDeleteImage(img.name);
+                                    }}
+                                    className="bg-white text-red-600 p-2 rounded-full shadow-lg hover:bg-red-50 transition-colors"
+                                    title="Supprimer définitivement"
+                                >
+                                    <Trash2 size={20} />
+                                </button>
                             </div>
                         </div>
                     ))}
 
                     {images.length === 0 && (
                         <div className="col-span-full py-10 text-center text-gray-500 italic">
-                            Aucune image dans la bibliothèque.
+                            Aucune image trouvée sur le serveur.
                         </div>
                     )}
                 </div>

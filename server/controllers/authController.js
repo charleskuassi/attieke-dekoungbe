@@ -3,13 +3,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const log = require('../utils/logger');
-const { sendVerificationEmail, sendResetPasswordEmail } = require('../services/emailService');
+const { sendVerificationEmail, sendResetPasswordEmail, sendAdminNewUser } = require('../services/emailService');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_key';
 
 exports.register = async (req, res) => {
     try {
         log('Register called:', req.body);
+        console.log("Register body:", req.body);
         let { name, email, password, phone, address, role } = req.body;
 
         // Sanitize
@@ -43,7 +44,7 @@ exports.register = async (req, res) => {
             phone,
             address,
             role: role || 'customer',
-            isVerified: false,
+            isVerified: false, // Force verification
             verificationCode,
             verificationCodeExpires
         });
@@ -51,17 +52,20 @@ exports.register = async (req, res) => {
         // Send Email
         try {
             await sendVerificationEmail(user, verificationCode);
+            // Notify Admin
+            sendAdminNewUser(user).catch(err => console.error("Admin Email Error:", err.message));
+
             res.status(201).json({
                 message: 'Inscription réussie. Veuillez vérifier votre email.',
                 userId: user.id
             });
         } catch (emailError) {
-            console.error("Failed to send email but user created:", emailError);
-            // Fallback: SMTP failed (blocked port/timeout), return code to user to unblock them
+            console.error("Erreur SMTP (Ignorée en local):", emailError);
+            // Fallback: Return success even if email fails, with the code for local dev
             res.status(201).json({
-                message: 'Inscription réussie, mais l\'envoi de l\'email a échoué (Blocage Réseau). Voici le code.',
+                message: 'Inscription réussie (Mode Local: Email ignoré).',
                 userId: user.id,
-                devCode: verificationCode // EMERGENCY FALLBACK
+                devCode: verificationCode
             });
         }
 

@@ -1,20 +1,40 @@
 const { ContactMessage } = require('../models');
+const { sendAdminNewMessage } = require('../services/emailService');
 
 exports.createMessage = async (req, res) => {
     try {
-        const { name, email, message } = req.body;
-        const contactMessage = await ContactMessage.create({
-            name, email, message
-        });
+        console.log("📨 [CONTACT] Received Body:", req.body);
+        const { name, email, message, subject } = req.body;
 
-        // Admin Notification
-        const { createNotification } = require('./notificationController');
-        createNotification('message', `Nouveau message de ${name}`, contactMessage.id);
+        if (!name || !email || !message) {
+            return res.status(400).json({ success: false, message: 'Nom, email et message requis.' });
+        }
+
+        const contactMessage = await ContactMessage.create({
+            name, email, message, subject
+        });
+        console.log("✅ Message Saved:", contactMessage.id);
+
+        try {
+            // Admin Notification
+            const { createNotification } = require('./notificationController');
+            createNotification('message', `Nouveau message de ${name}: ${subject || 'Contact'}`, contactMessage.id);
+
+            // Email Notification
+            sendAdminNewMessage(contactMessage).catch(e => console.error("Email Error:", e.message));
+
+        } catch (notifErr) {
+            console.error("⚠️ Notification Error (Ignored):", notifErr.message);
+        }
 
         res.status(201).json({ success: true, data: contactMessage });
     } catch (err) {
-        console.error("Create Message Error:", err);
-        res.status(500).json({ success: false, message: 'Server Error' });
+        console.error("❌ Create Message Error:", err);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur Serveur (Contact)',
+            error: err.message
+        });
     }
 };
 

@@ -15,6 +15,10 @@ const ContactMessage = sequelize.define('ContactMessage', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    subject: {
+        type: DataTypes.STRING,
+        allowNull: true // Optional as per common sense, but good to have
+    },
     message: {
         type: DataTypes.TEXT,
         allowNull: false

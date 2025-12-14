@@ -1,11 +1,10 @@
 const nodemailer = require('nodemailer');
 
+// --- CONFIGURATION ---
 // Helper to get transporter
 const getTransporter = async () => {
     // Check if real SMTP credentials are provided
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-
-        console.log(`Using Real SMTP for: ${process.env.SMTP_USER}`);
 
         // Optimisation pour Gmail : utiliser le service intégré
         if (process.env.SMTP_HOST && process.env.SMTP_HOST.includes('gmail')) {
@@ -20,18 +19,18 @@ const getTransporter = async () => {
 
         // Configuration standard pour autres SMTP
         return nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT || 587, // Default to 587 if not specified
-            secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
+            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: process.env.SMTP_PORT || 587,
+            secure: process.env.SMTP_PORT == 465,
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS
             },
             tls: {
-                ciphers: 'SSLv3', // Aide parfois pour compatibilité
+                ciphers: 'SSLv3',
                 rejectUnauthorized: false
             },
-            connectionTimeout: 10000 // 10 secondes timeout
+            connectionTimeout: 10000
         });
     } else {
         console.log("⚠️ No valid SMTP config found. Using Ethereal Email (Dev Mode).");
@@ -48,161 +47,212 @@ const getTransporter = async () => {
     }
 };
 
-exports.sendOrderNotification = async (order, user) => {
+const sendEmail = async (to, subject, htmlContent) => {
+    // [SIMULATION] Log always available for debug transparency
+    console.log(`📧 [SIMULATION] Email envoyé à : ${to} | Sujet : ${subject}`);
+
     try {
         const transporter = await getTransporter();
         const mailOptions = {
             from: '"Attièkè Dèkoungbé" <no-reply@attieke-dekoungbe.com>',
-            to: user.email,
-            subject: `Confirmation de commande #${order.id}`,
-            html: `
-                <div style="font-family: Arial, sans-serif; color: #333;">
-                    <h1 style="color: #ea580c;">Merci pour votre commande !</h1>
-                    <p>Bonjour ${user.name},</p>
-                    <p>Nous avons bien reçu votre commande <strong>#${order.id}</strong>.</p>
-                    <p>Elle est actuellement en cours de préparation.</p>
-                    
-                    <h3>Récapitulatif :</h3>
-                    <ul>
-                        ${order.Products ? order.Products.map(p => `<li>${p.OrderItem.quantity}x ${p.name} - ${p.price} FCFA</li>`).join('') : ''}
-                    </ul>
-                    
-                    <p><strong>Total : ${order.total_price} FCFA</strong></p>
-                    
-                    <p>Adresse de livraison : ${order.address}</p>
-                    
-                    <p>Bon appétit !<br>L'équipe Attièkè Dèkoungbé</p>
-                </div>
-            `
+            to: to,
+            subject: subject,
+            html: htmlContent
         };
 
         const info = await transporter.sendMail(mailOptions);
-        console.log('Order Email sent: %s', info.messageId);
+        console.log(`✅ SMTP Success: Message ID: ${info.messageId}`);
+
         if (info.messageId && !process.env.SMTP_USER) {
-            console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+            console.log('🔎 Preview URL: %s', nodemailer.getTestMessageUrl(info));
         }
         return info;
-
     } catch (error) {
-        console.error('Error sending order email:', error);
+        // IMPORTANT: Non-blocking error handling
+        console.error(`⚠️ Email non envoyé (${subject}):`, error.message);
+        // We purposefully do NOT throw here. 
+        // This ensures the main controller (order/auth) continues successfully even if email fails.
     }
+};
+
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || process.env.SMTP_USER || 'admin@attieke-dekoungbe.com';
+
+// --- CLIENT NOTIFICATIONS ---
+
+exports.sendOrderConfirmation = async (order, user) => {
+    const html = `
+        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 8px;">
+            <h1 style="color: #ea580c; text-align: center;">Merci pour votre commande !</h1>
+            <p>Bonjour ${user.name},</p>
+            <p>Nous avons bien reçu votre commande <strong>#${order.id}</strong>.</p>
+            <p>Elle est en cours de préparation par nos chefs.</p>
+            
+            <div style="background-color: #fff7ed; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #c2410c;">Récapitulatif</h3>
+                <ul style="padding-left: 20px;">
+                    ${order.Products ? order.Products.map(p => `<li>${p.OrderItem.quantity}x ${p.name} - ${p.price} FCFA</li>`).join('') : '<li>Détails non disponibles</li>'}
+                </ul>
+                <hr style="border: 0; border-top: 1px solid #ffd7a6; margin: 10px 0;">
+                <p style="font-weight: bold; font-size: 1.1em; text-align: right;">Total : ${order.total_price} FCFA</p>
+            </div>
+            
+            <p><strong>Livraison à :</strong> ${order.address}</p>
+            <p style="text-align: center; margin-top: 30px; font-size: 0.9em; color: #666;">Attièkè Dèkoungbé - Le goût authentique</p>
+        </div>
+    `;
+    await sendEmail(user.email, `✅ Confirmation de commande #${order.id}`, html);
 };
 
 exports.sendVerificationEmail = async (user, code) => {
-    try {
-        const transporter = await getTransporter();
-        const mailOptions = {
-            from: '"Attièkè Dèkoungbé" <no-reply@attieke-dekoungbe.com>',
-            to: user.email,
-            subject: 'Vérifiez votre compte - Attièkè Dèkoungbé',
-            html: `
-                <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-                    <h1 style="color: #ea580c; text-align: center;">Bienvenue chez Attièkè Dèkoungbé !</h1>
-                    <p>Bonjour ${user.name},</p>
-                    <p>Pour activer votre compte, veuillez utiliser le code de vérification ci-dessous :</p>
-                    
-                    <div style="background-color: #fff7ed; border: 2px dashed #ea580c; padding: 20px; text-align: center; margin: 30px 0;">
-                        <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #ea580c;">${code}</span>
-                    </div>
-                    
-                    <p>Ce code expire dans 15 minutes.</p>
-                    <p>Si vous n'avez pas créé de compte, ignorez simplement cet email.</p>
-                </div>
-            `
-        };
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Verification Email sent: %s', info.messageId);
-        // Only verify logic:
-        if (info.messageId && (!process.env.SMTP_USER || process.env.SMTP_USER.includes('votre_email'))) {
-            console.log('🔎 DEV PREVIEW URL: %s', nodemailer.getTestMessageUrl(info));
-        }
-    } catch (error) {
-        console.error('Error sending verification email:', error);
-        throw error; // Re-throw to catch in controller
-    }
+    const html = `
+        <div style="font-family: Arial, sans-serif; text-align: center; color: #333;">
+            <h1 style="color: #ea580c;">Bienvenue !</h1>
+            <p>Votre code de vérification est :</p>
+            <div style="font-size: 32px; font-weight: bold; color: #ea580c; border: 2px dashed #ea580c; display: inline-block; padding: 10px 20px; margin: 20px 0;">${code}</div>
+            <p>Ce code expire dans 15 minutes.</p>
+        </div>
+    `;
+    // We use the safe sendEmail helper which swallows errors
+    await sendEmail(user.email, 'Vérifiez votre compte - Attièkè Dèkoungbé', html);
 };
 
 exports.sendResetPasswordEmail = async (user, url) => {
-    try {
-        const transporter = await getTransporter();
-        const mailOptions = {
-            from: '"Attièkè Dèkoungbé" <security@attieke-dekoungbe.com>',
-            to: user.email,
-            subject: 'Réinitialisation de mot de passe',
-            html: `
-                <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #ea580c;">Mot de passe oublié ?</h2>
-                    <p>Vous avez demandé une réinitialisation de mot de passe.</p>
-                    <p>Cliquez sur le lien ci-dessous pour définir un nouveau mot de passe :</p>
-                    
-                    <div style="text-align: center; margin: 30px 0;">
-                        <a href="${url}" style="background-color: #ea580c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Réinitialiser mon mot de passe</a>
-                    </div>
-                    
-                    <p>Si le bouton ne fonctionne pas, copiez ce lien : <br> <a href="${url}">${url}</a></p>
-                    <p>Ce lien est valide pour 1 heure.</p>
-                </div>
-            `
-        };
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Reset Email sent: %s', info.messageId);
-    } catch (error) {
-        console.error('Error sending reset email:', error);
-    }
+    const html = `
+        <div style="font-family: Arial, sans-serif; text-align: center; color: #333;">
+            <h2 style="color: #ea580c;">Réinitialisation de mot de passe</h2>
+            <p>Cliquez ci-dessous pour changer votre mot de passe :</p>
+            <a href="${url}" style="background-color: #ea580c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin: 20px 0;">Changer mon mot de passe</a>
+            <p><small>${url}</small></p>
+        </div>
+    `;
+    await sendEmail(user.email, 'Réinitialisation de mot de passe', html);
 };
 
 exports.sendStatusUpdateEmail = async (order, user, status) => {
-    try {
-        const transporter = await getTransporter();
+    let subject = `Mise à jour commande #${order.id}`;
+    let message = `Le statut de votre commande est : <strong>${status}</strong>.`;
 
-        let subject = `Mise à jour commande #${order.id}`;
-        let title = "Statut mis à jour";
-        let message = `Le statut de votre commande est passé à : <strong>${status}</strong>.`;
-
-        if (status === 'en_cours') {
-            subject = `🚀 Commande #${order.id} en route !`;
-            title = "Votre commande est en route !";
-            message = "Bonne nouvelle ! Votre livreur a récupéré votre commande et se dirige vers vous.";
-        } else if (status === 'delivered') {
-            subject = `✅ Commande #${order.id} livrée`;
-            title = "Commande Livrée !";
-            message = "Votre commande a été marquée comme livrée. Merci de votre confiance et bon appétit !";
-        } else if (status === 'cancelled') {
-            subject = `❌ Commande #${order.id} annulée`;
-            title = "Commande Annulée";
-            message = "Votre commande a été annulée. Contactez-nous pour plus d'informations.";
-        }
-
-        const mailOptions = {
-            from: '"Attièkè Dèkoungbé" <no-reply@attieke-dekoungbe.com>',
-            to: user.email,
-            subject: subject,
-            html: `
-                <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                    <h1 style="color: #ea580c; text-align: center;">${title}</h1>
-                    <p>Bonjour ${user.name},</p>
-                    <p style="font-size: 16px;">${message}</p>
-                    
-                    <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
-                        <p><strong>Commande :</strong> #${order.id}</p>
-                        <p><strong>Montant :</strong> ${order.total_price} FCFA</p>
-                    </div>
-
-                    <p style="text-align: center; color: #888; font-size: 12px; margin-top: 30px;">
-                        Attièkè Dèkoungbé - Le goût authentique.<br>
-                        Ceci est un message automatique, merci de ne pas y répondre.
-                    </p>
-                </div>
-            `
-        };
-
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`Status Update Email (${status}) sent: %s`, info.messageId);
-
-        if (info.messageId && (!process.env.SMTP_USER || process.env.SMTP_USER.includes('votre_email'))) {
-            console.log('🔎 DEV PREVIEW URL: %s', nodemailer.getTestMessageUrl(info));
-        }
-    } catch (error) {
-        console.error('Error sending status update email:', error);
+    if (status === 'en_cours' || status === 'preparing') {
+        subject = `👨‍🍳 Commande #${order.id} en cuisine`;
+        message = "Nos chefs préparent votre plat avec amour !";
+    } else if (status === 'delivered' || status === 'completed') {
+        subject = `🍽️ Commande #${order.id} livrée`;
+        message = "Bon appétit ! Merci de votre confiance.";
+    } else if (status === 'cancelled') {
+        subject = `❌ Commande #${order.id} annulée`;
+        message = "Votre commande a été annulée.";
     }
+
+    const html = `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+            <h2 style="color: #ea580c;">${subject}</h2>
+            <p>Bonjour ${user.name},</p>
+            <p>${message}</p>
+            <p><a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard">Suivre ma commande</a></p>
+        </div>
+    `;
+    await sendEmail(user.email, subject, html);
 };
+
+exports.sendDriverAssigned = async (order, user) => {
+    const html = `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+            <h2 style="color: #ea580c;">🛵 Votre livreur est en route !</h2>
+            <p>Bonjour ${user.name},</p>
+            <p>Votre commande <strong>#${order.id}</strong> a été récupérée par notre livreur.</p>
+            <p>Il se dirige vers : <strong>${order.address}</strong>.</p>
+            <p>Préparez-vous à déguster !</p>
+        </div>
+    `;
+    await sendEmail(user.email, `🛵 Votre livreur arrive (Commande #${order.id})`, html);
+};
+
+exports.sendReservationReceived = async (reservation, userEmail) => {
+    const html = `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+            <h2 style="color: #ea580c;">Réservation Reçue</h2>
+            <p>Bonjour ${reservation.name},</p>
+            <p>Nous avons bien reçu votre demande de réservation pour le :</p>
+            <div style="background-color: #f3f4f6; padding: 10px; margin: 10px 0; border-left: 4px solid #ea580c;">
+                <strong>📅 Date :</strong> ${reservation.date} <br>
+                <strong>⏰ Heure :</strong> ${reservation.time} <br>
+                <strong>👥 Invités :</strong> ${reservation.guests}
+            </div>
+            <p>Nous vous confirmerons la disponibilité très rapidement par téléphone ou email.</p>
+        </div>
+    `;
+    await sendEmail(userEmail || reservation.email, `📅 Demande de réservation reçue`, html); // Try to use user email if passed, or reservation email field
+}
+
+
+// --- ADMIN NOTIFICATIONS (TO ADMIN) ---
+
+exports.sendAdminNewOrder = async (order) => {
+    const html = `
+        <div style="font-family: Arial, sans-serif;">
+            <h2 style="color: #166534;">💰 Nouvelle Commande !</h2>
+            <p><strong>Ref:</strong> #${order.id}</p>
+            <p><strong>Client:</strong> ${order.customer_name} (${order.phone})</p>
+            <p><strong>Montant:</strong> ${order.total_price} FCFA</p>
+            <p><strong>Adresse:</strong> ${order.address}</p>
+            <hr>
+            <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin" style="background-color: #166534; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">Gérer la commande</a>
+        </div>
+    `;
+    await sendEmail(ADMIN_EMAIL, `💰 NOUVELLE COMMANDE #${order.id} - ${order.total_price} FCFA`, html);
+};
+
+exports.sendAdminNewUser = async (user) => {
+    const html = `
+        <div style="font-family: Arial, sans-serif;">
+            <h2 style="color: #2563eb;">👤 Nouveau Client Inscrit</h2>
+            <p><strong>Nom:</strong> ${user.name}</p>
+            <p><strong>Email:</strong> ${user.email}</p>
+            <p><strong>Téléphone:</strong> ${user.phone || 'Non renseigné'}</p>
+        </div>
+    `;
+    await sendEmail(ADMIN_EMAIL, `👤 NOUVEAU CLIENT : ${user.name}`, html);
+};
+
+exports.sendAdminNewReservation = async (reservation) => {
+    const html = `
+        <div style="font-family: Arial, sans-serif;">
+            <h2 style="color: #9333ea;">📅 Nouvelle Réservation</h2>
+            <p><strong>Nom:</strong> ${reservation.name}</p>
+            <p><strong>Date:</strong> ${reservation.date} à ${reservation.time}</p>
+            <p><strong>Personnes:</strong> ${reservation.guests}</p>
+            <p><strong>Message:</strong> ${reservation.message || '-'}</p>
+        </div>
+    `;
+    await sendEmail(ADMIN_EMAIL, `📅 NOUVELLE RÉSERVATION : ${reservation.date} à ${reservation.time}`, html);
+};
+
+exports.sendAdminNewMessage = async (msg) => {
+    const html = `
+        <div style="font-family: Arial, sans-serif;">
+            <h2 style="color: #db2777;">✉️ Nouveau Message Contact</h2>
+            <p><strong>De:</strong> ${msg.name} (${msg.email})</p>
+            <p><strong>Sujet:</strong> ${msg.subject}</p>
+            <div style="background-color: #fdf2f8; padding: 10px; margin-top: 10px; border-radius: 4px;">
+                ${msg.message}
+            </div>
+        </div>
+    `;
+    await sendEmail(ADMIN_EMAIL, `✉️ MESSAGE : ${msg.subject}`, html);
+};
+
+exports.sendAdminNewReview = async (review) => {
+    const color = review.type === 'avis' ? '#16a34a' : '#dc2626'; // Green vs Red
+    const html = `
+        <div style="font-family: Arial, sans-serif;">
+            <h2 style="color: ${color};">${review.type === 'avis' ? '⭐ Nouvel Avis' : '⚠️ Nouvelle Réclamation'}</h2>
+            <p><strong>Note:</strong> ${review.rating ? review.rating + '/5' : '-'}</p>
+            <p><strong>Message:</strong></p>
+            <blockquote style="border-left: 4px solid ${color}; padding-left: 10px; margin: 10px 0; color: #555;">
+                ${review.message}
+            </blockquote>
+        </div>
+    `;
+    await sendEmail(ADMIN_EMAIL, `${review.type === 'avis' ? '⭐ NOUVEL AVIS' : '⚠️ RÉCLAMATION'}`, html);
+};
+

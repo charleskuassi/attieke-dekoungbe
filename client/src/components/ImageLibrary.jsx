@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { Image, Upload, Check, Loader } from 'lucide-react';
 
 const ImageLibrary = ({ onSelect, selectionMode = false }) => {
@@ -15,10 +15,7 @@ const ImageLibrary = ({ onSelect, selectionMode = false }) => {
     const fetchImages = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem('token');
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/library`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.get('/api/admin/library');
             setImages(res.data);
             setLoading(false);
         } catch (err) {
@@ -39,17 +36,7 @@ const ImageLibrary = ({ onSelect, selectionMode = false }) => {
             const formData = new FormData();
             formData.append('image', file);
 
-            const token = localStorage.getItem('token');
-            const res = await axios.post(
-                `${import.meta.env.VITE_API_URL}/api/admin/library/upload`,
-                formData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'multipart/form-data'
-                    }
-                }
-            );
+            const res = await api.post('/api/admin/library/upload', formData);
 
             // Add new image to list (res.data contains filename & url)
             const newImage = {
@@ -69,8 +56,9 @@ const ImageLibrary = ({ onSelect, selectionMode = false }) => {
 
     const getFullUrl = (url) => {
         if (!url) return '';
-        if (url.startsWith('http')) return url;
-        return `${import.meta.env.VITE_API_URL}${url}`;
+        if (url.startsWith('http') || url.startsWith('/images/')) return url;
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        return `${apiUrl}${url}`;
     };
 
     return (

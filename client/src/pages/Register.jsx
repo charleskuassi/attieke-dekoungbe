@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { CheckCircle } from 'lucide-react';
 
@@ -22,10 +22,18 @@ const Register = () => {
 
     const handleRegister = async (e) => {
         e.preventDefault();
+
+        // Validation Téléphone Bénin (8 ou 10 chiffres)
+        const phoneRegex = /^[0-9]{8}$|^[0-9]{10}$/;
+        if (!phoneRegex.test(formData.phone)) {
+            setError("Le numéro de téléphone doit comporter 8 ou 10 chiffres.");
+            return;
+        }
+
         setLoading(true);
         setError('');
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/register`, formData);
+            const response = await api.post('/api/auth/register', formData);
 
             if (response.data.devCode) {
                 // Network Block Workaround: Show code directly
@@ -45,7 +53,7 @@ const Register = () => {
         setLoading(true);
         setError('');
         try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/verify-email`, {
+            const res = await api.post('/api/auth/verify-email', {
                 email: formData.email,
                 code: verificationCode
             });
@@ -113,7 +121,7 @@ const Register = () => {
                         </div>
                         <div>
                             <label className="block text-sm font-bold mb-1 dark:text-gray-300">Téléphone</label>
-                            <input type="tel" name="phone" required className="w-full border dark:border-gray-600 rounded p-2 dark:bg-gray-700 dark:text-white" onChange={handleChange} />
+                            <input type="tel" name="phone" required minLength="8" maxLength="10" placeholder="Ex: 97000000 (Test) ou 01..." className="w-full border dark:border-gray-600 rounded p-2 dark:bg-gray-700 dark:text-white" onChange={handleChange} />
                         </div>
                         <div>
                             <label className="block text-sm font-bold mb-1 dark:text-gray-300">Adresse</label>

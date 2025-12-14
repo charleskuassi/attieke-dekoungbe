@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { Truck, Plus, Trash2, User, Phone } from 'lucide-react';
 
 const DriversPanel = () => {
@@ -12,9 +12,7 @@ const DriversPanel = () => {
 
     const fetchDrivers = async () => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/drivers`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-            });
+            const res = await api.get('/api/drivers');
             setDrivers(res.data);
         } catch (error) {
             console.error("Error fetching drivers:", error);
@@ -24,9 +22,7 @@ const DriversPanel = () => {
     const handleAdd = async (e) => {
         e.preventDefault();
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL}/api/drivers`, newDriver, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-            });
+            await api.post('/api/drivers', newDriver);
             setNewDriver({ name: '', phone: '' });
             fetchDrivers();
             alert("Livreur ajouté !");
@@ -39,9 +35,7 @@ const DriversPanel = () => {
     const handleDelete = async (id) => {
         if (!confirm("Supprimer ce livreur ?")) return;
         try {
-            await axios.delete(`${import.meta.env.VITE_API_URL}/api/drivers/${id}`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-            });
+            await api.delete(`/api/drivers/${id}`);
             fetchDrivers();
         } catch (error) {
             console.error("Error deleting driver:", error);

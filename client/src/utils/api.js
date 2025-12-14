@@ -4,7 +4,7 @@ import axios from 'axios';
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
     headers: {
-        'Content-Type': 'application/json',
+        // 'Content-Type': 'application/json', // Let Axios handle this automatically
     },
     withCredentials: true // Important for CORS if using cookies (optional but good practice)
 });

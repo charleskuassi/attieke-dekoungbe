@@ -1,4 +1,6 @@
 const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const multer = require('multer');
 require('dotenv').config();
 
 cloudinary.config({
@@ -7,6 +9,16 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-console.log('✅ Configuration Cloudinary chargée pour:', process.env.CLOUDINARY_CLOUD_NAME);
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'attieke_library',
+        allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+    },
+});
 
-module.exports = cloudinary;
+const upload = multer({ storage: storage });
+
+console.log('✅ Configuration Cloudinary RESTAURÉE pour:', process.env.CLOUDINARY_CLOUD_NAME);
+
+module.exports = { cloudinary, upload };

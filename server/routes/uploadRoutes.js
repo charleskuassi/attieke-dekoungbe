@@ -1,12 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { upload, uploadImage } = require('../controllers/uploadController');
+const uploadController = require('../controllers/uploadController');
+// IMPORT CRUCIAL : On utilise la config centrale
+const { upload } = require('../config/cloudinary');
 
-/**
- * POST /api/upload
- * Upload an image file
- * Returns: { success: true, imageUrl: '/uploads/timestamp_filename.jpg', ... }
- */
-router.post('/', upload.single('image'), uploadImage);
+// On utilise le middleware Cloudinary ici
+router.post('/', upload.single('image'), uploadController.uploadImage);
 
 module.exports = router;

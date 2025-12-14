@@ -17,6 +17,7 @@ exports.seedProducts = async (req, res) => {
 exports.getAllProducts = async (req, res) => {
     try {
         const products = await Product.findAll();
+        console.log("Plats trouvés en BDD:", products.length);
         res.json(products);
     } catch (err) {
         console.error(err);

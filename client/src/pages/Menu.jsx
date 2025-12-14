@@ -17,8 +17,20 @@ const Menu = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/products`);
-                setProducts(response.data);
+                // FALLBACK si .env mal configuré
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                console.log("Fetching Products from:", apiUrl);
+
+                const response = await axios.get(`${apiUrl}/api/products`);
+
+                if (Array.isArray(response.data)) {
+                    console.log(`Loaded ${response.data.length} products`);
+                    setProducts(response.data);
+                } else {
+                    console.error("Format de données invalide reçu (HTML au lieu de JSON ?):", response.data);
+                    setError("Erreur de configuration API (Format invalide)");
+                    setProducts([]);
+                }
                 setLoading(false);
             } catch (err) {
                 console.error("Failed to fetch products", err);

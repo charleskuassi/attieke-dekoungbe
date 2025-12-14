@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { Star, AlertTriangle, CheckCircle, MessageSquare, Phone } from 'lucide-react';
 
 const AdminReviews = () => {
@@ -12,10 +12,7 @@ const AdminReviews = () => {
 
     const fetchReviews = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/reviews`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.get('/api/reviews');
             setReviews(res.data);
             setLoading(false);
         } catch (error) {
@@ -26,10 +23,7 @@ const AdminReviews = () => {
 
     const handleMarkAsRead = async (id) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.put(`${import.meta.env.VITE_API_URL}/api/reviews/${id}/read`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.put(`/api/reviews/${id}/read`);
             // Update local state
             setReviews(reviews.map(r => r.id === id ? { ...r, status: 'read' } : r));
         } catch (error) {
@@ -58,8 +52,8 @@ const AdminReviews = () => {
                     <div className="grid grid-cols-1 gap-4">
                         {complaints.map(review => (
                             <div key={review.id} className={`bg-white dark:bg-gray-800 border-l-4 rounded-r-xl shadow-sm p-4 transition-colors ${review.status === 'new'
-                                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                                    : 'border-gray-300 dark:border-gray-600'
+                                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                                : 'border-gray-300 dark:border-gray-600'
                                 }`}>
                                 <div className="flex justify-between items-start">
                                     <div>

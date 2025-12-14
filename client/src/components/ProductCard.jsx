@@ -1,6 +1,7 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { getImageUrl } from '../utils/imageHelper';
 
 const ProductCard = ({ product }) => {
     const { addToCart } = useCart();
@@ -9,13 +10,7 @@ const ProductCard = ({ product }) => {
         <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition duration-300 flex flex-col h-full ring-1 ring-gray-100 dark:ring-gray-700">
             <div className="h-48 overflow-hidden relative">
                 <img
-                    src={
-                        !product.image_url
-                            ? "https://via.placeholder.com/400?text=No+Image"
-                            : product.image_url.startsWith('http') || product.image_url.startsWith('/images/')
-                                ? product.image_url
-                                : `${import.meta.env.VITE_API_URL}${product.image_url}`
-                    }
+                    src={getImageUrl(product.image_url)}
                     alt={product.name}
                     className="w-full h-full object-cover hover:scale-110 transition duration-500"
                 />

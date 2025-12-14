@@ -8651,3 +8651,144 @@
   "exp": 1765592000
 }
 [2025-12-12T02:26:37.975Z] ✅ Commande créée avec succès ID: 3
+[2025-12-12T17:36:50.799Z] createOrder called. User: {
+  "id": 1,
+  "role": "customer",
+  "iat": 1765560652,
+  "exp": 1765647052
+}
+[2025-12-12T17:36:53.344Z] ✅ Commande créée avec succès ID: 4
+[2025-12-12T17:57:14.479Z] createOrder called. User: {
+  "id": 1,
+  "role": "customer",
+  "iat": 1765562203,
+  "exp": 1765648603
+}
+[2025-12-12T17:57:16.525Z] ✅ Commande créée avec succès ID: 6
+[2025-12-12T18:01:27.092Z] createOrder called. User: {
+  "id": 1,
+  "role": "customer",
+  "iat": 1765562203,
+  "exp": 1765648603
+}
+[2025-12-12T18:01:29.441Z] ✅ Commande créée avec succès ID: 7
+[2025-12-12T19:48:00.083Z] createOrder called. User: {
+  "id": 3,
+  "role": "admin",
+  "iat": 1765568103,
+  "exp": 1765654503
+}
+[2025-12-12T19:48:02.140Z] ✅ Commande créée avec succès ID: 8
+[2025-12-12T20:11:14.533Z] createOrder called. User: {
+  "id": 3,
+  "role": "admin",
+  "iat": 1765568103,
+  "exp": 1765654503
+}
+[2025-12-12T20:11:16.496Z] ✅ Commande créée avec succès ID: 9
+[2025-12-12T20:28:26.144Z] Update Profile called: {
+  "name": "Charles KUASSI",
+  "phone": "97000000",
+  "address": "Godomey"
+}
+[2025-12-12T20:28:44.803Z] createOrder called. User: {
+  "id": 6,
+  "role": "customer",
+  "iat": 1765571268,
+  "exp": 1765657668
+}
+[2025-12-12T20:28:46.866Z] ✅ Commande créée avec succès ID: 10
+[2025-12-12T20:30:28.648Z] createOrder called. User: {
+  "id": 6,
+  "role": "customer",
+  "iat": 1765571268,
+  "exp": 1765657668
+}
+[2025-12-12T20:30:30.571Z] ✅ Commande créée avec succès ID: 11
+[2025-12-12T20:41:26.524Z] createOrder called. User: {
+  "id": 1,
+  "role": "customer",
+  "iat": 1765572061,
+  "exp": 1765658461
+}
+[2025-12-12T20:41:28.987Z] ✅ Commande créée avec succès ID: 12
+[2025-12-12T20:42:14.580Z] createOrder called. User: {
+  "id": 1,
+  "role": "customer",
+  "iat": 1765572061,
+  "exp": 1765658461
+}
+[2025-12-12T20:42:16.567Z] ✅ Commande créée avec succès ID: 13
+[2025-12-12T20:44:22.193Z] createOrder called. User: {
+  "id": 1,
+  "role": "customer",
+  "iat": 1765572061,
+  "exp": 1765658461
+}
+[2025-12-12T20:44:24.124Z] ✅ Commande créée avec succès ID: 14
+[2025-12-12T20:49:57.330Z] createOrder called. User: {
+  "id": 1,
+  "role": "customer",
+  "iat": 1765572557,
+  "exp": 1765658957
+}
+[2025-12-12T20:49:59.689Z] ✅ Commande créée avec succès ID: 15
+[2025-12-12T20:50:36.711Z] Register called: {
+  "email": "chalinyvidente08@gmail.com",
+  "password": "azerqsd12321@",
+  "name": "ABEL",
+  "phone": "97000000",
+  "address": "Godomey"
+}
+[2025-12-12T22:05:19.489Z] createOrder called. User: {
+  "id": 3,
+  "role": "admin",
+  "iat": 1765577009,
+  "exp": 1765663409
+}
+[2025-12-12T22:05:23.784Z] ✅ Commande créée avec succès ID: 16
+[2025-12-12T22:13:51.747Z] createOrder called. User: {
+  "id": 1,
+  "role": "customer",
+  "iat": 1765577531,
+  "exp": 1765663931
+}
+[2025-12-12T22:13:54.566Z] ✅ Commande créée avec succès ID: 17
+[2025-12-13T23:57:02.631Z] createOrder called. User: {
+  "id": 1,
+  "role": "customer",
+  "iat": 1765670188,
+  "exp": 1765756588
+}
+[2025-12-13T23:57:05.766Z] ✅ Commande créée avec succès ID: 18
+[2025-12-14T00:17:41.629Z] createOrder called. User: {
+  "id": 6,
+  "role": "customer",
+  "iat": 1765671416,
+  "exp": 1765757816
+}
+[2025-12-14T00:17:44.933Z] ✅ Commande créée avec succès ID: 19
+[2025-12-14T00:58:59.952Z] createOrder called. User: {
+  "id": 1,
+  "role": "customer",
+  "iat": 1765673897,
+  "exp": 1765760297
+}
+[2025-12-14T00:59:02.978Z] ✅ Commande créée avec succès ID: 20
+[2025-12-14T01:22:37.791Z] Update Profile called: {
+  "name": "Légérol TCHOGBE",
+  "phone": "97000000",
+  "address": "Godomey"
+}
+[2025-12-14T01:23:12.779Z] createOrder called. User: {
+  "id": 2,
+  "role": "customer",
+  "iat": 1765674644,
+  "exp": 1765761044
+}
+[2025-12-14T01:23:15.514Z] ✅ Commande créée avec succès ID: 1
+[2025-12-14T01:32:51.796Z] Update Profile called: {
+  "name": "Admin User",
+  "phone": "97000000",
+  "address": "Admin HQ"
+}

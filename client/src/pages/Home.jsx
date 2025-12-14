@@ -1,7 +1,7 @@
+import api from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Home = () => {
@@ -11,7 +11,7 @@ const Home = () => {
     useEffect(() => {
         const fetchStars = async () => {
             try {
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products`);
+                const res = await api.get('/api/products');
                 // Filter for 'plats' to show as stars, or pick random ones
                 const plats = res.data.filter(p => p.category === 'plats');
                 // Shuffle and pick 6 items for variety

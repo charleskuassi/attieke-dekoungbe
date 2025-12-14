@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { Calendar, Phone, CheckCircle, XCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -9,9 +9,7 @@ const AdminReservations = () => {
 
     const fetchReservations = async () => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/reservations`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-            });
+            const res = await api.get('/api/reservations');
             setReservations(res.data);
         } catch (error) {
             console.error("Fetch reservations error:", error);
@@ -24,10 +22,7 @@ const AdminReservations = () => {
 
     const handleStatusUpdate = async (id, newStatus) => {
         try {
-            await axios.put(`${import.meta.env.VITE_API_URL}/api/reservations/${id}`,
-                { status: newStatus },
-                { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-            );
+            await api.put(`/api/reservations/${id}`, { status: newStatus });
             fetchReservations(); // Refresh
         } catch (error) {
             console.error("Update status error:", error);

@@ -23,7 +23,11 @@ const User = sequelize.define('User', {
         allowNull: true
     },
     phone: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        validate: {
+            // Accepte 8 chiffres (Test / Ancien) ou 10 chiffres (Nouveau format Bénin)
+            is: /^[0-9]{8}$|^[0-9]{10}$/
+        }
     },
     address: {
         type: DataTypes.TEXT

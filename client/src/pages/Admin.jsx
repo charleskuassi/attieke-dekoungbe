@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import AdminAnnouncement from '../components/AdminAnnouncement';
 import MaintenancePanel from '../components/MaintenancePanel';
 import { LayoutDashboard, ShoppingBag, Users, TrendingUp, Package, Search, Filter, ChevronDown, CheckCircle, XCircle, Clock, Truck, Plus, Edit, Trash, Trash2, Image, Utensils, Percent, Megaphone, FileText, MessageSquare, Shield, Archive as ArchiveIcon, Bell } from 'lucide-react';
@@ -16,6 +16,7 @@ import ImageLibrary from './admin/ImageLibrary';
 
 const Admin = () => {
     const navigate = useNavigate();
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const [activeTab, setActiveTab] = useState('dashboard');
     const [stats, setStats] = useState({ dailySales: 0, monthlyData: [], topProducts: [] });
     const [orders, setOrders] = useState([]);
@@ -50,6 +51,7 @@ const Admin = () => {
     // Assignment Modal State
     const [showAssignModal, setShowAssignModal] = useState(false);
     const [selectedOrderForAssign, setSelectedOrderForAssign] = useState(null);
+    const [previewImage, setPreviewImage] = useState(null); // State pour le zoom image
 
     // Library Modal State
     const [showLibraryModal, setShowLibraryModal] = useState(false);
@@ -67,11 +69,7 @@ const Admin = () => {
 
     const fetchNotifications = async () => {
         try {
-            const token = localStorage.getItem('token');
-            if (!token) return;
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/notifications`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.get('/api/admin/notifications');
             setNotifications(res.data.notifications);
             setUnreadCount(res.data.unreadCount);
         } catch (err) {
@@ -81,10 +79,7 @@ const Admin = () => {
 
     const markNotificationAsRead = async (id) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.put(`${import.meta.env.VITE_API_URL}/api/admin/notifications/read/${id}`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.put(`/api/admin/notifications/read/${id}`);
             fetchNotifications(); // Refresh
         } catch (err) {
             console.error("Error marking read", err);
@@ -94,30 +89,19 @@ const Admin = () => {
     const getImageUrl = (url) => {
         if (!url) return '';
         if (url.startsWith('http') || url.startsWith('/images/')) return url;
-        return `${import.meta.env.VITE_API_URL}${url}`;
+        return `${API_URL}${url}`;
     };
 
     const fetchData = async () => {
         try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                console.error("⛔ Pas de token trouvé ! Redirection login...");
-                alert("Session expirée (Pas de token). Veuillez vous reconnecter.");
-                navigate('/login');
-                return;
-            }
-
-            // console.log("Token présent, chargement des données..."); // Debug silencieux
-            const headers = { Authorization: `Bearer ${token}` };
-
             const [statsRes, ordersRes, clientsRes, productsRes, promoRes, countsRes, driversRes] = await Promise.all([
-                axios.get(`${import.meta.env.VITE_API_URL}/api/orders/stats`, { headers }),
-                axios.get(`${import.meta.env.VITE_API_URL}/api/orders/admin`, { headers }),
-                axios.get(`${import.meta.env.VITE_API_URL}/api/orders/clients`, { headers }),
-                axios.get(`${import.meta.env.VITE_API_URL}/api/products`),
-                axios.get(`${import.meta.env.VITE_API_URL}/api/promo`),
-                axios.get(`${import.meta.env.VITE_API_URL}/api/orders/notifications-counts`, { headers }),
-                axios.get(`${import.meta.env.VITE_API_URL}/api/drivers`, { headers })
+                api.get('/api/orders/stats'),
+                api.get('/api/orders/admin'),
+                api.get('/api/orders/clients'),
+                api.get('/api/products'),
+                api.get('/api/promo'),
+                api.get('/api/orders/notifications-counts'),
+                api.get('/api/drivers')
             ]);
 
             setStats(statsRes.data);
@@ -144,11 +128,7 @@ const Admin = () => {
     const handleAssignDriver = async (driverId) => {
         if (!selectedOrderForAssign) return;
         try {
-            const token = localStorage.getItem('token');
-            await axios.patch(`${import.meta.env.VITE_API_URL}/api/orders/admin/${selectedOrderForAssign.id}/assign`,
-                { driverId },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            await api.patch(`/api/orders/admin/${selectedOrderForAssign.id}/assign`, { driverId });
             alert("Livreur assigné !");
             setShowAssignModal(false);
             setSelectedOrderForAssign(null);
@@ -161,10 +141,7 @@ const Admin = () => {
 
     const handleDeleteClient = async (clientId) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.delete(`${import.meta.env.VITE_API_URL}/api/admin/users/${clientId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.delete(`/api/admin/users/${clientId}`);
             // Update UI immediately
             setClients(clients.filter(c => c.id !== clientId));
             alert("Utilisateur supprimé avec succès.");
@@ -176,11 +153,7 @@ const Admin = () => {
 
     const handleStatusUpdate = async (orderId, newStatus) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.patch(`${import.meta.env.VITE_API_URL}/api/orders/admin/${orderId}`,
-                { status: newStatus },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            await api.patch(`/api/orders/admin/${orderId}`, { status: newStatus });
             setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
         } catch (error) {
             console.error("Error updating status:", error);
@@ -196,10 +169,7 @@ const Admin = () => {
 
     const handleArchiveOrder = async (orderId, currentStatus) => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/admin/archive/order/${orderId}`,
-                {},
-                { headers: { Authorization: `Bearer ${token}` } });
+            const res = await api.put(`/api/admin/archive/order/${orderId}`, {});
 
             // Update local state
             setOrders(orders.map(o => o.id === orderId ? { ...o, isArchived: res.data.isArchived } : o));
@@ -314,11 +284,7 @@ const Admin = () => {
     const handlePromoUpdate = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('token');
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/promo`,
-                promo,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            const res = await api.post('/api/admin/promo', promo);
             setPromo(res.data);
             alert("Promotion mise à jour avec succès !");
         } catch (error) {
@@ -343,7 +309,6 @@ const Admin = () => {
     const handleProductSubmit = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('token');
             const formData = new FormData();
             formData.append('name', productForm.name);
             formData.append('description', productForm.description);
@@ -352,18 +317,31 @@ const Admin = () => {
             formData.append('is_popular', productForm.is_popular);
 
             if (productForm.image) {
-                // Now productForm.image is always a string (URL) thanks to handleImageUpload
-                // It can be from server upload (/uploads/...) or library
-                formData.append('image_url', productForm.image);
+                let imageUrl = productForm.image;
+
+                // Si c'est un fichier (nouvel upload), on l'envoie d'abord au serveur
+                if (productForm.image instanceof File) {
+                    const uploadData = new FormData();
+                    uploadData.append('image', productForm.image);
+
+                    try {
+                        const uploadRes = await api.post('/api/admin/library/upload', uploadData);
+                        imageUrl = uploadRes.data.url;
+                    } catch (uploadErr) {
+                        console.error("Failed to upload image:", uploadErr);
+                        alert("Erreur lors de l'upload de l'image. Veuillez réessayer.");
+                        return;
+                    }
+                }
+
+                formData.append('image_url', imageUrl);
             }
 
-            const config = { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } };
-
             if (editingProduct) {
-                const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/products/${editingProduct.id}`, formData, config);
+                const res = await api.put(`/api/products/${editingProduct.id}`, formData);
                 setProducts(products.map(p => p.id === editingProduct.id ? res.data : p));
             } else {
-                const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/products`, formData, config);
+                const res = await api.post('/api/products', formData);
                 setProducts([...products, res.data]);
             }
             setShowProductModal(false);
@@ -378,7 +356,7 @@ const Admin = () => {
     const openLibraryModal = async () => {
         setShowLibraryModal(true);
         try {
-            const res = await axios.get('http://localhost:5000/api/admin/library');
+            const res = await api.get('/api/admin/library');
             setLibraryImages(res.data);
         } catch (err) {
             console.error(err);
@@ -393,10 +371,7 @@ const Admin = () => {
     const handleDeleteProduct = async (id) => {
         if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) return;
         try {
-            const token = localStorage.getItem('token');
-            await axios.delete(`${import.meta.env.VITE_API_URL}/api/products/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.delete(`/api/products/${id}`);
             setProducts(products.filter(p => p.id !== id));
         } catch (error) {
             console.error("Error deleting product:", error);
@@ -735,7 +710,9 @@ const Admin = () => {
                                                                     <img
                                                                         src={getImageUrl(p.image_url)}
                                                                         alt={p.name}
-                                                                        className="w-10 h-10 rounded-md object-cover border border-gray-200"
+                                                                        onClick={() => setPreviewImage(getImageUrl(p.image_url))}
+                                                                        className="w-10 h-10 rounded-md object-cover border border-gray-200 cursor-pointer hover:scale-105 transition-transform"
+                                                                        title="Zoomer"
                                                                     />
                                                                 ) : (
                                                                     <div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-400 dark:text-gray-300 border border-gray-200 dark:border-gray-500">
@@ -839,45 +816,44 @@ const Admin = () => {
                                 <select
                                     value={menuCategory}
                                     onChange={(e) => setMenuCategory(e.target.value)}
-                                    className="border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    className="border rounded-lg px-4 py-2 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                 >
                                     <option value="all">Toutes catégories</option>
                                     <option value="plats">Plats</option>
                                     <option value="boissons">Boissons</option>
-                                    <option value="vins">Vins</option>
-                                    <option value="whiskys">Whiskys</option>
-                                    <option value="champagnes">Champagnes</option>
+                                    <option value="desserts">Desserts</option>
                                 </select>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {filteredProducts.map(product => (
-                                    <div key={product.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden group transition-colors duration-300">
-                                        <div className="relative h-48">
-                                            <img src={getImageUrl(product.image_url) || "/api/placeholder/400/300"} alt={product.name} className="w-full h-full object-cover" />
-                                            <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-4">
-                                                <button onClick={() => openEditModal(product)} className="p-2 bg-white rounded-full text-blue-600 hover:bg-blue-50">
-                                                    <Edit size={20} />
-                                                </button>
-                                                <button onClick={() => handleDeleteProduct(product.id)} className="p-2 bg-white rounded-full text-red-600 hover:bg-red-50">
-                                                    <Trash size={20} />
-                                                </button>
-                                            </div>
+                                    <div key={product.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden flex flex-col group hover:shadow-md transition-shadow duration-300">
+                                        <div className="h-48 overflow-hidden relative">
+                                            <img
+                                                src={getImageUrl(product.image_url)}
+                                                alt={product.name}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                                            />
                                             {product.is_popular && (
-                                                <span className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full flex items-center">
-                                                    <TrendingUp size={12} className="mr-1" /> Populaire
+                                                <span className="absolute top-2 right-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                                                    Populaire
                                                 </span>
                                             )}
                                         </div>
-                                        <div className="p-4">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div>
-                                                    <h3 className="font-bold text-lg dark:text-white">{product.name}</h3>
-                                                    <span className="text-xs text-gray-500 dark:text-gray-400 uppercase">{product.category}</span>
+                                        <div className="p-4 flex-1 flex flex-col">
+                                            <h3 className="font-bold text-lg mb-1 dark:text-white">{product.name}</h3>
+                                            <p className="text-gray-500 text-sm mb-4 line-clamp-2 dark:text-gray-400">{product.description}</p>
+                                            <div className="mt-auto flex justify-between items-center">
+                                                <span className="font-bold text-primary text-xl">{product.price} FCFA</span>
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => openEditModal(product)} className="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                                                        <Edit size={18} />
+                                                    </button>
+                                                    <button onClick={() => handleDeleteProduct(product.id)} className="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                                                        <Trash2 size={18} />
+                                                    </button>
                                                 </div>
-                                                <span className="font-bold text-primary">{product.price} FCFA</span>
                                             </div>
-                                            <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">{product.description}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -886,295 +862,341 @@ const Admin = () => {
                     )
                 }
 
-                {
-                    activeTab === 'clients' && (
-                        <div className="space-y-6">
-                            <h2 className="text-2xl font-bold">Clients ({clients.length})</h2>
-                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden transition-colors duration-300">
-                                <table className="w-full text-left">
-                                    <thead className="bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-700 dark:text-gray-200">
-                                        <tr>
-                                            <th className="p-4 font-semibold">Nom</th>
-                                            <th className="p-4 font-semibold">Email</th>
-                                            <th className="p-4 font-semibold">Téléphone</th>
-                                            <th className="p-4 font-semibold">Inscrit le</th>
-                                            <th className="p-4 font-semibold">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y dark:divide-gray-700">
-                                        {clients.map(client => (
-                                            <tr key={client.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                                <td className="p-4 font-bold dark:text-white">{client.name}</td>
-                                                <td className="p-4 text-gray-600 dark:text-gray-300">{client.email}</td>
-                                                <td className="p-4 text-gray-600 dark:text-gray-300">{client.phone || '-'}</td>
-                                                <td className="p-4 text-gray-500 dark:text-gray-400">{new Date(client.createdAt).toLocaleDateString()}</td>
-                                                <td className="p-4">
-                                                    <button
-                                                        onClick={() => {
-                                                            if (window.confirm(`⚠️ DANGER: Êtes-vous sûr de vouloir supprimer définitivement ${client.name} ? Cette action est irréversible et supprimera tout l'historique associé.`)) {
-                                                                handleDeleteClient(client.id);
-                                                            }
-                                                        }}
-                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-lg transition"
-                                                        title="Supprimer définitivement"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                {activeTab === 'clients' && (
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden transition-colors duration-300">
+                        <div className="p-6 border-b dark:border-gray-700">
+                            <h2 className="text-2xl font-bold dark:text-white">Liste des Clients</h2>
                         </div>
-                    )
-                }
+                        <table className="w-full text-left">
+                            <thead className="bg-gray-50 dark:bg-gray-700 dark:text-gray-200">
+                                <tr>
+                                    <th className="p-4">Nom</th>
+                                    <th className="p-4">Email</th>
+                                    <th className="p-4">Téléphone</th>
+                                    <th className="p-4">Adresse</th>
+                                    <th className="p-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {clients.map(client => (
+                                    <tr key={client.id} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                        <td className="p-4 font-bold flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
+                                                {client.name.charAt(0).toUpperCase()}
+                                            </div>
+                                            {client.name}
+                                        </td>
+                                        <td className="p-4 text-gray-600 dark:text-gray-400">{client.email}</td>
+                                        <td className="p-4">{client.phone || '-'}</td>
+                                        <td className="p-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">{client.address || '-'}</td>
+                                        <td className="p-4">
+                                            <button
+                                                onClick={() => {
+                                                    if (window.confirm("Voulez-vous vraiment supprimer cet utilisateur ?")) {
+                                                        handleDeleteClient(client.id);
+                                                    }
+                                                }}
+                                                className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded transition-colors"
+                                                title="Supprimer l'utilisateur"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
 
-                {
-                    activeTab === 'promo' && (
-                        <div className="max-w-2xl mx-auto space-y-8">
-                            <h2 className="text-2xl font-bold dark:text-white">Configuration Promotion</h2>
-                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-8 transition-colors duration-300">
-                                <form onSubmit={handlePromoUpdate} className="space-y-6">
-                                    <div className="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-900/10 rounded-lg border border-orange-100 dark:border-orange-800">
-                                        <div>
-                                            <h3 className="font-bold text-lg text-orange-900 dark:text-orange-100">Activer la promotion</h3>
-                                            <p className="text-sm text-orange-700 dark:text-orange-200">Appliquer automatiquement la réduction au panier</p>
-                                        </div>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={promo.isActive}
-                                                onChange={e => setPromo({ ...promo, isActive: e.target.checked })}
-                                                className="sr-only peer"
-                                            />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                        </label>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Montant Minimum (FCFA)</label>
-                                        <div className="relative">
-                                            <input
-                                                type="number"
-                                                value={promo.minAmount}
-                                                onChange={e => setPromo({ ...promo, minAmount: parseInt(e.target.value) })}
-                                                className="w-full pl-4 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none text-lg font-bold dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                            />
-                                            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 font-bold">FCFA</span>
-                                        </div>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Le panier doit dépasser ce montant pour bénéficier de la promo.</p>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pourcentage de réduction (%)</label>
-                                        <div className="relative">
-                                            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 font-bold">%</span>
-                                            <input
-                                                type="number"
-                                                value={promo.discountPercentage}
-                                                onChange={e => setPromo({ ...promo, discountPercentage: parseInt(e.target.value) })}
-                                                className="w-full pl-4 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none text-lg font-bold dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        className="w-full bg-primary text-white font-bold py-4 rounded-xl hover:bg-orange-700 transition shadow-lg flex items-center justify-center gap-2"
-                                    >
-                                        <CheckCircle size={20} /> Enregistrer les modifications
-                                    </button>
-                                </form>
-                            </div>
+                {activeTab === 'promo' && (
+                    <div className="max-w-md mx-auto bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg transition-colors duration-300">
+                        <div className="flex items-center justify-center mb-6 text-primary">
+                            <Percent size={48} />
                         </div>
-                    )
-                }
+                        <h2 className="text-2xl font-bold mb-6 text-center">Configuration Promotions</h2>
+                        <form onSubmit={handlePromoUpdate} className="space-y-6">
+                            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <label className="font-bold dark:text-white">Activer la promotion</label>
+                                <input
+                                    type="checkbox"
+                                    checked={promo.isActive}
+                                    onChange={(e) => setPromo({ ...promo, isActive: e.target.checked })}
+                                    className="w-6 h-6 text-primary rounded focus:ring-primary"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold mb-2 dark:text-gray-300">Montant Minimum (FCFA)</label>
+                                <input
+                                    type="number"
+                                    value={promo.minAmount}
+                                    onChange={(e) => setPromo({ ...promo, minAmount: parseInt(e.target.value) })}
+                                    className="w-full border dark:border-gray-600 rounded-lg p-3 dark:bg-gray-700 dark:text-white"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold mb-2 dark:text-gray-300">Pourcentage de réduction (%)</label>
+                                <input
+                                    type="number"
+                                    value={promo.discountPercentage}
+                                    onChange={(e) => setPromo({ ...promo, discountPercentage: parseInt(e.target.value) })}
+                                    className="w-full border dark:border-gray-600 rounded-lg p-3 dark:bg-gray-700 dark:text-white"
+                                />
+                            </div>
+
+                            <button type="submit" className="w-full bg-primary hover:bg-orange-700 text-white font-bold py-3 rounded-lg shadow-lg transition">
+                                Enregistrer les modifications
+                            </button>
+                        </form>
+                    </div>
+                )}
 
                 {activeTab === 'reservations' && <AdminReservations />}
                 {activeTab === 'messages' && <AdminMessages />}
                 {activeTab === 'reviews' && <AdminReviews />}
-
+                {activeTab === 'drivers' && <DriversPanel drivers={drivers} setDrivers={setDrivers} />}
                 {activeTab === 'announcement' && <AdminAnnouncement />}
-                {activeTab === 'drivers' && <DriversPanel />}
-                {activeTab === 'library' && <div className="max-w-7xl mx-auto"><ImageLibrary /></div>}
+                {activeTab === 'library' && <ImageLibrary />}
                 {activeTab === 'maintenance' && <MaintenancePanel />}
-            </main >
 
-            {/* Assignment Modal */}
-            {
-                showAssignModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-sm w-full p-6 transition-colors duration-300">
-                            <h3 className="text-lg font-bold mb-4 dark:text-white">Assigner un livreur</h3>
-                            <div className="space-y-2 max-h-60 overflow-y-auto">
-                                {drivers.filter(d => d.status === 'available').map(driver => (
-                                    <button
-                                        key={driver.id}
-                                        onClick={() => handleAssignDriver(driver.id)}
-                                        className="w-full text-left p-3 border dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700 flex justify-between items-center transition-colors"
-                                    >
-                                        <span className="font-bold dark:text-white">{driver.name}</span>
-                                        <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full">Dispo</span>
-                                    </button>
-                                ))}
-                                {drivers.filter(d => d.status !== 'available').map(driver => (
-                                    <button
-                                        key={driver.id}
-                                        disabled
-                                        className="w-full text-left p-3 border dark:border-gray-700 rounded bg-gray-50 dark:bg-gray-700/50 opacity-50 flex justify-between items-center cursor-not-allowed"
-                                    >
-                                        <span className="dark:text-gray-400">{driver.name}</span>
-                                        <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 px-2 py-0.5 rounded-full">{driver.status}</span>
-                                    </button>
-                                ))}
-                            </div>
-                            <button onClick={() => setShowAssignModal(false)} className="mt-4 w-full py-2 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Annuler</button>
-                        </div>
-                    </div>
-                )
-            }
-
+            </main>
 
             {/* Product Modal */}
-            {
-                showProductModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6 max-h-[90vh] transition-colors duration-300 overflow-y-auto">
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-xl font-bold dark:text-white">{editingProduct ? 'Modifier le produit' : 'Nouveau produit'}</h3>
-                                <button onClick={() => setShowProductModal(false)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                                    <XCircle size={24} />
-                                </button>
+            {showProductModal && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto transition-colors duration-300 transform scale-100 animate-fade-in relative">
+                        <button
+                            onClick={() => setShowProductModal(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                        >
+                            <XCircle size={28} />
+                        </button>
+
+                        <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white flex items-center gap-2">
+                            {editingProduct ? <><Edit className="text-blue-500" /> Modifier le Produit</> : <><Plus className="text-green-500" /> Ajouter un Produit</>}
+                        </h2>
+
+                        <form onSubmit={handleProductSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-bold mb-1 dark:text-gray-300">Nom du produit</label>
+                                <input
+                                    type="text"
+                                    value={productForm.name}
+                                    onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+                                    className="w-full border dark:border-gray-600 rounded-lg p-3 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary outline-none"
+                                    required
+                                />
                             </div>
-                            <form onSubmit={handleProductSubmit} className="space-y-4">
-                                {/* ... fields ... */}
+
+                            <div>
+                                <label className="block text-sm font-bold mb-1 dark:text-gray-300">Description</label>
+                                <textarea
+                                    value={productForm.description}
+                                    onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                                    className="w-full border dark:border-gray-600 rounded-lg p-3 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary outline-none"
+                                    rows="3"
+                                    required
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom du produit</label>
+                                    <label className="block text-sm font-bold mb-1 dark:text-gray-300">Prix (FCFA)</label>
                                     <input
-                                        type="text"
+                                        type="number"
+                                        value={productForm.price}
+                                        onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
+                                        className="w-full border dark:border-gray-600 rounded-lg p-3 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary outline-none"
                                         required
-                                        value={productForm.name}
-                                        onChange={e => setProductForm({ ...productForm, name: e.target.value })}
-                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                                    <textarea
-                                        required
-                                        value={productForm.description}
-                                        onChange={e => setProductForm({ ...productForm, description: e.target.value })}
-                                        rows="3"
-                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    ></textarea>
+                                    <label className="block text-sm font-bold mb-1 dark:text-gray-300">Catégorie</label>
+                                    <select
+                                        value={productForm.category}
+                                        onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
+                                        className="w-full border dark:border-gray-600 rounded-lg p-3 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary outline-none"
+                                    >
+                                        <option value="plats">Plats</option>
+                                        <option value="boissons">Boissons</option>
+                                        <option value="desserts">Desserts</option>
+                                    </select>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prix (FCFA)</label>
+                            </div>
+
+                            <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <input
+                                    type="checkbox"
+                                    checked={productForm.is_popular}
+                                    onChange={(e) => setProductForm({ ...productForm, is_popular: e.target.checked })}
+                                    className="w-5 h-5 text-primary rounded focus:ring-primary"
+                                />
+                                <label className="font-bold text-sm dark:text-white">Marquer comme populaire (Star)</label>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold mb-2 dark:text-gray-300">Image</label>
+
+                                <div className="flex flex-col gap-3">
+                                    {/* Option 1: Upload File */}
+                                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:bg-gray-50 dark:hover:bg-gray-700/50 transition cursor-pointer relative">
                                         <input
-                                            type="number"
-                                            required
-                                            value={productForm.price}
-                                            onChange={e => setProductForm({ ...productForm, price: e.target.value })}
-                                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            type="file"
+                                            onChange={(e) => setProductForm({ ...productForm, image: e.target.files[0] })}
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                            accept="image/*"
                                         />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Catégorie</label>
-                                        <select
-                                            value={productForm.category}
-                                            onChange={e => setProductForm({ ...productForm, category: e.target.value })}
-                                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                        >
-                                            <option value="plats">Plats</option>
-                                            <option value="boissons">Boissons</option>
-                                            <option value="vins">Vins</option>
-                                            <option value="whiskys">Whiskys</option>
-                                            <option value="champagnes">Champagnes</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <input
-                                        type="checkbox"
-                                        id="is_popular"
-                                        checked={productForm.is_popular}
-                                        onChange={e => setProductForm({ ...productForm, is_popular: e.target.checked })}
-                                        className="rounded text-primary focus:ring-primary"
-                                    />
-                                    <label htmlFor="is_popular" className="text-sm font-medium text-gray-700 dark:text-gray-300">Marquer comme populaire</label>
-                                </div>
-
-                                {/* SELECTION IMAGE */}
-                                <div>
-                                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Image du produit</label>
-
-                                    <div className="flex gap-4 items-start">
-                                        {/* Prévisualisation */}
-                                        <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-gray-50 dark:bg-gray-700 overflow-hidden relative">
-                                            {productForm.image ? (
-                                                <img src={getImageUrl(productForm.image)} alt="Aperçu" className="w-full h-full object-cover" />
-                                            ) : (
-                                                <Image size={32} className="text-gray-400" />
-                                            )}
+                                        <div className="flex flex-col items-center text-gray-500">
+                                            <Image size={32} className="mb-2" />
+                                            <span className="text-sm">Cliquez pour téléverser une image</span>
                                         </div>
+                                    </div>
 
-                                        {/* Bouton pour choisir */}
+                                    <div className="text-center text-gray-400 text-sm">- OU -</div>
+
+                                    {/* Option 2: Choose from Library */}
+                                    <button
+                                        type="button"
+                                        onClick={openLibraryModal}
+                                        className="w-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white py-2 rounded-lg font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition flex items-center justify-center gap-2"
+                                    >
+                                        <Image size={18} /> Choisir dans la médiathèque
+                                    </button>
+                                </div>
+
+                                {/* Preview */}
+                                {productForm.image && (
+                                    <div className="mt-3 relative w-full h-40 bg-gray-100 rounded-lg overflow-hidden group">
+                                        {/* Handle both file object and string url previews */}
+                                        <img
+                                            src={typeof productForm.image === 'string' ? getImageUrl(productForm.image) : URL.createObjectURL(productForm.image)}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover"
+                                        />
                                         <button
                                             type="button"
-                                            onClick={openLibraryModal}
-                                            className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg transition flex items-center gap-2 border border-gray-200 dark:border-gray-600"
+                                            onClick={() => setProductForm({ ...productForm, image: null })}
+                                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition"
                                         >
-                                            <Image size={18} />
-                                            Choisir depuis la bibliothèque
+                                            <XCircle size={20} />
                                         </button>
                                     </div>
-                                </div>
-
-                                {/* MODALE BIBLIOTHÈQUE (Popup) */}
-                                {showLibraryModal && (
-                                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4">
-                                        <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-4xl max-h-[80vh] flex flex-col shadow-2xl overflow-hidden">
-                                            <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center bg-white dark:bg-gray-800">
-                                                <h3 className="font-bold text-lg dark:text-white">Choisir une image</h3>
-                                                <button type="button" onClick={() => setShowLibraryModal(false)} className="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white font-bold text-xl">&times;</button>
-                                            </div>
-
-                                            <div className="p-6 overflow-y-auto grid grid-cols-3 md:grid-cols-5 gap-4 bg-gray-50 dark:bg-gray-900">
-                                                {libraryImages.map((img) => (
-                                                    <div
-                                                        key={img.name}
-                                                        onClick={() => selectImageFromLibrary(img.url)}
-                                                        className={`cursor-pointer rounded-lg overflow-hidden border-2 transition relative group aspect-square ${productForm.image === img.url ? 'border-orange-500 ring-2 ring-orange-200' : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'}`}
-                                                    >
-                                                        <img src={getImageUrl(img.url)} alt={img.name} className="w-full h-full object-cover" />
-                                                        {/* Indicateur si sélectionné */}
-                                                        {productForm.image === img.url && (
-                                                            <div className="absolute inset-0 bg-orange-500/20 flex items-center justify-center">
-                                                                <div className="bg-white rounded-full p-1"><CheckCircle className="text-orange-600" size={16} /></div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </div>
-
-                                            <div className="p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-b-2xl text-right">
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">Astuce : Ajoutez de nouvelles images via le menu "Médiathèque"</p>
-                                            </div>
-                                        </div>
-                                    </div>
                                 )}
+                            </div>
 
-                                <button type="submit" className="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-orange-700 transition">
-                                    {editingProduct ? 'Mettre à jour' : 'Créer le produit'}
+
+                            <div className="flex gap-4 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowProductModal(false)}
+                                    className="flex-1 py-3 rounded-lg border dark:border-gray-600 font-bold hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 transition"
+                                >
+                                    Annuler
                                 </button>
-                            </form>
+                                <button
+                                    type="submit"
+                                    className="flex-1 bg-primary hover:bg-orange-700 text-white font-bold py-3 rounded-lg shadow-lg transition transform active:scale-95"
+                                >
+                                    {editingProduct ? 'Mettre à jour' : 'Ajouter le produit'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Assignment Modal */}
+            {showAssignModal && selectedOrderForAssign && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl w-full max-w-sm transform scale-100 animate-fade-in">
+                        <h3 className="text-xl font-bold mb-4 dark:text-white">Assigner un livreur</h3>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">
+                            Pour la commande <span className="font-mono font-bold">#{selectedOrderForAssign.id}</span>
+                        </p>
+                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                            {drivers.map(driver => (
+                                <button
+                                    key={driver.id}
+                                    onClick={() => handleAssignDriver(driver.id)}
+                                    className={`w-full text-left p-3 rounded-lg flex items-center justify-between transition ${selectedOrderForAssign.DeliveryDriverId === driver.id
+                                        ? 'bg-blue-50 border-blue-200 border text-blue-800'
+                                        : 'hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-xs">
+                                            {driver.name.charAt(0)}
+                                        </div>
+                                        <span className="font-bold">{driver.name}</span>
+                                    </div>
+                                    {selectedOrderForAssign.DeliveryDriverId === driver.id && <CheckCircle size={16} />}
+                                </button>
+                            ))}
+                            {drivers.length === 0 && <p className="text-gray-400 text-center py-4">Aucun livreur disponible</p>}
+                        </div>
+                        <button
+                            onClick={() => setShowAssignModal(false)}
+                            className="w-full mt-4 py-2 border dark:border-gray-600 rounded-lg font-bold hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 transition"
+                        >
+                            Annuler
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Library Modal */}
+            {showLibraryModal && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-8">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[80vh] flex flex-col">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold dark:text-white flex items-center gap-2">
+                                <Image size={24} /> Médiathèque
+                            </h2>
+                            <button onClick={() => setShowLibraryModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                                <XCircle size={24} />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 p-2">
+                            {libraryImages.map((img, idx) => (
+                                <div
+                                    key={idx}
+                                    onClick={() => selectImageFromLibrary(img.url)}
+                                    className="group relative cursor-pointer rounded-lg overflow-hidden border-2 border-transparent hover:border-primary transition-all aspect-square"
+                                >
+                                    <img src={getImageUrl(img.url)} alt="Library" className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                        <CheckCircle className="text-white opacity-0 group-hover:opacity-100 transform scale-0 group-hover:scale-110 transition-all duration-300" size={32} />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
-                )
-            }
-        </div >
+                </div>
+            )}
+            {/* --- IMAGE PREVIEW MODAL --- */}
+            {previewImage && (
+                <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 cursor-pointer animate-fade-in"
+                    onClick={() => setPreviewImage(null)}
+                >
+                    <button
+                        className="absolute top-4 right-4 text-white hover:text-orange-500 transition-colors z-[10000]"
+                        onClick={() => setPreviewImage(null)}
+                    >
+                        <X size={32} />
+                    </button>
+                    <img
+                        src={previewImage}
+                        alt="Aperçu"
+                        className="max-w-full max-h-screen rounded-lg shadow-2xl transform transition-transform duration-300 scale-100 hover:scale-[1.02]"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                </div>
+            )}
+        </div>
     );
 };
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { Truck, Phone } from 'lucide-react';
 
@@ -12,10 +12,9 @@ const ClientDashboard = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const token = localStorage.getItem('token');
                 const [ordersRes, reservationsRes] = await Promise.all([
-                    axios.get(`${import.meta.env.VITE_API_URL}/api/orders/my-orders`, { headers: { Authorization: `Bearer ${token}` } }),
-                    axios.get(`${import.meta.env.VITE_API_URL}/api/reservations/my-history`, { headers: { Authorization: `Bearer ${token}` } })
+                    api.get('/api/orders/my-orders'),
+                    api.get('/api/reservations/my-history')
                 ]);
                 setOrders(ordersRes.data);
                 setReservations(reservationsRes.data);
