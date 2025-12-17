@@ -7,8 +7,9 @@ const ImageLibrary = ({ onSelect, selectionMode = false }) => {
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState(null);
+    const [selectedId, setSelectedId] = useState(null);
 
-    // 🔄 CHARGEMENT AU DÉMARRAGE (ESSENTIEL POUR LA PERSISTANCE)
+    // 🔄 CHARGEMENT AU DÉMARRAGE
     useEffect(() => {
         fetchImages();
     }, []);
@@ -16,7 +17,6 @@ const ImageLibrary = ({ onSelect, selectionMode = false }) => {
     const fetchImages = async () => {
         try {
             setLoading(true);
-            // On appelle le backend qui va interroger Cloudinary
             const res = await api.get('/api/admin/library');
             setImages(res.data);
         } catch (err) {
@@ -38,10 +38,8 @@ const ImageLibrary = ({ onSelect, selectionMode = false }) => {
             const formData = new FormData();
             formData.append('image', file);
 
-            // Upload vers le backend -> Cloudinary
             const res = await api.post('/api/admin/library/upload', formData);
 
-            // On ajoute immédiatement la nouvelle image à la liste affichée
             const newImage = {
                 name: res.data.name,
                 url: res.data.url
@@ -56,26 +54,36 @@ const ImageLibrary = ({ onSelect, selectionMode = false }) => {
         }
     };
 
-
     const handleDeleteImage = async (public_id) => {
         if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette image ? Cette action est irréversible.")) return;
 
         try {
-            // Optimistic UI update: Remove immediately
             setImages(prev => prev.filter(img => img.name !== public_id));
-
             await api.post('/api/admin/library/delete', { public_id });
+            if (selectedId === public_id) setSelectedId(null);
         } catch (err) {
             console.error("Erreur suppression:", err);
             alert("Erreur lors de la suppression de l'image.");
-            fetchImages(); // Revert/Reload if failed
+            fetchImages();
         }
     };
 
     const getFullUrl = (url) => {
         if (!url) return '';
-        // Les URLs Cloudinary sont déjà complètes (https://...)
         return url;
+    };
+
+    const handleImageClick = (img) => {
+        if (selectionMode) {
+            onSelect && onSelect(img.url);
+        } else {
+            // Toggle focus logic for deletion safely
+            if (selectedId === img.name) {
+                setSelectedId(null);
+            } else {
+                setSelectedId(img.name);
+            }
+        }
     };
 
     return (
@@ -128,44 +136,47 @@ const ImageLibrary = ({ onSelect, selectionMode = false }) => {
                     <Loader className="animate-spin text-primary" size={40} />
                 </div>
             ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 h-96 overflow-y-auto p-2">
-                    {images.map((img, idx) => (
-                        <div
-                            key={idx}
-                            onClick={() => onSelect && onSelect(img.url)}
-                            className={`
-                                group relative aspect-square rounded-xl overflow-hidden border-2 cursor-pointer transition-all duration-200
-                                ${selectionMode ? 'hover:border-primary hover:shadow-lg' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-600'}
-                            `}
-                        >
-                            <img
-                                src={getFullUrl(img.url)}
-                                alt={img.name}
-                                className="w-full h-full object-cover transition duration-500 group-hover:scale-110"
-                            />
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 h-96 overflow-y-auto p-4 content-start">
+                    {images.map((img, idx) => {
+                        const isSelected = selectedId === img.name;
+                        return (
+                            <div
+                                key={idx}
+                                onClick={() => handleImageClick(img)}
+                                className={`
+                                    group relative aspect-square rounded-xl overflow-hidden border-2 cursor-pointer transition-all duration-300 ease-out
+                                    ${selectionMode ? 'hover:border-primary hover:shadow-lg' : ''}
+                                    ${isSelected ? 'z-50 scale-110 shadow-2xl border-primary ring-4 ring-primary/30' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-600 hover:z-10'}
+                                `}
+                            >
+                                <img
+                                    src={getFullUrl(img.url)}
+                                    alt={img.name}
+                                    className={`w-full h-full object-cover transition duration-500 ${isSelected ? 'scale-110' : 'group-hover:scale-110'}`}
+                                />
 
-                            {/* Overlay de sélection & suppression */}
-                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3 z-20">
-                                {selectionMode && (
-                                    <div className="bg-white text-primary px-4 py-2 rounded-full shadow-lg font-bold flex items-center gap-2 transform active:scale-95 transition" title="Sélectionner">
-                                        <Check size={18} strokeWidth={3} /> Utiliser
-                                    </div>
-                                )}
+                                {/* Overlay de sélection & suppression */}
+                                <div className={`absolute inset-0 bg-black/60 transition-opacity flex flex-col items-center justify-center gap-3 z-20 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                                    {selectionMode && (
+                                        <div className="bg-white text-primary px-4 py-2 rounded-full shadow-lg font-bold flex items-center gap-2 transform active:scale-95 transition" title="Sélectionner">
+                                            <Check size={18} strokeWidth={3} /> Utiliser
+                                        </div>
+                                    )}
 
-                                {/* Bouton Suppression */}
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation(); // Empêcher la sélection
-                                        handleDeleteImage(img.name);
-                                    }}
-                                    className="bg-red-600 text-white px-3 py-2 rounded-full shadow-lg hover:bg-red-700 transition flex items-center gap-2"
-                                    title="Supprimer définitivement"
-                                >
-                                    <Trash2 size={16} /> Supprimer
-                                </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteImage(img.name);
+                                        }}
+                                        className="bg-red-600 text-white px-3 py-2 rounded-full shadow-lg hover:bg-red-700 transition flex items-center gap-2 transform hover:scale-105 active:scale-95"
+                                        title="Supprimer définitivement"
+                                    >
+                                        <Trash2 size={16} /> Supprimer
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
 
                     {images.length === 0 && (
                         <div className="col-span-full py-10 text-center text-gray-500 italic">
