@@ -145,10 +145,10 @@ const ImageLibrary = ({ onSelect, selectionMode = false }) => {
                             />
 
                             {/* Overlay de sélection & suppression */}
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3 z-20">
                                 {selectionMode && (
-                                    <div className="bg-white text-primary p-2 rounded-full shadow-lg" title="Sélectionner">
-                                        <Check size={20} strokeWidth={3} />
+                                    <div className="bg-white text-primary px-4 py-2 rounded-full shadow-lg font-bold flex items-center gap-2 transform active:scale-95 transition" title="Sélectionner">
+                                        <Check size={18} strokeWidth={3} /> Utiliser
                                     </div>
                                 )}
 
@@ -158,10 +158,10 @@ const ImageLibrary = ({ onSelect, selectionMode = false }) => {
                                         e.stopPropagation(); // Empêcher la sélection
                                         handleDeleteImage(img.name);
                                     }}
-                                    className="bg-white text-red-600 p-2 rounded-full shadow-lg hover:bg-red-50 transition-colors"
+                                    className="bg-red-600 text-white px-3 py-2 rounded-full shadow-lg hover:bg-red-700 transition flex items-center gap-2"
                                     title="Supprimer définitivement"
                                 >
-                                    <Trash2 size={20} />
+                                    <Trash2 size={16} /> Supprimer
                                 </button>
                             </div>
                         </div>

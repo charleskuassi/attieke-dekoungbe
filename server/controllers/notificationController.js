@@ -43,4 +43,13 @@ exports.markAsRead = async (req, res) => {
         console.error(error);
         res.status(500).json({ error: "Server Error" });
     }
+// API: Delete All Notifications
+exports.deleteAllNotifications = async (req, res) => {
+    try {
+        await Notification.destroy({ where: {}, truncate: true });
+        res.json({ success: true, message: "All notifications cleared" });
+    } catch (error) {
+        console.error("Delete All Notifications Error:", error);
+        res.status(500).json({ error: "Server Error" });
+    }
 };

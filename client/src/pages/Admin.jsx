@@ -87,6 +87,18 @@ const Admin = () => {
         }
     };
 
+    const clearAllNotifications = async () => {
+        if (!window.confirm("Voulez-vous vraiment supprimer tout l'historique des notifications ?")) return;
+        try {
+            await api.delete('/api/admin/notifications/clear-all');
+            fetchNotifications(); // Refresh
+            alert("Historique effacé avec succès.");
+        } catch (err) {
+            console.error("Error clearing notifications", err);
+            alert("Erreur lors de la suppression.");
+        }
+    };
+
     const getImageUrl = (url) => {
         if (!url) return '';
         if (url.startsWith('http') || url.startsWith('/images/')) return url;
@@ -520,20 +532,26 @@ const Admin = () => {
                             {/* Dropdown */}
                             {showNotifications && (
                                 <div className="absolute right-0 mt-4 w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden z-50 border border-gray-100 dark:border-gray-700 ring-4 ring-black/5">
-                                    <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900">
+                                    <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900 sticky top-0 z-10">
                                         <h3 className="font-bold text-sm dark:text-gray-200 uppercase tracking-wider text-gray-500">Notifications</h3>
-                                        <div className="flex gap-3">
-                                            {unreadCount > 0 && (
-                                                <button
-                                                    onClick={() => markNotificationAsRead('all')}
-                                                    className="text-xs text-primary hover:text-orange-700 font-bold uppercase"
-                                                >
-                                                    Tout lire
-                                                </button>
-                                            )}
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => markNotificationAsRead('all')}
+                                                className="text-[10px] bg-blue-50 hover:bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold uppercase transition-colors"
+                                                title="Marquer tout comme lu"
+                                            >
+                                                Tout lire
+                                            </button>
+                                            <button
+                                                onClick={clearAllNotifications}
+                                                className="text-[10px] bg-red-50 hover:bg-red-100 text-red-600 px-2 py-1 rounded font-bold uppercase transition-colors"
+                                                title="Supprimer tout l'historique"
+                                            >
+                                                Tout supprimer
+                                            </button>
                                             <button
                                                 onClick={() => setShowNotifications(false)}
-                                                className="text-gray-400 hover:text-gray-600"
+                                                className="text-gray-400 hover:text-gray-600 ml-1"
                                             >
                                                 <XCircle size={16} />
                                             </button>
