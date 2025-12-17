@@ -50,7 +50,7 @@ const Home = () => {
                 <div className="absolute inset-0 bg-black/40"></div>
                 <div className="relative z-10 text-center text-white px-4 max-w-3xl">
                     <h1 className="text-5xl md:text-7xl font-serif font-bold mb-6 leading-tight drop-shadow-lg">
-                        100% Chaud - Chaud <br /> <span className="text-primary-light">chez vous</span>
+                        100% Chaud - Chaud <br /> <span className="text-primary-light">chez nous</span>
                     </h1>
                     <p className="text-xl md:text-2xl mb-8 font-light text-gray-100 drop-shadow-md">
                         Découvrez les saveurs de la Côte d'Ivoire. Attiéké, Poisson braisé, Aloco... préparés avec passion.
