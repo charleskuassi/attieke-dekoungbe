@@ -1078,7 +1078,7 @@ const Admin = () => {
                                         onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
                                         className="w-full border dark:border-gray-600 rounded-lg p-3 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary outline-none"
                                     >
-                                    >
+
                                         <option value="Plats">Plats</option>
                                         <option value="Boissons">Boissons</option>
                                         <option value="Jus">Jus</option>

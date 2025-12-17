@@ -43,6 +43,8 @@ exports.markAsRead = async (req, res) => {
         console.error(error);
         res.status(500).json({ error: "Server Error" });
     }
+};
+
 // API: Delete All Notifications
 exports.deleteAllNotifications = async (req, res) => {
     try {
