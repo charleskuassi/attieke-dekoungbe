@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Attieke Dekoungbe</string>
+    <string name="title_activity_main">Attieke Dekoungbe</string>
+    <string name="package_name">com.attieke.app</string>
+    <string name="custom_url_scheme">com.attieke.app</string>
+</resources>

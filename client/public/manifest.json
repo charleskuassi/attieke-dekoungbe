@@ -1,0 +1,17 @@
+{
+    "name": "Attièkè Dèkoungbé",
+    "short_name": "Attièkè Dèkoungbé",
+    "description": "Le goût authentique livré chez vous.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#fff7ed",
+    "theme_color": "#ea580c",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/images/logo.png",
+            "sizes": "192x192 512x512",
+            "type": "image/png"
+        }
+    ]
+}

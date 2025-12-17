@@ -1,0 +1,16 @@
+{
+  "name": "attieke-dekoungbe",
+  "version": "1.0.0",
+  "description": "Projet racine",
+  "scripts": {
+    "clean": "rimraf server/check_testimonials_data.js server/fix_testimonial_paths.js",
+    "install-all": "npm install && cd client && npm install && cd ../server && npm install",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "devDependencies": {
+    "rimraf": "^6.1.2",
+    "concurrently": "^8.0.0"
+  },
+  "dependencies": {
+  }
+}
