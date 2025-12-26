@@ -5,7 +5,12 @@ const GoogleButton = ({ text = "Continuer avec Google" }) => {
         // Force direct URL to eliminate env variable issues
         // Use environment variable for robustness
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const targetUrl = `${apiUrl}/api/auth/google`;
+        
+        // Detect if we are running natively (Capacitor)
+        const isNative = window.Capacitor?.isNativePlatform();
+        const stateParam = isNative ? '?state=mobile' : '?state=web';
+
+        const targetUrl = `${apiUrl}/api/auth/google${stateParam}`;
         console.log("Redirecting to:", targetUrl);
         window.location.href = targetUrl;
     };

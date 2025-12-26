@@ -23,7 +23,10 @@ router.get('/me', protect, authController.getMe);
 
 // Google Auth Routes
 if (process.env.GOOGLE_CLIENT_ID) {
-    router.get('/google', passport.authenticate('google', { session: false, scope: ['profile', 'email'] }));
+    router.get('/google', (req, res, next) => {
+        const state = req.query.state || 'web';
+        passport.authenticate('google', { session: false, scope: ['profile', 'email'], state })(req, res, next);
+    });
 
     router.get('/google/callback',
         passport.authenticate('google', { session: false, failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=google_failed` }),
@@ -34,6 +37,14 @@ if (process.env.GOOGLE_CLIENT_ID) {
                 process.env.JWT_SECRET || 'your_super_secret_key',
                 { expiresIn: '1d' }
             );
+
+            // Check if this is a mobile login
+            const state = req.query.state;
+            if (state === 'mobile') {
+                console.log("Redirecting to Mobile App Scheme");
+                // Custom Scheme Redirect for Android/iOS App
+                return res.redirect(`attiekeapp://google-callback?token=${token}`);
+            }
 
             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
             console.log("Redirecting to Frontend:", `${frontendUrl}/google-callback`);
