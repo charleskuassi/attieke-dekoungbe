@@ -38,19 +38,15 @@ if (process.env.GOOGLE_CLIENT_ID) {
                 { expiresIn: '1d' }
             );
 
-            // Check if this is a mobile login
-            const state = req.query.state;
+            // Mobile Redirect (Absolute)
             if (state === 'mobile') {
                 console.log("Redirecting to Mobile App Scheme");
-                // Custom Scheme Redirect for Android/iOS App
                 return res.redirect(`attiekeapp://google-callback?token=${token}`);
             }
 
-            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-            console.log("Redirecting to Frontend:", `${frontendUrl}/google-callback`);
-
-            // Use explicit HTML redirect for better debugging/compatibility than res.redirect sometimes
-            res.redirect(`${frontendUrl}/google-callback?token=${token}`);
+            // Web Redirect (Relative - works perfectly for Monolith)
+            console.log("Redirecting to Web Frontend (Relative)");
+            res.redirect(`/google-callback?token=${token}`);
         }
     );
 } else {
