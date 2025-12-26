@@ -8813,3 +8813,10 @@
   "exp": 1765833591
 }
 [2025-12-14T21:20:50.203Z] ✅ Commande créée avec succès ID: 8
+[2025-12-26T18:03:34.269Z] createOrder called. User: {
+  "id": 8,
+  "role": "customer",
+  "iat": 1766772099,
+  "exp": 1766858499
+}
+[2025-12-26T18:03:36.590Z] ✅ Commande créée avec succès ID: 18

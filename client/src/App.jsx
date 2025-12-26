@@ -19,6 +19,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import SplashScreen from './components/SplashScreen';
 import Contact from './pages/Contact';
 import FloatingContact from './components/FloatingContact';
+import DeveloperCredit from './components/DeveloperCredit';
 
 import Reviews from './pages/Reviews';
 import { useAuth } from './context/AuthContext';
@@ -96,9 +97,7 @@ function App() {
                             />
                         </Routes>
                     </main>
-                    <footer className="bg-primary text-white py-6 text-center">
-                        <p>&copy; 2025 Attièkè Dèkoungbé. 100% Chaud – Chaud</p>
-                    </footer>
+                    <DeveloperCredit />
                     <FloatingContact />
                 </>
             )}
