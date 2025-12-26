@@ -20,6 +20,7 @@ import SplashScreen from './components/SplashScreen';
 import Contact from './pages/Contact';
 import FloatingContact from './components/FloatingContact';
 import DeveloperCredit from './components/DeveloperCredit';
+import NetworkAlert from './components/NetworkAlert';
 
 import Reviews from './pages/Reviews';
 import { useAuth } from './context/AuthContext';
@@ -119,6 +120,7 @@ function App() {
                     </main>
                     <DeveloperCredit />
                     <FloatingContact />
+                    <NetworkAlert />
                 </>
             )}
         </div>

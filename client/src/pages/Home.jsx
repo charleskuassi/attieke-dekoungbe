@@ -89,8 +89,8 @@ const Home = () => {
                                             initial={{ opacity: 0, x: 100 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0, x: -100 }}
-                                            transition={{ duration: 2.5, ease: "easeInOut" }}
-                                            className="bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition group"
+                                            transition={{ duration: 0.5 }} // Faster transition
+                                            className={`bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition group ${index > 0 ? 'hidden md:block' : ''}`}
                                         >
                                             <div className="h-64 overflow-hidden">
                                                 <img

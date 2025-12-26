@@ -26,9 +26,9 @@ const GoogleCallback = () => {
 
                     // Update context directly
                     if (updateUser) updateUser(user);
-
-                    navigate('/');
-                    window.location.reload();
+                    
+                    // Force full reload to home to ensure auth state is clean
+                    window.location.href = '/';
                 })
                 .catch(err => {
                     console.error("Failed to fetch profile", err);
