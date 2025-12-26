@@ -10,12 +10,25 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
-        if (token && storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-        setLoading(false);
+        const initAuth = async () => {
+            const token = localStorage.getItem('token');
+            const storedUser = localStorage.getItem('user');
+            
+            if (token && storedUser) {
+                try {
+                    // Optional: Verify token validity with backend here if strictly needed
+                    // For now, trust local storage for speed, but ensure axios has header
+                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                    setUser(JSON.parse(storedUser));
+                } catch (e) {
+                    console.error("Auth init error", e);
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                }
+            }
+            setLoading(false);
+        };
+        initAuth();
     }, []);
 
     const login = async (email, password) => {
@@ -38,7 +51,9 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('user');
         localStorage.removeItem('cart'); // Clear cart on logout
         setUser(null);
-        window.location.reload(); // Force reload to clear all states
+        setUser(null);
+        // Navigate or simple state update is enough usually 
+        window.location.href = '/login';
     };
 
     const updateUser = (userData) => {
