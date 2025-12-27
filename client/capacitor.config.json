@@ -1,5 +1,12 @@
 {
   "appId": "com.attieke.app",
   "appName": "Attieke App",
-  "webDir": "dist"
+  "webDir": "dist",
+  "server": {
+    "allowNavigation": [
+      "accounts.google.com",
+      "*.google.com",
+      "*.googleusercontent.com"
+    ]
+  }
 }

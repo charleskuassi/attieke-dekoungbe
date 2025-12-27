@@ -28,27 +28,44 @@ if (process.env.GOOGLE_CLIENT_ID) {
         passport.authenticate('google', { session: false, scope: ['profile', 'email'], state })(req, res, next);
     });
 
-    router.get('/google/callback',
-        passport.authenticate('google', { session: false, failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=google_failed` }),
-        (req, res) => {
-            console.log("GOOGLE CALLBACK SUCCESS - User:", req.user.email);
-            const token = jwt.sign(
-                { id: req.user.id, role: req.user.role },
-                process.env.JWT_SECRET || 'your_super_secret_key',
-                { expiresIn: '1d' }
-            );
-
-            // Mobile Redirect (Absolute)
-            if (state === 'mobile') {
-                console.log("Redirecting to Mobile App Scheme");
-                return res.redirect(`attiekeapp://google-callback?token=${token}`);
+    router.get('/google/callback', (req, res, next) => {
+        passport.authenticate('google', { session: false }, (err, user, info) => {
+            if (err) {
+                console.error("GOOGLE AUTH ERROR:", err);
+                return res.redirect(`${process.env.FRONTEND_URL || ''}/login?error=auth_error`);
+            }
+            if (!user) {
+                console.error("GOOGLE AUTH FAILED: No user returned", info);
+                return res.redirect(`${process.env.FRONTEND_URL || ''}/login?error=google_failed`);
             }
 
-            // Web Redirect (Relative - works perfectly for Monolith)
-            console.log("Redirecting to Web Frontend (Relative)");
-            res.redirect(`/google-callback?token=${token}`);
-        }
-    );
+            // Success: User found
+            req.user = user;
+            console.log("GOOGLE CALLBACK SUCCESS - User:", user.email);
+            
+            try {
+                const token = jwt.sign(
+                    { id: user.id, role: user.role },
+                    process.env.JWT_SECRET || 'your_super_secret_key',
+                    { expiresIn: '1d' }
+                );
+
+                // Mobile Redirect (Absolute)
+                const state = req.query.state;
+                if (state === 'mobile') {
+                    console.log("Redirecting to Mobile App Scheme");
+                    return res.redirect(`attiekeapp://google-callback?token=${token}`);
+                }
+
+                // Web Redirect (Relative)
+                console.log("Redirecting to Web Frontend (Relative)");
+                return res.redirect(`/google-callback?token=${token}`);
+            } catch (error) {
+                console.error("Token Generation Error:", error);
+                return res.redirect(`${process.env.FRONTEND_URL || ''}/login?error=token_error`);
+            }
+        })(req, res, next);
+    });
 } else {
     router.get('/google', (req, res) => {
         res.status(503).send('Google Login is not configured on this server.');

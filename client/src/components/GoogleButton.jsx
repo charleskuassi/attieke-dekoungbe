@@ -1,18 +1,25 @@
-import React from 'react';
+import { Browser } from '@capacitor/browser';
 
 const GoogleButton = ({ text = "Continuer avec Google" }) => {
-    const handleGoogleLogin = () => {
-        // Force direct URL to eliminate env variable issues
-        // Use environment variable for robustness
+    const handleGoogleLogin = async () => {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        
-        // Detect if we are running natively (Capacitor)
         const isNative = window.Capacitor?.isNativePlatform();
         const stateParam = isNative ? '?state=mobile' : '?state=web';
-
         const targetUrl = `${apiUrl}/api/auth/google${stateParam}`;
-        console.log("Redirecting to:", targetUrl);
-        window.location.href = targetUrl;
+
+        console.log("Initiating Google Login. Native:", isNative, "URL:", targetUrl);
+
+        try {
+            if (isNative) {
+                // Mobile: Open system browser/custom tab to ensure cookie/session handling works for Google
+                await Browser.open({ url: targetUrl });
+            } else {
+                // Web: Standard redirect
+                window.location.href = targetUrl;
+            }
+        } catch (error) {
+            console.error("Failed to open browser:", error);
+        }
     };
 
     return (
