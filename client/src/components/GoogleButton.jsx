@@ -1,21 +1,29 @@
+import React from 'react';
 import { Browser } from '@capacitor/browser';
 
 const GoogleButton = ({ text = "Continuer avec Google" }) => {
     const handleGoogleLogin = async () => {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         const isNative = window.Capacitor?.isNativePlatform();
-        const stateParam = isNative ? '?state=mobile' : '?state=web';
-        const targetUrl = `${apiUrl}/api/auth/google${stateParam}`;
-
-        console.log("Initiating Google Login. Native:", isNative, "URL:", targetUrl);
 
         try {
             if (isNative) {
-                // Mobile: Open system browser/custom tab to ensure cookie/session handling works for Google
+                // Mobile: Force Absolute URL with state=mobile
+                // Use Capacitor Browser for secure session handling
+                const targetUrl = `${apiUrl}/api/auth/google?state=mobile`;
+                console.log("Mobile Login Initiated:", targetUrl);
                 await Browser.open({ url: targetUrl });
             } else {
-                // Web: Standard redirect
-                window.location.href = targetUrl;
+                // Web: Smart Handling
+                // In Dev (Localhost), use Absolute URL to hit Backend
+                // In Prod (Render), use Relative URL to verify against current domain
+                // This prevents "localhost" redirection issues on deployed sites
+                const webUrl = import.meta.env.DEV 
+                    ? `${apiUrl}/api/auth/google?state=web` 
+                    : '/api/auth/google?state=web';
+                
+                console.log("Web Login Initiated:", webUrl);
+                window.location.href = webUrl;
             }
         } catch (error) {
             console.error("Failed to open browser:", error);

@@ -32,11 +32,11 @@ if (process.env.GOOGLE_CLIENT_ID) {
         passport.authenticate('google', { session: false }, (err, user, info) => {
             if (err) {
                 console.error("GOOGLE AUTH ERROR:", err);
-                return res.redirect(`${process.env.FRONTEND_URL || ''}/login?error=auth_error`);
+                return res.redirect('/login?error=auth_error');
             }
             if (!user) {
                 console.error("GOOGLE AUTH FAILED: No user returned", info);
-                return res.redirect(`${process.env.FRONTEND_URL || ''}/login?error=google_failed`);
+                return res.redirect('/login?error=google_failed');
             }
 
             // Success: User found
@@ -62,7 +62,7 @@ if (process.env.GOOGLE_CLIENT_ID) {
                 return res.redirect(`/google-callback?token=${token}`);
             } catch (error) {
                 console.error("Token Generation Error:", error);
-                return res.redirect(`${process.env.FRONTEND_URL || ''}/login?error=token_error`);
+                return res.redirect('/login?error=token_error');
             }
         })(req, res, next);
     });
