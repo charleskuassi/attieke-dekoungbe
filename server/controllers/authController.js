@@ -60,13 +60,20 @@ exports.register = async (req, res) => {
                 userId: user.id
             });
         } catch (emailError) {
+
             console.error("Erreur SMTP (Ignorée en local):", emailError);
-            // Fallback: Return success even if email fails, with the code for local dev
-            res.status(201).json({
-                message: 'Inscription réussie (Mode Local: Email ignoré).',
-                userId: user.id,
-                devCode: verificationCode
-            });
+            
+            // SECURITY: Only return the code in Development mode
+            const responseData = {
+                message: 'Inscription réussie.' + (process.env.NODE_ENV !== 'production' ? ' (Mode DEV: Code inclus)' : ' Veuillez vérifier vos emails.'),
+                userId: user.id
+            };
+
+            if (process.env.NODE_ENV !== 'production') {
+                responseData.devCode = verificationCode;
+            }
+
+            res.status(201).json(responseData);
         }
 
     } catch (err) {

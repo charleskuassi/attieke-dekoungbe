@@ -5,6 +5,8 @@
   "scripts": {
     "clean": "rimraf server/check_testimonials_data.js server/fix_testimonial_paths.js",
     "install-all": "npm install && cd client && npm install && cd ../server && npm install",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
     "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "devDependencies": {

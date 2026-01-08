@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5000;
 // --- SECURITY MIDDLEWARES ---
 // 1. CORS FIRST (Critical for Vercel/Render communication)
 app.use(cors({
-    origin: true,
+    origin: process.env.CLIENT_URL || true, // In PROD, set CLIENT_URL in .env to restrict access
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']

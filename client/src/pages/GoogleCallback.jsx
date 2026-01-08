@@ -11,31 +11,16 @@ const GoogleCallback = () => {
     useEffect(() => {
         const token = searchParams.get('token');
         if (token) {
-            // 1. Store Token
+            console.log("Token received in callback, saving and reloading...");
+            // 1. Store Token immediately
             localStorage.setItem('token', token);
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-            // 2. Fetch User Data
-            // Use fallback URL logic just in case
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-            axios.get(`${apiUrl}/api/auth/me`)
-                .then(res => {
-                    const user = res.data;
-                    localStorage.setItem('user', JSON.stringify(user));
-
-                    // Update context directly
-                    if (updateUser) updateUser(user);
-                    
-                    // Force full reload to home to ensure auth state is clean
-                    window.location.href = '/';
-                })
-                .catch(err => {
-                    console.error("Failed to fetch profile", err);
-                    navigate('/login?error=profile_fetch_failed');
-                });
-
+            
+            // 2. Force HARD RELOAD to root immediately
+            // We skip fetching /me here because AuthContext will do it on app init
+            // This avoids race conditions and double-fetching issues
+            window.location.href = '/'; 
         } else {
+            console.error("No token found in callback URL");
             navigate('/login?error=no_token');
         }
     }, [searchParams, navigate]);

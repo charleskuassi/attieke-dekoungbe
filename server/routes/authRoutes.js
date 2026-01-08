@@ -57,9 +57,10 @@ if (process.env.GOOGLE_CLIENT_ID) {
                     return res.redirect(`attiekeapp://google-callback?token=${token}`);
                 }
 
-                // Web Redirect (Relative)
-                console.log("Redirecting to Web Frontend (Relative)");
-                return res.redirect(`/google-callback?token=${token}`);
+                // Web Redirect (Absolute with Frontend URL)
+                const frontendUrl = process.env.FRONTEND_URL || '';
+                console.log("Redirecting to Web Frontend:", `${frontendUrl}/#/google-callback`);
+                return res.redirect(`${frontendUrl}/#/google-callback?token=${token}`);
             } catch (error) {
                 console.error("Token Generation Error:", error);
                 return res.redirect('/login?error=token_error');

@@ -14,16 +14,31 @@ export const AuthProvider = ({ children }) => {
             const token = localStorage.getItem('token');
             const storedUser = localStorage.getItem('user');
             
-            if (token && storedUser) {
-                try {
-                    // Optional: Verify token validity with backend here if strictly needed
-                    // For now, trust local storage for speed, but ensure axios has header
-                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                    setUser(JSON.parse(storedUser));
-                } catch (e) {
-                    console.error("Auth init error", e);
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
+            if (token) {
+                // Ensure Axios has the token
+                api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+                if (storedUser) {
+                    try {
+                        setUser(JSON.parse(storedUser));
+                    } catch (e) {
+                        console.error("Stored user parse error", e);
+                        localStorage.removeItem('user');
+                    }
+                } else {
+                    // Token exists but no user data (e.g. fresh Google Login)
+                    // We must fetch the user profile
+                    try {
+                        const res = await api.get('/api/auth/me');
+                        setUser(res.data);
+                        localStorage.setItem('user', JSON.stringify(res.data));
+                        console.log("User profile fetched via token on init");
+                    } catch (err) {
+                        console.error("Failed to fetch user with stored token", err);
+                        // If token is invalid, clear it
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                    }
                 }
             }
             setLoading(false);

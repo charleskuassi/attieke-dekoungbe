@@ -44,7 +44,8 @@ const Checkout = () => {
 
     const finalTotal = totalWithDiscount || total;
     // Utilise ta clé publique ici (idéalement via .env)
-    const KKIAPAY_PUBLIC_KEY = import.meta.env.VITE_KKIAPAY_PUBLIC_KEY || "eb11d9d0d01d11f09d79fd5b587b7fd7";
+    const KKIAPAY_PUBLIC_KEY = import.meta.env.VITE_KKIAPAY_PUBLIC_KEY;
+    if (!KKIAPAY_PUBLIC_KEY) console.warn("⚠️ VITE_KKIAPAY_PUBLIC_KEY non définie dans .env");
     const IS_SANDBOX = true;
 
     // --- LOGIQUE DE RÉFÉRENCE (POUR ÉVITER LE BUG DE DONNÉES VIDES) ---
