@@ -22,27 +22,43 @@ exports.uploadImage = async (req, res) => {
 
 exports.getLibraryImages = async (req, res) => {
     try {
-        console.log("📂 Recherche d'images dans le dossier : attieke_library");
+        console.log("📂 Recherche d'images (Optimisé) : attieke_library");
 
-        const result = await cloudinary.api.resources({
-            type: 'upload',
-            prefix: 'attieke_library', // DOIT correspondre au folder de l'upload
-            max_results: 50,
-            direction: 'desc'
-        });
+        // Use Search API for better performance and filtering
+        const result = await cloudinary.search
+            .expression('folder:attieke_library')
+            .sort_by('created_at', 'desc')
+            .max_results(50)
+            .execute();
 
         const images = result.resources.map(res => ({
             url: res.secure_url,
             name: res.public_id
         }));
 
-        console.log(`✅ ${images.length} images trouvées.`);
+        console.log(`✅ ${images.length} images trouvées (Search API).`);
         res.json(images);
 
     } catch (error) {
-        console.error("Erreur Lecture Bibliothèque:", error);
-        // Ne pas bloquer l'UI si erreur Cloudinary
-        res.json([]);
+        console.error("Erreur Recherche Bibliothèque:", error);
+        // Fallback to Admin API if Search API fails (e.g. rate limit or permission)
+        try {
+             console.log("⚠️ Fallback to Admin API...");
+             const fallbackResult = await cloudinary.api.resources({
+                type: 'upload',
+                prefix: 'attieke_library', 
+                max_results: 50,
+                direction: 'desc'
+            });
+            const fallbackImages = fallbackResult.resources.map(res => ({
+                url: res.secure_url,
+                name: res.public_id
+            }));
+            res.json(fallbackImages);
+        } catch (fallbackError) {
+             console.error("❌ Echec total lecture:", fallbackError);
+             res.json([]);
+        }
     }
 };
 

@@ -101,6 +101,8 @@ exports.sendOrderConfirmation = async (order, user) => {
     await sendEmail(user.email, `✅ Confirmation de commande #${order.id}`, html);
 };
 
+exports.sendOrderNotification = exports.sendOrderConfirmation;
+
 exports.sendVerificationEmail = async (user, code) => {
     const html = `
         <div style="font-family: Arial, sans-serif; text-align: center; color: #333;">

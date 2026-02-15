@@ -52,7 +52,7 @@ const Admin = () => {
     const [showProductModal, setShowProductModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
     const [productForm, setProductForm] = useState({
-        name: '', description: '', price: '', category: 'Plats', is_popular: false, image: null
+        name: '', description: '', price: '', category: 'Plats', is_popular: false, image: null, images: []
     });
 
     // Library Modal State
@@ -329,26 +329,36 @@ const Admin = () => {
             formData.append('category', productForm.category);
             formData.append('is_popular', productForm.is_popular);
 
-            if (productForm.image) {
-                let imageUrl = productForm.image;
+            let mainImageUrl = productForm.image;
 
-                // Si c'est un fichier (nouvel upload), on l'envoie d'abord au serveur
-                if (productForm.image instanceof File) {
-                    const uploadData = new FormData();
-                    uploadData.append('image', productForm.image);
-
-                    try {
-                        const uploadRes = await api.post('/api/admin/library/upload', uploadData);
-                        imageUrl = uploadRes.data.url;
-                    } catch (uploadErr) {
-                        console.error("Failed to upload image:", uploadErr);
-                        alert("Erreur lors de l'upload de l'image. Veuillez réessayer.");
-                        return;
-                    }
+            // 1. Handle Main Image Upload (File -> URL)
+            if (productForm.image && productForm.image instanceof File) {
+                const uploadData = new FormData();
+                uploadData.append('image', productForm.image);
+                try {
+                    const uploadRes = await api.post('/api/admin/library/upload', uploadData);
+                    mainImageUrl = uploadRes.data.url;
+                } catch (uploadErr) {
+                    console.error("Failed to upload image:", uploadErr);
+                    alert("Erreur upload image principale.");
+                    return;
                 }
-
-                formData.append('image_url', imageUrl);
             }
+            
+            // Set main image_url
+            if (mainImageUrl) {
+                formData.append('image_url', mainImageUrl);
+            }
+
+            // 2. Handle Gallery Images
+            // Ensure main image is included in 'images' list if desired, or keep separate. 
+            // Here we assume 'images' is the additional gallery. 
+            // We filter out nulls and ensure it's a valid JSON string.
+            const allImages = [...(productForm.images || [])];
+            if (mainImageUrl && !allImages.includes(mainImageUrl)) {
+                allImages.unshift(mainImageUrl); // Add main image to start of gallery if not present
+            }
+            formData.append('images', JSON.stringify(allImages));
 
             if (editingProduct) {
                 const res = await api.put(`/api/products/${editingProduct.id}`, formData);
@@ -359,7 +369,7 @@ const Admin = () => {
             }
             setShowProductModal(false);
             setEditingProduct(null);
-            setProductForm({ name: '', description: '', price: '', category: 'Plats', is_popular: false, image: null });
+            setProductForm({ name: '', description: '', price: '', category: 'Plats', is_popular: false, image: null, images: [] });
         } catch (error) {
             console.error("Error saving product:", error);
             alert("Erreur lors de l'enregistrement du produit");
@@ -376,8 +386,13 @@ const Admin = () => {
         }
     };
 
-    const selectImageFromLibrary = (url) => {
-        setProductForm({ ...productForm, image: url });
+    const selectImageFromLibrary = (selection) => {
+        const newImages = Array.isArray(selection) ? selection : [selection];
+        setProductForm(prev => ({ 
+            ...prev, 
+            image: prev.image || newImages[0], // If no main image, take first selected
+            images: [...(prev.images || []), ...newImages] // Add all to gallery
+        }));
         setShowLibraryModal(false);
     };
 
@@ -400,14 +415,15 @@ const Admin = () => {
             price: product.price,
             category: product.category,
             is_popular: product.is_popular,
-            image: product.image_url // Preload existing image URL
+            image: product.image_url, // Preload existing image URL
+            images: product.images || [] // Preload gallery
         });
         setShowProductModal(true);
     };
 
     const openAddModal = () => {
         setEditingProduct(null);
-        setProductForm({ name: '', description: '', price: '', category: 'Plats', is_popular: false, image: null });
+        setProductForm({ name: '', description: '', price: '', category: 'Plats', is_popular: false, image: null, images: [] });
         setShowProductModal(true);
     };
 
@@ -432,7 +448,7 @@ const Admin = () => {
     if (loading) return <div className="flex justify-center items-center h-screen">Chargement...</div>;
 
     return (
-        <div className="flex h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 overflow-hidden">
+        <div className="flex h-[calc(100vh-6rem)] bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 overflow-hidden">
             {/* Mobile Overlay */}
             {isSidebarOpen && (
                 <div
@@ -446,17 +462,18 @@ const Admin = () => {
                 w-64 bg-white dark:bg-gray-800 shadow-md transition-all duration-300
                 fixed inset-y-0 left-0 z-50 transform
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                md:translate-x-0 md:static md:block
-                flex flex-col h-full
+                md:translate-x-0
+                md:sticky md:top-20 md:h-[calc(100vh-5rem)] md:bottom-auto md:z-40 md:shadow-none
+                flex flex-col border-r border-gray-200 dark:border-gray-700 flex-shrink-0
             `}>
-                <div className="p-6 flex justify-between items-center">
+                <div className="p-6 flex justify-between items-center bg-white dark:bg-gray-800 z-10">
                     <h1 className="text-2xl font-serif font-bold text-primary">Admin Panel</h1>
                     <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-gray-500">
                         <X size={24} />
                     </button>
                 </div>
 
-                <nav className="mt-2 flex-1 overflow-y-auto custom-scrollbar pb-6">
+                <nav className="flex-1 overflow-y-auto min-h-0 custom-scrollbar pb-6">
                     <a onClick={() => { setActiveTab('dashboard'); setIsSidebarOpen(false); }} className={`flex items-center px-6 py-3 cursor-pointer ${activeTab === 'dashboard' ? 'bg-orange-50 dark:bg-orange-900/20 text-primary border-r-4 border-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                         <LayoutDashboard size={20} className="mr-3 flex-shrink-0" /> Tableau de bord
                     </a>
@@ -877,6 +894,7 @@ const Admin = () => {
                                     <option value="Plats">Plats</option>
                                     <option value="Boissons">Boissons</option>
                                     <option value="Jus">Jus</option>
+                                    <option value="Eau">Eau</option>
                                     <option value="Yahourt">Yahourt</option>
                                     <option value="Vins">Vins</option>
                                     <option value="Whiskys">Whiskys</option>
@@ -1082,6 +1100,7 @@ const Admin = () => {
                                         <option value="Plats">Plats</option>
                                         <option value="Boissons">Boissons</option>
                                         <option value="Jus">Jus</option>
+                                        <option value="Eau">Eau</option>
                                         <option value="Yahourt">Yahourt</option>
                                         <option value="Vins">Vins</option>
                                         <option value="Whiskys">Whiskys</option>
@@ -1101,7 +1120,7 @@ const Admin = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold mb-2 dark:text-gray-300">Image</label>
+                                <label className="block text-sm font-bold mb-2 dark:text-gray-300">Image Principale & Galerie</label>
 
                                 <div className="flex flex-col gap-3">
                                     {/* Option 1: Upload File */}
@@ -1114,7 +1133,7 @@ const Admin = () => {
                                         />
                                         <div className="flex flex-col items-center text-gray-500">
                                             <Image size={32} className="mb-2" />
-                                            <span className="text-sm">Cliquez pour téléverser une image</span>
+                                            <span className="text-sm">Cliquez pour changer l'image principale</span>
                                         </div>
                                     </div>
 
@@ -1126,26 +1145,56 @@ const Admin = () => {
                                         onClick={openLibraryModal}
                                         className="w-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white py-2 rounded-lg font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition flex items-center justify-center gap-2"
                                     >
-                                        <Image size={18} /> Choisir dans la médiathèque
+                                        <Image size={18} /> Ajouter depuis la médiathèque
                                     </button>
                                 </div>
 
-                                {/* Preview */}
+                                {/* Preview - Main Image */}
                                 {productForm.image && (
-                                    <div className="mt-3 relative w-full h-40 bg-gray-100 rounded-lg overflow-hidden group">
-                                        {/* Handle both file object and string url previews */}
-                                        <img
-                                            src={typeof productForm.image === 'string' ? getImageUrl(productForm.image) : URL.createObjectURL(productForm.image)}
-                                            alt="Preview"
-                                            className="w-full h-full object-cover"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setProductForm({ ...productForm, image: null })}
-                                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition"
-                                        >
-                                            <XCircle size={20} />
-                                        </button>
+                                    <div className="mt-4">
+                                        <p className="text-xs font-bold text-gray-500 mb-2">Image Principale</p>
+                                        <div className="relative w-full h-40 bg-gray-100 rounded-lg overflow-hidden group">
+                                            <img
+                                                src={typeof productForm.image === 'string' ? getImageUrl(productForm.image) : URL.createObjectURL(productForm.image)}
+                                                alt="Preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setProductForm({ ...productForm, image: null })}
+                                                className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition"
+                                            >
+                                                <XCircle size={20} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {/* Preview - Gallery Images */}
+                                {productForm.images && productForm.images.length > 0 && (
+                                    <div className="mt-4">
+                                        <p className="text-xs font-bold text-gray-500 mb-2">Galerie ({productForm.images.length})</p>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {productForm.images.map((img, idx) => (
+                                                <div key={idx} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group">
+                                                    <img
+                                                        src={getImageUrl(img)}
+                                                        alt={`Gallery ${idx}`}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setProductForm(prev => ({
+                                                            ...prev,
+                                                            images: prev.images.filter((_, i) => i !== idx)
+                                                        }))}
+                                                        className="absolute top-1 right-1 bg-red-500 text-white p-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition"
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -1223,19 +1272,8 @@ const Admin = () => {
                             </button>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 p-2">
-                            {libraryImages.map((img, idx) => (
-                                <div
-                                    key={idx}
-                                    onClick={() => selectImageFromLibrary(img.url)}
-                                    className="group relative cursor-pointer rounded-lg overflow-hidden border-2 border-transparent hover:border-primary transition-all aspect-square"
-                                >
-                                    <img src={getImageUrl(img.url)} alt="Library" className="w-full h-full object-cover" />
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                                        <CheckCircle className="text-white opacity-0 group-hover:opacity-100 transform scale-0 group-hover:scale-110 transition-all duration-300" size={32} />
-                                    </div>
-                                </div>
-                            ))}
+                        <div className="flex-1 overflow-y-auto p-1">
+                             <ImageLibrary selectionMode={true} multiSelect={true} onSelect={selectImageFromLibrary} />
                         </div>
                     </div>
                 </div>

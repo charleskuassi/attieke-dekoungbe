@@ -8820,3 +8820,40 @@
   "exp": 1766858499
 }
 [2025-12-26T18:03:36.590Z] ✅ Commande créée avec succès ID: 18
+[2026-02-15T22:05:55.285Z] Register called: {
+  "email": "charleskuassi11@gmail.com",
+  "password": "AZERTY1234@",
+  "name": "Charles KUASSI",
+  "phone": "0164647730",
+  "address": "Cotonou Dêkoungbé\n\nTogbin"
+}
+[2026-02-15T22:15:33.664Z] Update Profile called: {
+  "name": "Charles KUASSI",
+  "phone": "0164647730",
+  "address": "+229 41816669\n+229 64647730"
+}
+[2026-02-15T22:26:40.654Z] createOrder called. User: {
+  "id": 12,
+  "role": "customer",
+  "iat": 1771193197,
+  "exp": 1771279597
+}
+[2026-02-15T22:26:40.657Z] ⚠️ SANDBOX/DEV BYPASS: Skipping verification for TEST_SUCCESS 
+[2026-02-15T22:26:50.167Z] createOrder called. User: {
+  "id": 12,
+  "role": "customer",
+  "iat": 1771193197,
+  "exp": 1771279597
+}
+[2026-02-15T22:26:50.169Z] ⚠️ SANDBOX/DEV BYPASS: Skipping verification for TEST_SUCCESS 
+[2026-02-15T22:29:16.742Z] createOrder called. User: {
+  "id": 1,
+  "email": "test@example.com"
+}
+[2026-02-15T22:29:16.744Z] ⚠️ SANDBOX/DEV BYPASS: Skipping verification for TEST_SUCCESS 
+[2026-02-15T22:30:02.724Z] createOrder called. User: {
+  "id": 1,
+  "email": "test@example.com"
+}
+[2026-02-15T22:30:02.727Z] ⚠️ SANDBOX/DEV BYPASS: Skipping verification for TEST_SUCCESS 
+[2026-02-15T22:30:03.897Z] ✅ Commande créée avec succès ID: 24

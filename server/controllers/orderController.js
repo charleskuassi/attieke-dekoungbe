@@ -42,8 +42,9 @@ exports.createOrder = async (req, res) => {
 
         // 2. Vérification KKiaPay (Sauf si Cash ou Test)
         if (transaction_id && payment_method !== 'cash') {
-            if (process.env.KKIAPAY_SANDBOX === 'true' && transaction_id === 'TEST_SUCCESS') {
-                log('⚠️ SANDBOX BYPASS: Skipping verification for TEST_SUCCESS');
+            // Allow Test ID in Sandbox OR Development mode
+            if ((process.env.KKIAPAY_SANDBOX === 'true' || process.env.NODE_ENV === 'development') && transaction_id === 'TEST_SUCCESS') {
+                log('⚠️ SANDBOX/DEV BYPASS: Skipping verification for TEST_SUCCESS');
             } else {
                 try {
                     const kkiapayUrl = 'https://api.kkiapay.me/api/v1/transactions/verify';

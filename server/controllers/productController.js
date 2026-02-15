@@ -27,10 +27,18 @@ exports.getAllProducts = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
     try {
-        const { name, description, price, category, is_popular, image_url } = req.body;
+        let { name, description, price, category, is_popular, image_url, images } = req.body;
+
+        if (typeof images === 'string') {
+            try {
+                images = JSON.parse(images);
+            } catch (e) {
+                images = [];
+            }
+        }
 
         const product = await Product.create({
-            name, description, price, image_url, category, is_popular: is_popular === 'true'
+            name, description, price, image_url, category, is_popular: is_popular === 'true' || is_popular === true, images
         });
         res.status(201).json(product);
     } catch (err) {
@@ -42,13 +50,21 @@ exports.createProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, price, category, is_popular, image_url } = req.body;
+        let { name, description, price, category, is_popular, image_url, images } = req.body;
 
         const product = await Product.findByPk(id);
         if (!product) return res.status(404).json({ message: 'Product not found' });
 
+        if (typeof images === 'string') {
+            try {
+                images = JSON.parse(images);
+            } catch (e) {
+                images = [];
+            }
+        }
+
         await product.update({
-            name, description, price, image_url, category, is_popular: is_popular === 'true'
+            name, description, price, image_url, category, is_popular: is_popular === 'true' || is_popular === true, images
         });
 
         res.json(product);

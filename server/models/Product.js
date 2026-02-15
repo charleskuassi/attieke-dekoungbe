@@ -16,6 +16,10 @@ const Product = sequelize.define('Product', {
     image_url: {
         type: DataTypes.STRING
     },
+    images: {
+        type: DataTypes.JSON,
+        defaultValue: []
+    },
     category: {
         type: DataTypes.STRING
     },

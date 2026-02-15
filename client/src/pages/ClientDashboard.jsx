@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { Truck, Phone } from 'lucide-react';
@@ -36,9 +37,9 @@ const ClientDashboard = () => {
                         <p className="font-bold text-orange-700 dark:text-orange-400">Votre profil est incomplet !</p>
                         <p className="text-sm text-orange-600 dark:text-orange-300">Veuillez ajouter votre adresse et numéro de téléphone pour faciliter la livraison.</p>
                     </div>
-                    <a href="/settings" className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded transition text-sm">
+                    <Link to="/settings" className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded transition text-sm">
                         Compléter mon profil
-                    </a>
+                    </Link>
                 </div>
             )}
 

@@ -295,6 +295,8 @@ const Checkout = () => {
 
                         {/* Bouton Paiement */}
                         <div className="mt-6">
+    
+
                             {(!deliveryInfo.name || !deliveryInfo.phone || !deliveryInfo.address || (zones.length > 0 && !deliveryInfo.zoneName)) ? (
                                 <div className="bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 p-3 rounded-lg flex items-center gap-2 text-sm border border-yellow-200 dark:border-yellow-800">
                                     <AlertCircle size={16} />
