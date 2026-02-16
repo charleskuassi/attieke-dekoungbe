@@ -8,22 +8,25 @@ const GoogleButton = ({ text = "Continuer avec Google" }) => {
 
         try {
             if (isNative) {
-                // Mobile: Force Absolute URL with state=mobile
-                // Use Capacitor Browser for secure session handling
-                const targetUrl = `${apiUrl}/api/auth/google?state=mobile`;
+                // Mobile state
+                const stateObj = { platform: 'mobile' };
+                const state = btoa(JSON.stringify(stateObj));
+                const targetUrl = `${apiUrl}/api/auth/google?state=${encodeURIComponent(state)}`;
+                
                 console.log("Mobile Login Initiated:", targetUrl);
                 await Browser.open({ url: targetUrl });
             } else {
-                // Web: Smart Handling
-                // In Dev (Localhost), use Absolute URL to hit Backend
-                // In Prod (Render), use Relative URL to verify against current domain
-                // This prevents "localhost" redirection issues on deployed sites
-                const webUrl = import.meta.env.DEV 
-                    ? `${apiUrl}/api/auth/google?state=web` 
-                    : '/api/auth/google?state=web';
+                // Web state - Dynamic Return URL
+                const stateObj = { platform: 'web', returnUrl: window.location.origin };
+                const state = btoa(JSON.stringify(stateObj));
                 
-                console.log("Web Login Initiated:", webUrl);
-                window.location.href = webUrl;
+                // Construct URL
+                // In Prod, usually relative '/api/...' works if on same domain, 
+                // but absolute is safer if apiUrl is distinct.
+                const targetUrl = `${apiUrl}/api/auth/google?state=${encodeURIComponent(state)}`;
+
+                console.log("Web Login Initiated (Dynamic Return):", targetUrl);
+                window.location.href = targetUrl;
             }
         } catch (error) {
             console.error("Failed to open browser:", error);

@@ -43,6 +43,32 @@ if (process.env.GOOGLE_CLIENT_ID) {
             req.user = user;
             console.log("GOOGLE CALLBACK SUCCESS - User:", user.email);
             
+            // PARSE STATE with Fallback
+            let returnUrl = process.env.FRONTEND_URL || '/';
+            let isMobile = false;
+
+            try {
+                const rawState = req.query.state;
+                if (rawState) {
+                    if (rawState === 'mobile') {
+                        isMobile = true;
+                    } else if (rawState === 'web') {
+                        // Keep default returnUrl
+                    } else {
+                        // Try Base64 Decode
+                        const decoded = Buffer.from(rawState, 'base64').toString('utf-8');
+                        // Simple check to avoid JSON.parse on random strings
+                        if (decoded.trim().startsWith('{')) {
+                            const data = JSON.parse(decoded);
+                            if (data.platform === 'mobile') isMobile = true;
+                            if (data.returnUrl) returnUrl = data.returnUrl;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log("State parsing failed, using default:", e.message);
+            }
+
             try {
                 const token = jwt.sign(
                     { id: user.id, role: user.role },
@@ -50,17 +76,15 @@ if (process.env.GOOGLE_CLIENT_ID) {
                     { expiresIn: '1d' }
                 );
 
-                // Mobile Redirect (Absolute)
-                const state = req.query.state;
-                if (state === 'mobile') {
+                if (isMobile) {
                     console.log("Redirecting to Mobile App Scheme");
                     return res.redirect(`attiekeapp://google-callback?token=${token}`);
                 }
 
-                // Web Redirect (Absolute with Frontend URL)
-                const frontendUrl = process.env.FRONTEND_URL || '';
-                console.log("Redirecting to Web Frontend:", `${frontendUrl}/#/google-callback`);
-                return res.redirect(`${frontendUrl}/#/google-callback?token=${token}`);
+                // Web Redirect
+                const cleanUrl = returnUrl.replace(/\/$/, '');
+                console.log(`Redirecting to Web Frontend: ${cleanUrl}/#/google-callback`);
+                return res.redirect(`${cleanUrl}/#/google-callback?token=${token}`);
             } catch (error) {
                 console.error("Token Generation Error:", error);
                 return res.redirect('/login?error=token_error');
