@@ -76,13 +76,10 @@ if (process.env.GOOGLE_CLIENT_ID) {
                     { expiresIn: '1d' }
                 );
 
-                if (isMobile) {
-                    console.log("Redirecting to Mobile App Scheme");
-                    return res.redirect(`attiekeapp://google-callback?token=${token}`);
-                }
-
                 // Web Redirect
+                // Ensure we don't double slash
                 const cleanUrl = returnUrl.replace(/\/$/, '');
+                // Redirect to the hash router path
                 console.log(`Redirecting to Web Frontend: ${cleanUrl}/#/google-callback`);
                 return res.redirect(`${cleanUrl}/#/google-callback?token=${token}`);
             } catch (error) {

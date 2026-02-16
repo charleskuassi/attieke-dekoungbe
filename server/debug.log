@@ -8857,3 +8857,8 @@
 }
 [2026-02-15T22:30:02.727Z] ⚠️ SANDBOX/DEV BYPASS: Skipping verification for TEST_SUCCESS 
 [2026-02-15T22:30:03.897Z] ✅ Commande créée avec succès ID: 24
+[2026-02-16T15:12:29.307Z] Update Profile called: {
+  "name": "Rosam TCHOGBE",
+  "phone": "0164647730",
+  "address": "+229 41816669\n+229 64647730"
+}

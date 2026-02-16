@@ -1,35 +1,24 @@
 import React from 'react';
-import { Browser } from '@capacitor/browser';
+
 
 const GoogleButton = ({ text = "Continuer avec Google" }) => {
     const handleGoogleLogin = async () => {
+        // Use environment variable or fallback to localhost
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const isNative = window.Capacitor?.isNativePlatform();
-
+        
         try {
-            if (isNative) {
-                // Mobile state
-                const stateObj = { platform: 'mobile' };
-                const state = btoa(JSON.stringify(stateObj));
-                const targetUrl = `${apiUrl}/api/auth/google?state=${encodeURIComponent(state)}`;
-                
-                console.log("Mobile Login Initiated:", targetUrl);
-                await Browser.open({ url: targetUrl });
-            } else {
-                // Web state - Dynamic Return URL
-                const stateObj = { platform: 'web', returnUrl: window.location.origin };
-                const state = btoa(JSON.stringify(stateObj));
-                
-                // Construct URL
-                // In Prod, usually relative '/api/...' works if on same domain, 
-                // but absolute is safer if apiUrl is distinct.
-                const targetUrl = `${apiUrl}/api/auth/google?state=${encodeURIComponent(state)}`;
-
-                console.log("Web Login Initiated (Dynamic Return):", targetUrl);
-                window.location.href = targetUrl;
-            }
+            // Web Flow -> Standard Redirect
+            // We send 'web' and current origin so backend redirects back correctly
+            const stateObj = { platform: 'web', returnUrl: window.location.origin };
+            const state = btoa(JSON.stringify(stateObj));
+            
+            const targetUrl = `${apiUrl}/api/auth/google?state=${encodeURIComponent(state)}`;
+            
+            console.log("Web Login - Redirecting:", targetUrl);
+            window.location.href = targetUrl;
         } catch (error) {
-            console.error("Failed to open browser:", error);
+            console.error("Google Login Error:", error);
+            alert("Erreur lors de l'ouverture de la connexion Google.");
         }
     };
 

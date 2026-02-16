@@ -48,25 +48,7 @@ function App() {
         return () => clearTimeout(timer);
     }, [loading]);
 
-    // Deep Link Handler (Google Login)
-    useEffect(() => {
-        if (window.Capacitor?.isNativePlatform()) {
-            import('@capacitor/app').then(({ App: CapApp }) => {
-                CapApp.addListener('appUrlOpen', data => {
-                    console.log('App opened with URL:', data.url);
-                    // URL format: attiekeapp://google-callback?token=...
-                    if (data.url.includes('google-callback')) {
-                        const url = new URL(data.url);
-                        const token = url.searchParams.get('token');
-                        if (token) {
-                            // Redirect internally
-                            window.location.hash = `/google-callback?token=${token}`;
-                        }
-                    }
-                });
-            });
-        }
-    }, []);
+
 
     return (
         <div className="min-h-screen bg-background dark:bg-gray-900 dark:text-white transition-colors duration-300 flex flex-col">
