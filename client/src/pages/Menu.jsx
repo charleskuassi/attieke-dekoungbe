@@ -76,8 +76,7 @@ const Menu = () => {
             />
             <div className="text-center mb-12">
                 <span className="text-primary font-bold tracking-widest uppercase text-sm mb-2 block">Attièkè Dèkoungbé Selection</span>
-                <h1 className="text-4xl md:text-6xl font-serif font-bold text-gray-900 dark:text-white">Le Menu Dèkoungbé</h1>
-                <p className="text-gray-500 mt-4 max-w-xl mx-auto italic">Le goût du pays, là où vous êtes.</p>
+                <h1 className="text-4xl md:text-6xl font-serif font-bold text-gray-900 dark:text-white mt-2">Nos délices</h1>
             </div>
 
             {/* Search Bar */}

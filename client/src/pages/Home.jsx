@@ -59,8 +59,9 @@ const Home = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-5xl md:text-8xl font-serif font-extrabold mb-6 leading-[1.1] drop-shadow-2xl"
                     >
-                        L'Attièkè <span className="text-primary-light italic">Dèkoungbé</span> <br /> 
-                        <span className="text-4xl md:text-6xl font-light">100% Chaud – Chaud. Fait maison</span>
+                        Attièkè <span className="text-primary-light italic">Dèkoungbé</span> <br /> 
+                        <span className="text-4xl md:text-6xl font-light block mt-4">100% Chaud – Chaud</span>
+                        <span className="text-3xl md:text-5xl font-light block mt-1 text-primary-light/90 italic">Fait maison</span>
                     </motion.h1>
                     <p className="text-xl md:text-2xl mb-10 font-light text-gray-100 drop-shadow-md max-w-2xl mx-auto">
                         Le premier Fast-Food Ivoirien spécialisé dans l'excellence. Chaud, rapide et livré partout à votre porte.
