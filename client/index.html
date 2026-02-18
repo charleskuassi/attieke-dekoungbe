@@ -1,22 +1,43 @@
 <!doctype html>
 <html lang="fr">
 
-<meta charset="UTF-8" />
-<link rel="icon" type="image/svg+xml" href="/vite.svg" />
-<link rel="manifest" href="/manifest.json" />
-<meta name="theme-color" content="#ea580c" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Attièkè Dèkoungbé - Le goût authentique</title>
-<script src="https://cdn.kkiapay.me/k.js"></script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('SW registred!', reg.scope))
-        .catch(err => console.log('SW failed', err));
-    });
-  }
-</script>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#ea580c" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Attièkè Dèkoungbé - Fast-Food Ivoirien & Livraison de Repas</title>
+  <meta name="description" content="Découvrez Attièkè Dèkoungbé, votre fast-food ivoirien de référence. Savourez l'attiéké authentique, poisson braisé et aloco, livrés chauds chez vous." />
+  <meta name="keywords" content="Attiéké, Fast-food ivoirien, Livraison repas, Dêkoungbé, Côte d'Ivoire, Poisson braisé, Aloco" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://attieke-dekoungbe.art/" />
+  <meta property="og:title" content="Attièkè Dèkoungbé - Le Goût Authentique Ivoirien" />
+  <meta property="og:description" content="Le meilleur de l'attiéké et des saveurs ivoiriennes. Commande en ligne et livraison rapide." />
+  <meta property="og:image" content="/images/og-image.jpg" />
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:title" content="Attièkè Dèkoungbé - Fast-food Ivoirien" />
+  <meta property="twitter:description" content="Plats ivoiriens authentiques livrés chez vous." />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.kkiapay.me/k.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('SW registred!', reg.scope))
+          .catch(err => console.log('SW failed', err));
+      });
+    }
+  </script>
 </head>
 
 <body>

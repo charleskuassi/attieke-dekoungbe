@@ -1,9 +1,11 @@
 import api from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Clock, MapPin, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Testimonials from '../components/Testimonials';
+import SEO from '../components/SEO';
+import { getImageUrl } from '../utils/imageHelper';
 
 const Home = () => {
     const [stars, setStars] = useState([]);
@@ -13,9 +15,7 @@ const Home = () => {
         const fetchStars = async () => {
             try {
                 const res = await api.get('/api/products');
-                // Filter for 'Mats' (case insensitive) to show as stars
                 const plats = res.data.filter(p => p.category && p.category.toLowerCase() === 'plats');
-                // Shuffle and pick 6 items for variety
                 const shuffled = plats.sort(() => 0.5 - Math.random()).slice(0, 6);
                 setStars(shuffled);
             } catch (error) {
@@ -29,11 +29,10 @@ const Home = () => {
         if (stars.length === 0) return;
         const interval = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % stars.length);
-        }, 10000); // 10 seconds
+        }, 10000);
         return () => clearInterval(interval);
     }, [stars]);
 
-    // Helper to get 3 visible items (panorama effect)
     const getVisibleItems = () => {
         if (stars.length === 0) return [];
         const items = [];
@@ -45,72 +44,113 @@ const Home = () => {
 
     return (
         <div className="flex flex-col">
+            <SEO 
+                title="Le Meilleur de la Gastronomie Ivoirienne" 
+                description="Commandez l'authentique Attiéké Dêkoungbé. Poisson braisé, Aloco et saveurs ivoiriennes livrés chauds chez vous. Le fast-food ivoirien de référence."
+            />
+
             {/* Hero Section */}
-            <section className="relative h-[80vh] flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: 'url("/images/delivery_packaging.jpg")' }}>
-                <div className="absolute inset-0 bg-black/40"></div>
-                <div className="relative z-10 text-center text-white px-4 max-w-3xl">
-                    <h1 className="text-5xl md:text-7xl font-serif font-bold mb-6 leading-tight drop-shadow-lg">
-                        100% Chaud - Chaud <br /> <span className="text-primary-light">chez nous</span>
-                    </h1>
-                    <p className="text-xl md:text-2xl mb-8 font-light text-gray-100 drop-shadow-md">
-                        Découvrez les saveurs de la Côte d'Ivoire. Attiéké, Poisson braisé, Aloco... préparés avec passion.
+            <section className="relative h-[85vh] flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: 'url("/images/delivery_packaging.jpg")' }}>
+                <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/30"></div>
+                <div className="relative z-10 text-center text-white px-4 max-w-4xl">
+                    <motion.h1 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-5xl md:text-8xl font-serif font-extrabold mb-6 leading-[1.1] drop-shadow-2xl"
+                    >
+                        L'Attiéké <span className="text-primary-light italic">Dêkoungbé</span> <br /> 
+                        <span className="text-4xl md:text-6xl font-light">Le Goût de la Tradition</span>
+                    </motion.h1>
+                    <p className="text-xl md:text-2xl mb-10 font-light text-gray-100 drop-shadow-md max-w-2xl mx-auto">
+                        Le premier Fast-Food Ivoirien spécialisé dans l'excellence. Chaud, rapide et livré partout à votre porte.
                     </p>
-                    <Link to="/menu" className="inline-flex items-center bg-primary hover:bg-orange-700 text-white font-bold py-4 px-8 rounded-full text-lg transition transform hover:scale-105 shadow-lg">
-                        Commander maintenant <ArrowRight className="ml-2" />
-                    </Link>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <Link to="/menu" className="inline-flex items-center bg-primary hover:bg-orange-700 text-white font-bold py-4 px-10 rounded-full text-xl transition transform hover:scale-105 shadow-2xl">
+                            Savourez l'authentique <ArrowRight className="ml-2" />
+                        </Link>
+                    </div>
                 </div>
             </section>
 
             {/* Features / Intro */}
-            <section className="py-16 px-4 bg-white dark:bg-gray-900 transition-colors duration-300">
-                <div className="container mx-auto text-center max-w-4xl">
-                    <h2 className="text-3xl md:text-4xl font-serif font-bold text-text dark:text-white mb-6">Une tradition culinaire</h2>
-                    <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                        Chez Attièkè Dèkoungbé, nous sélectionnons les meilleurs ingrédients pour vous offrir une expérience gustative inoubliable. Nos plats sont préparés à la commande pour garantir une fraîcheur absolue.
+            <section className="py-20 px-4 bg-white dark:bg-gray-900 transition-colors duration-300">
+                <div className="container mx-auto text-center max-w-5xl">
+                    <span className="text-primary font-bold tracking-widest uppercase text-sm mb-4 block">Notre Promesse</span>
+                    <h2 className="text-4xl md:text-5xl font-serif font-bold text-text dark:text-white mb-8">Plus qu'un repas, une expérience ivoirienne</h2>
+                    <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-3xl mx-auto">
+                        Chez Attièkè Dèkoungbé, nous sublimons le fast-food ivoirien. Chaque graine d'attiéké, chaque pièce de poisson braisé est sélectionnée avec rigueur pour honorer notre héritage culinaire.
                     </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-16">
+                        <div className="flex flex-col items-center">
+                            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center text-primary mb-4">
+                                <Clock size={32} />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">Service Express</h3>
+                            <p className="text-gray-500">Votre commande prête et expédiée dans les records.</p>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-4">
+                                <ShieldCheck size={32} />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">Fraîcheur Garantie</h3>
+                            <p className="text-gray-500">Produits locaux sélectionnés chaque matin au marché.</p>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-4">
+                                <MapPin size={32} />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">Livraison Partout</h3>
+                            <p className="text-gray-500">Nous livrons dans toute la zone avec soin et rapidité.</p>
+                        </div>
+                    </div>
                 </div>
             </section>
 
             {/* Popular Preview (Dynamic Carousel) */}
-            <section className="py-16 px-4 bg-orange-50 dark:bg-gray-800 overflow-hidden transition-colors duration-300">
+            <section className="py-20 px-4 bg-orange-50 dark:bg-gray-800/50 overflow-hidden transition-colors duration-300">
                 <div className="container mx-auto">
-                    <div className="flex justify-between items-end mb-10">
-                        <h2 className="text-3xl md:text-4xl font-serif font-bold text-text dark:text-white">Nos Stars</h2>
-                        <Link to="/menu" className="text-primary dark:text-orange-400 font-bold hover:underline hidden md:block">Voir tout le menu</Link>
+                    <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+                        <div className="text-center md:text-left">
+                            <h2 className="text-4xl md:text-5xl font-serif font-bold text-text dark:text-white mb-2">Nos Best-Sellers</h2>
+                            <p className="text-gray-500 dark:text-gray-400">Les plats favoris de la communauté Dêkoungbé</p>
+                        </div>
+                        <Link to="/menu" className="group flex items-center gap-2 bg-white dark:bg-gray-700 px-6 py-3 rounded-full shadow-sm hover:shadow-md transition text-primary font-bold">
+                            Voir la carte complète <ArrowRight size={18} className="group-hover:translate-x-1 transition" />
+                        </Link>
                     </div>
 
                     {stars.length > 0 ? (
-                        <div className="relative h-[400px]">
+                        <div className="relative min-h-[450px]">
                             <AnimatePresence mode='popLayout'>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 absolute w-full">
                                     {getVisibleItems().map((item, index) => (
                                         <motion.div
                                             key={`${item.id}-${currentIndex}-${index}`}
-                                            initial={{ opacity: 0, x: 100 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: -100 }}
-                                            transition={{ duration: 0.5 }} // Faster transition
-                                            className={`bg-white dark:bg-gray-700 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition group ${index > 0 ? 'hidden md:block' : ''}`}
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            transition={{ duration: 0.5 }}
+                                            className={`bg-white dark:bg-gray-700 rounded-2xl overflow-hidden shadow-xl group hover:shadow-2xl transition-all duration-300 ${index > 0 ? 'hidden md:block' : ''}`}
                                         >
-                                            <div className="h-64 overflow-hidden">
+                                            <div className="h-64 overflow-hidden relative">
                                                 <img
-                                                    src={
-                                                        !item.image_url
-                                                            ? "https://via.placeholder.com/400"
-                                                            : item.image_url.startsWith('http') || item.image_url.startsWith('/images/')
-                                                                ? item.image_url
-                                                                : `${import.meta.env.VITE_API_URL}${item.image_url}`
-                                                    }
+                                                    src={getImageUrl(item.image_url)}
                                                     alt={item.name}
-                                                    className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                                                    loading="lazy"
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition duration-700"
                                                 />
+                                                <div className="absolute top-4 right-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur px-3 py-1 rounded-full text-sm font-bold text-primary">
+                                                    {item.price} FCFA
+                                                </div>
                                             </div>
-                                            <div className="p-6">
-                                                <h3 className="text-xl font-bold mb-2 font-serif truncate dark:text-white">{item.name}</h3>
-                                                <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">{item.description}</p>
+                                            <div className="p-8">
+                                                <h3 className="text-2xl font-bold mb-3 font-serif truncate dark:text-white">{item.name}</h3>
+                                                <p className="text-gray-600 dark:text-gray-300 mb-6 line-clamp-2 h-12">{item.description}</p>
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-xl font-bold text-primary dark:text-orange-400">{item.price} FCFA</span>
-                                                    <Link to="/menu" className="text-secondary dark:text-green-400 font-bold hover:text-green-700 dark:hover:text-green-300">Commander</Link>
+                                                    <Link to="/menu" className="w-full text-center bg-secondary hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition">
+                                                        Je craque !
+                                                    </Link>
                                                 </div>
                                             </div>
                                         </motion.div>
@@ -119,12 +159,11 @@ const Home = () => {
                             </AnimatePresence>
                         </div>
                     ) : (
-                        <div className="text-center py-20 text-gray-500">Chargement des stars...</div>
+                        <div className="text-center py-32">
+                            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+                            <p className="mt-4 text-gray-500">Mise en place de nos spécialités...</p>
+                        </div>
                     )}
-
-                    <div className="mt-8 text-center md:hidden">
-                        <Link to="/menu" className="btn-primary inline-block bg-primary text-white py-3 px-6 rounded-full font-bold">Voir tout le menu</Link>
-                    </div>
                 </div>
             </section>
 
@@ -134,31 +173,37 @@ const Home = () => {
             </div>
 
             {/* Service Livraison Section */}
-            <section className="py-16 px-4 bg-white dark:bg-gray-900 transition-colors duration-300">
+            <section className="py-24 px-4 bg-white dark:bg-gray-900 transition-colors duration-300">
                 <div className="container mx-auto max-w-6xl">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                        <div className="order-2 md:order-1 text-left space-y-6">
-                            <h2 className="text-3xl md:text-5xl font-serif font-bold text-primary dark:text-orange-500 leading-tight">
-                                L'Authenticité livrée <br /> <span className="text-gray-900 dark:text-white">chez vous.</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                        <div className="order-2 md:order-1 text-left space-y-8">
+                            <h2 className="text-4xl md:text-6xl font-serif font-bold text-primary dark:text-orange-500 leading-tight">
+                                L'Attiéké Chaud <br /> <span className="text-gray-900 dark:text-white">Livré chez vous.</span>
                             </h2>
-                            <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                                Profitez de nos délicieux plats sans bouger de chez vous. Nos emballages soignés et résistants gardent votre Attiéké chaud et savoureux jusqu'à votre porte.
+                            <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed font-light">
+                                Plus besoin de sortir pour déguster le meilleur du terroir. Nos livreurs motorisés traversent la ville pour vous apporter une box encore fumante.
                             </p>
-                            <div className="flex items-center gap-4 text-primary dark:text-orange-400 font-bold">
-                                <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary dark:bg-orange-400"></div> Rapide</span>
-                                <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary dark:bg-orange-400"></div> Chaud</span>
-                                <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary dark:bg-orange-400"></div> Soigné</span>
+                            <div className="flex flex-wrap items-center gap-6">
+                                <div className="flex items-center gap-3 bg-orange-50 dark:bg-orange-900/20 px-4 py-2 rounded-lg">
+                                    <div className="w-3 h-3 rounded-full bg-primary animate-pulse"></div>
+                                    <span className="font-bold text-gray-700 dark:text-gray-200">Livraison Express</span>
+                                </div>
+                                <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/20 px-4 py-2 rounded-lg">
+                                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                    <span className="font-bold text-gray-700 dark:text-gray-200">Emballage Isotherme</span>
+                                </div>
                             </div>
-                            <Link to="/menu" className="inline-block bg-primary hover:bg-orange-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:-translate-y-1">
-                                Commander pour livraison
+                            <Link to="/menu" className="inline-flex items-center gap-3 bg-primary hover:bg-orange-700 text-white font-extrabold py-5 px-10 rounded-2xl shadow-xl transition transform hover:-translate-y-2 text-lg">
+                                Je commande mon festin <ArrowRight />
                             </Link>
                         </div>
-                        <div className="order-1 md:order-2 relative">
-                            <div className="absolute inset-0 bg-orange-100 dark:bg-orange-900/30 rounded-2xl transform rotate-3 scale-95 z-0"></div>
+                        <div className="order-1 md:order-2 relative group">
+                            <div className="absolute -inset-4 bg-primary/10 rounded-[3rem] blur-2xl group-hover:bg-primary/20 transition duration-1000"></div>
                             <img
                                 src="/images/delivery_packaging.jpg"
-                                alt="Livraison Attiéké Dékoungbé"
-                                className="relative z-10 w-full h-auto rounded-2xl shadow-xl transform -rotate-2 hover:rotate-0 transition duration-500 object-cover"
+                                alt="Livraison Repas Ivoirien Attiéké Dékoungbé"
+                                loading="lazy"
+                                className="relative z-10 w-full h-[500px] rounded-[2.5rem] shadow-2xl object-cover transform rotate-1 group-hover:rotate-0 transition duration-700"
                             />
                         </div>
                     </div>
@@ -169,3 +214,4 @@ const Home = () => {
 };
 
 export default Home;
+

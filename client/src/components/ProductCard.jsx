@@ -11,7 +11,8 @@ const ProductCard = ({ product }) => {
             <div className="h-48 overflow-hidden relative">
                 <img
                     src={getImageUrl(product.image_url)}
-                    alt={product.name}
+                    alt={`Plat d'Attiéké : ${product.name} - Spécialité Dêkoungbé`}
+                    loading="lazy"
                     className="w-full h-full object-cover hover:scale-110 transition duration-500"
                 />
                 {product.is_popular && (

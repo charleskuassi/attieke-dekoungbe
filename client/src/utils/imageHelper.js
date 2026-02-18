@@ -1,20 +1,22 @@
 // Cette fonction détecte si l'image vient du Cloud ou du serveur local
+// Et elle privilégie les versions WebP optimisées
 export const getImageUrl = (imagePath) => {
-    if (!imagePath) return '/images/placeholder.jpg'; // Image par défaut
+    if (!imagePath) return '/images/placeholder.jpg';
 
-    // Si ça commence par "http", c'est Cloudinary (ou une url externe)
-    if (imagePath.startsWith('http') || imagePath.startsWith('https')) {
+    // Si ça commence par "http", on garde tel quel
+    if (imagePath.startsWith('http')) {
         return imagePath;
     }
 
-    // Sinon, c'est une vieille image locale (on ajoute l'URL du serveur)
-    // Assure-toi que VITE_API_URL est bien défini dans ton .env frontend
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    // On privilégie le WebP pour les images locales
+    let optimizedPath = imagePath;
+    if (imagePath.match(/\.(jpg|jpeg|png)$/i)) {
+        optimizedPath = imagePath.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+    }
 
-    // Nettoyer le chemin pour éviter les doubles slashes si nécessaire, 
-    // mais généralement apiUrl n'a pas de slash de fin et imagePath commence par /.
-    // Si imagePath ne commence pas par /, on l'ajoute.
-    const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const cleanPath = optimizedPath.startsWith('/') ? optimizedPath : `/${optimizedPath}`;
 
     return `${apiUrl}${cleanPath}`;
 };
+

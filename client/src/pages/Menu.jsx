@@ -4,6 +4,7 @@ import ProductCard from '../components/ProductCard';
 import { Loader2, Search, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 
 
 const Menu = () => {
@@ -69,7 +70,15 @@ const Menu = () => {
 
     return (
         <div className="container mx-auto px-4 py-8 dark:bg-gray-900 transition-colors duration-300 min-h-screen">
-            <h1 className="text-4xl font-serif font-bold text-center mb-8 text-primary dark:text-orange-500">Notre Carte</h1>
+            <SEO 
+                title="Menu & Livraison : L'Attiéké Authentique" 
+                description="Consultez notre menu de fast-food ivoirien. Garba, Poisson braisé, Attiéké fumant et boissons locales. Commandez en ligne pour une livraison rapide."
+            />
+            <div className="text-center mb-12">
+                <span className="text-primary font-bold tracking-widest uppercase text-sm mb-2 block">Dôkoungbé Selection</span>
+                <h1 className="text-4xl md:text-6xl font-serif font-bold text-gray-900 dark:text-white">Le Menu Dêkoungbé</h1>
+                <p className="text-gray-500 mt-4 max-w-xl mx-auto italic">Le goût du pays, là où vous êtes.</p>
+            </div>
 
             {/* Search Bar */}
             <div className="max-w-md mx-auto mb-8 relative">

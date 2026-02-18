@@ -14,6 +14,8 @@ const storage = new CloudinaryStorage({
     params: {
         folder: 'attieke_library',
         allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+        format: 'webp', // Force la conversion en WebP à l'upload
+        transformation: [{ width: 1200, crop: 'limit', quality: 'auto:good' }] 
     },
 });
 
