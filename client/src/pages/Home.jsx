@@ -59,7 +59,7 @@ const Home = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-5xl md:text-8xl font-serif font-extrabold mb-6 leading-[1.1] drop-shadow-2xl"
                     >
-                        Attièkè <span className="text-primary-light italic">Dèkoungbé</span> <br /> 
+                        Attièkè <span className="italic">Dèkoungbé</span> <br /> 
                         <span className="text-4xl md:text-6xl font-light block mt-4">100% Chaud – Chaud</span>
                         <span className="text-3xl md:text-5xl font-light block mt-1 text-primary-light/90 italic">Fait maison</span>
                     </motion.h1>
