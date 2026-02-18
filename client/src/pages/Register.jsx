@@ -23,10 +23,10 @@ const Register = () => {
     const handleRegister = async (e) => {
         e.preventDefault();
 
-        // Validation Téléphone Bénin (8 ou 10 chiffres)
-        const phoneRegex = /^[0-9]{8}$|^[0-9]{10}$/;
+        // VALIDATION TÉLÉPHONE (Strictement 10 chiffres)
+        const phoneRegex = /^[0-9]{10}$/;
         if (!phoneRegex.test(formData.phone)) {
-            setError("Le numéro de téléphone doit comporter 8 ou 10 chiffres.");
+            setError("Le numéro de téléphone doit comporter exactement 10 chiffres.");
             return;
         }
 
@@ -121,7 +121,7 @@ const Register = () => {
                         </div>
                         <div>
                             <label className="block text-sm font-bold mb-1 dark:text-gray-300">Téléphone</label>
-                            <input type="tel" name="phone" required minLength="8" maxLength="10" placeholder="Ex: 97000000 (Test) ou 01..." className="w-full border dark:border-gray-600 rounded p-2 dark:bg-gray-700 dark:text-white" onChange={handleChange} />
+                            <input type="tel" name="phone" required minLength="10" maxLength="10" placeholder="Ex: 0102030405" className="w-full border dark:border-gray-600 rounded p-2 dark:bg-gray-700 dark:text-white" onChange={handleChange} />
                         </div>
                         <div>
                             <label className="block text-sm font-bold mb-1 dark:text-gray-300">Adresse</label>

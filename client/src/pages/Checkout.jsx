@@ -43,10 +43,11 @@ const Checkout = () => {
     }, []);
 
     const finalTotal = totalWithDiscount || total;
-    // Utilise ta clé publique ici (idéalement via .env)
+    // Utilise les variables d'environnement pour la production
     const KKIAPAY_PUBLIC_KEY = import.meta.env.VITE_KKIAPAY_PUBLIC_KEY;
+    const IS_SANDBOX = import.meta.env.VITE_KKIAPAY_SANDBOX === 'true';
+    
     if (!KKIAPAY_PUBLIC_KEY) console.warn("⚠️ VITE_KKIAPAY_PUBLIC_KEY non définie dans .env");
-    const IS_SANDBOX = true;
 
     // --- LOGIQUE DE RÉFÉRENCE (POUR ÉVITER LE BUG DE DONNÉES VIDES) ---
     const cartRef = useRef(cart);
@@ -132,10 +133,10 @@ const Checkout = () => {
             return;
         }
 
-        // VALIDATION TÉLÉPHONE BÉNIN (Mise à jour: 8 ou 10 chiffres acceptés)
-        const phoneRegex = /^(\d{8}|\d{10})$/;
+        // VALIDATION TÉLÉPHONE (Strictement 10 chiffres)
+        const phoneRegex = /^\d{10}$/;
         if (!phoneRegex.test(deliveryInfo.phone)) {
-            alert("Le numéro de téléphone doit comporter 8 ou 10 chiffres.");
+            alert("Le numéro de téléphone doit comporter exactement 10 chiffres.");
             return;
         }
 

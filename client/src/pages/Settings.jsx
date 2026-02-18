@@ -36,11 +36,11 @@ const Settings = () => {
         setMessage(null);
         setError(null);
 
-        // Validation Phone (8 or 10 digits)
-        const phoneRegex = /^(\d{8}|\d{10})$/;
+        // Validation Phone (Strictement 10 chiffres)
+        const phoneRegex = /^\d{10}$/;
         const cleanPhone = formData.phone.replace(/\s/g, '');
         if (!phoneRegex.test(cleanPhone)) {
-            setError('Le numéro de téléphone doit comporter 8 ou 10 chiffres.');
+            setError('Le numéro de téléphone doit comporter exactement 10 chiffres.');
             setLoading(false);
             return;
         }
@@ -115,7 +115,7 @@ const Settings = () => {
                             placeholder="97000000"
                             required
                         />
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Format : 8 ou 10 chiffres</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Format : Strictement 10 chiffres</p>
                     </div>
 
                     <div>

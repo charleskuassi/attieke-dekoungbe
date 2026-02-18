@@ -42,6 +42,12 @@ const Reservation = () => {
             return;
         }
 
+        const phoneRegex = /^\d{10}$/;
+        if (!phoneRegex.test(formData.phone)) {
+            alert("Le numéro de téléphone doit comporter exactement 10 chiffres.");
+            return;
+        }
+
         setStatus('loading');
         try {
             await api.post('/api/reservations', formData);

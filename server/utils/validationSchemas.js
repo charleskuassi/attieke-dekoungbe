@@ -15,6 +15,10 @@ const registerSchema = Joi.object({
         'string.min': 'Le mot de passe doit contenir au moins 8 caractères',
         'string.empty': 'Le mot de passe est obligatoire'
     }),
+    phone: Joi.string().pattern(new RegExp('^[0-9]{10}$')).required().messages({
+        'string.pattern.base': 'Le numéro de téléphone doit comporter exactement 10 chiffres'
+    }),
+    address: Joi.string().allow('', null),
     role: Joi.string().valid('customer', 'admin').default('customer')
 });
 
@@ -40,8 +44,8 @@ const orderSchema = Joi.object({
     deliveryInfo: Joi.object({
         name: Joi.string().required(),
         address: Joi.string().required(),
-        phone: Joi.string().pattern(new RegExp('^[0-9]{8,15}$')).required().messages({
-            'string.pattern.base': 'Le numéro de téléphone doit être valide (8 chiffres minimum)'
+        phone: Joi.string().pattern(new RegExp('^[0-9]{10}$')).required().messages({
+            'string.pattern.base': 'Le numéro de téléphone doit comporter exactement 10 chiffres'
         })
     }).required().messages({
         'any.required': 'Les informations de livraison sont obligatoires'
@@ -50,8 +54,28 @@ const orderSchema = Joi.object({
     transactionId: Joi.string().allow(null, '')
 });
 
+const reservationSchema = Joi.object({
+    name: Joi.string().required(),
+    phone: Joi.string().pattern(new RegExp('^[0-9]{10}$')).required().messages({
+        'string.pattern.base': 'Le numéro de téléphone doit comporter exactement 10 chiffres'
+    }),
+    date: Joi.string().required(),
+    time: Joi.string().required(),
+    guests: Joi.number().min(1).max(50),
+    message: Joi.string().allow('', null)
+});
+
+const messageSchema = Joi.object({
+    name: Joi.string().required(),
+    email: Joi.string().email().required(),
+    message: Joi.string().required()
+});
+
 module.exports = {
     registerSchema,
     loginSchema,
-    orderSchema
+    orderSchema,
+    reservationSchema,
+    messageSchema
 };
+

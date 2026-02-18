@@ -1,7 +1,7 @@
 import api from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Clock, MapPin, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Clock, MapPin, ShieldCheck, X, Maximize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Testimonials from '../components/Testimonials';
 import SEO from '../components/SEO';
@@ -10,6 +10,7 @@ import { getImageUrl } from '../utils/imageHelper';
 const Home = () => {
     const [stars, setStars] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [selectedProduct, setSelectedProduct] = useState(null);
 
     useEffect(() => {
         const fetchStars = async () => {
@@ -133,13 +134,19 @@ const Home = () => {
                                             transition={{ duration: 0.5 }}
                                             className={`bg-white dark:bg-gray-700 rounded-2xl overflow-hidden shadow-xl group hover:shadow-2xl transition-all duration-300 ${index > 0 ? 'hidden md:block' : ''}`}
                                         >
-                                            <div className="h-64 overflow-hidden relative">
+                                            <div 
+                                                className="h-64 overflow-hidden relative cursor-zoom-in"
+                                                onClick={() => setSelectedProduct(item)}
+                                            >
                                                 <img
                                                     src={getImageUrl(item.image_url)}
                                                     alt={item.name}
                                                     loading="lazy"
                                                     className="w-full h-full object-cover group-hover:scale-110 transition duration-700"
                                                 />
+                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                                    <Maximize2 className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
+                                                </div>
                                                 <div className="absolute top-4 right-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur px-3 py-1 rounded-full text-sm font-bold text-primary">
                                                     {item.price} FCFA
                                                 </div>
@@ -209,6 +216,57 @@ const Home = () => {
                     </div>
                 </div>
             </section>
+
+            {/* Zoom Modal (Shared with ProductCard logic) */}
+            <AnimatePresence>
+                {selectedProduct && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setSelectedProduct(null)}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.8, opacity: 0 }}
+                            className="relative z-10 max-w-4xl w-full bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
+                        >
+                            <button
+                                onClick={() => setSelectedProduct(null)}
+                                className="absolute top-4 right-4 z-20 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition"
+                            >
+                                <X size={24} />
+                            </button>
+                            <div className="aspect-video md:aspect-[16/10]">
+                                <img
+                                    src={getImageUrl(selectedProduct.image_url)}
+                                    alt={selectedProduct.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div className="p-6 md:p-8 text-left">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-2xl md:text-3xl font-serif font-bold dark:text-white">{selectedProduct.name}</h2>
+                                    <span className="text-2xl font-bold text-primary">{selectedProduct.price} FCFA</span>
+                                </div>
+                                <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed mb-6">
+                                    {selectedProduct.description}
+                                </p>
+                                <Link
+                                    to="/menu"
+                                    onClick={() => setSelectedProduct(null)}
+                                    className="inline-block w-full text-center bg-primary hover:bg-orange-700 text-white font-bold py-4 rounded-xl text-xl transition"
+                                >
+                                    Commander ce délice
+                                </Link>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
