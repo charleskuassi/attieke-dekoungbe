@@ -263,13 +263,13 @@ const ContactMap = () => {
                 <div className="mt-12 rounded-2xl overflow-hidden shadow-xl relative group">
                     <img
                         src="/images/restaurant_bar.jpg"
-                        alt="Bar Restaurant Attiéké Dèkoungbé"
+                        alt="Bar Restaurant Attièkè Dèkoungbé"
                         className="w-full h-64 md:h-80 object-cover transform group-hover:scale-105 transition duration-700"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-6">
                         <div className="text-white">
                             <h3 className="text-2xl font-serif font-bold mb-1">Notre Bar</h3>
-                            <p className="opacity-90 font-medium">Venez vivre l'expérience Attiéké Dèkoungbé sur place !</p>
+                            <p className="opacity-90 font-medium">Venez vivre l'expérience Attièkè Dèkoungbé sur place !</p>
                         </div>
                     </div>
                 </div>

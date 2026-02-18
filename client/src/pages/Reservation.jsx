@@ -230,7 +230,7 @@ const Reservation = () => {
             <div className="hidden md:block w-1/2 relative bg-gray-900">
                 <img
                     src="/images/restaurant_interior.jpg"
-                    alt="Intérieur Restaurant Attiéké Dèkoungbé"
+                    alt="Intérieur Restaurant Attièkè Dèkoungbé"
                     className="absolute inset-0 w-full h-full object-cover opacity-90"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>

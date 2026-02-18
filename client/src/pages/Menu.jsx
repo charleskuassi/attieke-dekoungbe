@@ -37,9 +37,9 @@ const Menu = () => {
                 console.error("Failed to fetch products", err);
                 // Fallback mock data
                 setProducts([
-                    { id: 1, name: "Attiéké Poisson", description: "Attiéké frais, poisson capitaine braisé.", price: 3500, image_url: "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?q=80&w=800&auto=format&fit=crop", category: "Plats", is_popular: true },
+                    { id: 1, name: "Attièkè Poisson", description: "Attièkè frais, poisson capitaine braisé.", price: 3500, image_url: "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?q=80&w=800&auto=format&fit=crop", category: "Plats", is_popular: true },
                     { id: 2, name: "Poulet Braisé", description: "Poulet fermier mariné et grillé.", price: 4000, image_url: "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?q=80&w=800&auto=format&fit=crop", category: "Plats", is_popular: true },
-                    { id: 4, name: "Garba", description: "Attiéké, thon frit, piment.", price: 1500, image_url: "https://images.unsplash.com/photo-1606459882370-16886e84a752?q=80&w=800&auto=format&fit=crop", category: "Plats", is_popular: true },
+                    { id: 4, name: "Garba", description: "Attièkè, thon frit, piment.", price: 1500, image_url: "https://images.unsplash.com/photo-1606459882370-16886e84a752?q=80&w=800&auto=format&fit=crop", category: "Plats", is_popular: true },
                     { id: 5, name: "Jus de Bissap", description: "Boisson rafraîchissante.", price: 1000, image_url: "https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?q=80&w=800&auto=format&fit=crop", category: "Boissons", is_popular: false },
                 ]);
                 setLoading(false);
@@ -71,12 +71,12 @@ const Menu = () => {
     return (
         <div className="container mx-auto px-4 py-8 dark:bg-gray-900 transition-colors duration-300 min-h-screen">
             <SEO 
-                title="Menu & Livraison : L'Attiéké Authentique" 
-                description="Consultez notre menu de fast-food ivoirien. Garba, Poisson braisé, Attiéké fumant et boissons locales. Commandez en ligne pour une livraison rapide."
+                title="Menu & Livraison : L'Attièkè Authentique" 
+                description="Consultez notre menu de fast-food ivoirien. Garba, Poisson braisé, Attièkè fumant et boissons locales. Commandez en ligne pour une livraison rapide."
             />
             <div className="text-center mb-12">
-                <span className="text-primary font-bold tracking-widest uppercase text-sm mb-2 block">Dôkoungbé Selection</span>
-                <h1 className="text-4xl md:text-6xl font-serif font-bold text-gray-900 dark:text-white">Le Menu Dêkoungbé</h1>
+                <span className="text-primary font-bold tracking-widest uppercase text-sm mb-2 block">Attièkè Dèkoungbé Selection</span>
+                <h1 className="text-4xl md:text-6xl font-serif font-bold text-gray-900 dark:text-white">Le Menu Dèkoungbé</h1>
                 <p className="text-gray-500 mt-4 max-w-xl mx-auto italic">Le goût du pays, là où vous êtes.</p>
             </div>
 

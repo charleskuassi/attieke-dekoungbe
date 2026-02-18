@@ -147,7 +147,7 @@ const Checkout = () => {
             email: user?.email || "client@dekoungbe.com",
             phone: deliveryInfo.phone,
             name: deliveryInfo.name,
-            reason: "Commande Attiéké Dèkoungbé"
+            reason: "Commande Attièkè Dèkoungbé"
         });
     };
 

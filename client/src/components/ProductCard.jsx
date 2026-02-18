@@ -17,7 +17,7 @@ const ProductCard = ({ product }) => {
                 >
                     <img
                         src={getImageUrl(product.image_url)}
-                        alt={`Plat d'Attiéké : ${product.name} - Spécialité Dêkoungbé`}
+                        alt={`Plat d'Attièkè : ${product.name} - Spécialité Dèkoungbé`}
                         loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-110 transition duration-700"
                     />
@@ -68,11 +68,11 @@ const ProductCard = ({ product }) => {
                             >
                                 <X size={24} />
                             </button>
-                            <div className="aspect-video md:aspect-[16/10]">
+                            <div className="max-h-[60vh] overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-gray-800">
                                 <img
                                     src={getImageUrl(product.image_url)}
                                     alt={product.name}
-                                    className="w-full h-full object-cover"
+                                    className="max-w-full max-h-full object-contain"
                                 />
                             </div>
                             <div className="p-6 md:p-8">

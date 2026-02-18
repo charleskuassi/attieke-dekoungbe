@@ -47,7 +47,7 @@ const Home = () => {
         <div className="flex flex-col">
             <SEO 
                 title="Le Meilleur de la Gastronomie Ivoirienne" 
-                description="Commandez l'authentique Attiéké Dêkoungbé. Poisson braisé, Aloco et saveurs ivoiriennes livrés chauds chez vous. Le fast-food ivoirien de référence."
+                description="Commandez l'authentique Attièkè Dèkoungbé. Poisson braisé, Aloco et saveurs ivoiriennes livrés chauds chez vous. Le fast-food ivoirien de référence."
             />
 
             {/* Hero Section */}
@@ -59,8 +59,8 @@ const Home = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-5xl md:text-8xl font-serif font-extrabold mb-6 leading-[1.1] drop-shadow-2xl"
                     >
-                        L'Attiéké <span className="text-primary-light italic">Dêkoungbé</span> <br /> 
-                        <span className="text-4xl md:text-6xl font-light">Le Goût de la Tradition</span>
+                        L'Attièkè <span className="text-primary-light italic">Dèkoungbé</span> <br /> 
+                        <span className="text-4xl md:text-6xl font-light">100% Chaud – Chaud. Fait maison</span>
                     </motion.h1>
                     <p className="text-xl md:text-2xl mb-10 font-light text-gray-100 drop-shadow-md max-w-2xl mx-auto">
                         Le premier Fast-Food Ivoirien spécialisé dans l'excellence. Chaud, rapide et livré partout à votre porte.
@@ -114,7 +114,7 @@ const Home = () => {
                     <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
                         <div className="text-center md:text-left">
                             <h2 className="text-4xl md:text-5xl font-serif font-bold text-text dark:text-white mb-2">Nos Best-Sellers</h2>
-                            <p className="text-gray-500 dark:text-gray-400">Les plats favoris de la communauté Dêkoungbé</p>
+                            <p className="text-gray-500 dark:text-gray-400">Les plats favoris de la communauté Dèkoungbé</p>
                         </div>
                         <Link to="/menu" className="group flex items-center gap-2 bg-white dark:bg-gray-700 px-6 py-3 rounded-full shadow-sm hover:shadow-md transition text-primary font-bold">
                             Voir la carte complète <ArrowRight size={18} className="group-hover:translate-x-1 transition" />
@@ -185,7 +185,7 @@ const Home = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
                         <div className="order-2 md:order-1 text-left space-y-8">
                             <h2 className="text-4xl md:text-6xl font-serif font-bold text-primary dark:text-orange-500 leading-tight">
-                                L'Attiéké Chaud <br /> <span className="text-gray-900 dark:text-white">Livré chez vous.</span>
+                                L'Attièkè Chaud <br /> <span className="text-gray-900 dark:text-white">Livré chez vous.</span>
                             </h2>
                             <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed font-light">
                                 Plus besoin de sortir pour déguster le meilleur du terroir. Nos livreurs motorisés traversent la ville pour vous apporter une box encore fumante.
@@ -208,7 +208,7 @@ const Home = () => {
                             <div className="absolute -inset-4 bg-primary/10 rounded-[3rem] blur-2xl group-hover:bg-primary/20 transition duration-1000"></div>
                             <img
                                 src="/images/delivery_packaging.jpg"
-                                alt="Livraison Repas Ivoirien Attiéké Dékoungbé"
+                                alt="Livraison Repas Ivoirien Attièkè Dèkoungbé"
                                 loading="lazy"
                                 className="relative z-10 w-full h-[500px] rounded-[2.5rem] shadow-2xl object-cover transform rotate-1 group-hover:rotate-0 transition duration-700"
                             />
@@ -240,11 +240,11 @@ const Home = () => {
                             >
                                 <X size={24} />
                             </button>
-                            <div className="aspect-video md:aspect-[16/10]">
+                            <div className="max-h-[60vh] overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-gray-800">
                                 <img
                                     src={getImageUrl(selectedProduct.image_url)}
                                     alt={selectedProduct.name}
-                                    className="w-full h-full object-cover"
+                                    className="max-w-full max-h-full object-contain"
                                 />
                             </div>
                             <div className="p-6 md:p-8 text-left">

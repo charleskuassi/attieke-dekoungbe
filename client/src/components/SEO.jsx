@@ -24,7 +24,7 @@ const SEO = ({ title, description, schemaType = 'Restaurant' }) => {
     "servesCuisine": "Ivoirienne, West African",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Quartier Dêkoungbé",
+      "streetAddress": "Quartier Dèkoungbé",
       "addressLocality": "Abidjan",
       "addressCountry": "CI"
     },
