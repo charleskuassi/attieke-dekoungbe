@@ -34,7 +34,7 @@ const NotificationService = {
      * @param {Object} userOrId - L'objet Utilisateur ou son ID
      * @param {Object} payload - { title, body, data }
      */
-    async sendToUser(userOrId, payload) {
+    async sendToUser(userOrId, payload, forceEmail = false) {
         let user = userOrId;
         
         // Si on a reçu un ID, on récupère l'utilisateur
@@ -66,33 +66,29 @@ const NotificationService = {
                 pushSent = true;
             } catch (error) {
                 console.error("❌ Échec de l'envoi Push FCM :", error.message);
-                // Si le token est invalide, on le supprime (prévention d'erreurs futures)
                 if (error.code === 'messaging/registration-token-not-registered' || 
                     error.code === 'messaging/invalid-registration-token') {
-                    console.log(`🗑️ Suppression du token invalide pour l'utilisateur ${user.id}`);
                     await User.update({ fcmToken: null }, { where: { id: user.id } });
                 }
             }
         }
 
-        // 2. Fallback Email (Si le push n'a pas été envoyé ou a échoué)
-        if (!pushSent) {
-            console.log(`📧 Fallback : Envoi d'un email à ${user.email}`);
+        // 2. Email (Si forceEmail est vrai OU si le push a échoué)
+        if (!pushSent || forceEmail) {
+            console.log(`📧 Envoi d'un email à ${user.email} (ForceEmail: ${forceEmail})`);
             try {
                 await emailService.sendEmail(
                     user.email, 
                     payload.title, 
-                    `<div style="font-family: sans-serif; padding: 20px;">
-                        <h2>${payload.title}</h2>
-                        <p>${payload.body}</p>
-                        <hr/>
-                        <p style="font-size: 0.8em; color: #666;">
-                            Ceci est une notification automatique de l'application Attièkè Dèkoungbé.
-                        </p>
+                    `<div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                        <h2 style="color: #ea580c;">${payload.title}</h2>
+                        <p style="font-size: 1.1em;">${payload.body}</p>
+                        <br/>
+                        <a href="https://attieke-dekoungbe.onrender.com/admin" style="background: #ea580c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Voir sur le Dashboard</a>
                     </div>`
                 );
             } catch (emailError) {
-                console.error("❌ Échec critique : Email de secours non envoyé :", emailError.message);
+                console.error("❌ Échec Email :", emailError.message);
             }
         }
         
@@ -100,15 +96,15 @@ const NotificationService = {
     },
 
     /**
-     * Envoie une notification à tous les administrateurs
+     * Envoie une notification à tous les administrateurs (Push + Email SYSTÉMATIQUE)
      */
     async notifyAdmins(payload) {
         try {
             const admins = await User.findAll({ where: { role: 'admin' } });
-            console.log(`🔔 Notification de ${admins.length} administrateurs...`);
+            console.log(`🔔 Notification de ${admins.length} administrateurs (Double canal: Push + Email)...`);
             
             const results = await Promise.all(
-                admins.map(adminUser => this.sendToUser(adminUser, payload))
+                admins.map(adminUser => this.sendToUser(adminUser, payload, true))
             );
             
             return results;

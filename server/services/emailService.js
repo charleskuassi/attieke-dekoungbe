@@ -5,16 +5,15 @@ const nodemailer = require('nodemailer');
 const getTransporter = async () => {
     // Check if real SMTP credentials are provided
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-        const port = parseInt(process.env.SMTP_PORT) || 465; // On préfère 465 sur Render
+        const port = parseInt(process.env.SMTP_PORT) || 2525; // Port 2525 est plus stable sur Render
         const host = process.env.SMTP_HOST || 'smtp-relay.brevo.com';
-        const secure = port === 465; 
-
-        console.log(`🔌 Configuring SMTP: ${host}:${port} (Secure: ${secure})...`);
+        
+        console.log(`🔌 Configuring SMTP: ${host}:${port}...`);
 
         return nodemailer.createTransport({
             host: host,
             port: port,
-            secure: secure,
+            secure: false, // TLS sera utilisé via STARTTLS sur le port 2525/587
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS
@@ -22,7 +21,7 @@ const getTransporter = async () => {
             tls: {
                 rejectUnauthorized: false
             },
-            connectionTimeout: 10000, // 10s
+            connectionTimeout: 10000,
         });
     } else {
         console.log("⚠️ No valid SMTP config found. Using Ethereal Email (Dev Mode).");
