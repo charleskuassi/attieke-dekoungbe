@@ -19,6 +19,7 @@ router.post('/verify-email', authController.verifyEmail);
 router.post('/forgot-password', authController.forgotPassword);
 router.put('/reset-password/:token', authController.resetPassword);
 router.put('/profile', protect, authController.updateProfile);
+router.put('/fcm-token', protect, authController.updateFcmToken);
 router.get('/me', protect, authController.getMe);
 
 // Google Auth Routes

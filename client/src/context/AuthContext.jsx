@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../utils/api';
+import { requestFcmToken } from '../firebase';
 
 const AuthContext = createContext();
 
@@ -8,6 +9,18 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    const syncFcmToken = async () => {
+        try {
+            const token = await requestFcmToken();
+            if (token) {
+                await api.put('/api/auth/fcm-token', { fcmToken: token });
+                console.log("FCM Token synchronisé avec le serveur");
+            }
+        } catch (err) {
+            console.error("Erreur sync FCM Token:", err);
+        }
+    };
 
     useEffect(() => {
         const initAuth = async () => {
@@ -21,6 +34,7 @@ export const AuthProvider = ({ children }) => {
                 if (storedUser) {
                     try {
                         setUser(JSON.parse(storedUser));
+                        syncFcmToken(); // Sync token for existing session
                     } catch (e) {
                         console.error("Stored user parse error", e);
                         localStorage.removeItem('user');
@@ -33,6 +47,7 @@ export const AuthProvider = ({ children }) => {
                         setUser(res.data);
                         localStorage.setItem('user', JSON.stringify(res.data));
                         console.log("User profile fetched via token on init");
+                        syncFcmToken(); // Sync token on init if user is logged in
                     } catch (err) {
                         console.error("Failed to fetch user with stored token", err);
                         // If token is invalid, clear it
@@ -54,6 +69,7 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
             setUser(user);
+            syncFcmToken(); // Sync token after login
             return { success: true };
         } catch (err) {
             console.error(err);

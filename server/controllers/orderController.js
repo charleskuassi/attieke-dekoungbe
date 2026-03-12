@@ -1,5 +1,6 @@
 const { Order, OrderItem, Product, User, sequelize, DeliveryDriver, Promotion } = require('../models');
 const { sendOrderNotification, sendStatusUpdateEmail, sendAdminNewOrder, sendDriverAssigned } = require('../services/emailService');
+const notificationService = require('../services/notificationService');
 const log = require('../utils/logger');
 const axios = require('axios');
 
@@ -177,7 +178,14 @@ exports.createOrder = async (req, res) => {
         // Admin Email
         sendAdminNewOrder(fullOrder).catch(err => console.error('Admin Email error:', err.message));
 
-        // Admin Dashboard Notification
+        // Admin Push/FCM Notification
+        notificationService.notifyAdmins({
+            title: "💰 Nouvelle Commande !",
+            body: `Commande #${order.id} de ${customer_name} (${total_price} FCFA)`,
+            data: { orderId: order.id.toString(), type: 'new_order' }
+        }).catch(err => console.error('Admin Notification error:', err.message));
+
+        // Admin Dashboard Notification (Legacy DB)
         const { createNotification } = require('./notificationController');
         createNotification('order', `Nouvelle commande #${order.id} de ${customer_name}`, order.id);
 
@@ -264,6 +272,14 @@ exports.updateOrderStatus = async (req, res) => {
             if (['en_cours', 'delivered', 'cancelled', 'preparing'].includes(status)) {
                 console.log(`📧 Sending status update email (${status}) to ${order.User.email}`);
                 sendStatusUpdateEmail(order, order.User, status).catch(err => console.error('Status Email Error:', err));
+                
+                // Push Notification for Status Update
+                const statusNames = { 'en_cours': 'Acceptée', 'preparing': 'En préparation', 'delivered': 'Livrée', 'cancelled': 'Annulée' };
+                notificationService.sendToUser(order.User, {
+                    title: `📦 Commande #${order.id}`,
+                    body: `Le statut de votre commande est maintenant : ${statusNames[status] || status}`,
+                    data: { orderId: order.id.toString(), type: 'status_update' }
+                }).catch(err => console.error('Status Push Notification error:', err.message));
             }
             // Using logic: If status becomes shipping (En livraison) without driver initially?
             // Usually shipping implies driver assigned.
@@ -288,9 +304,17 @@ exports.assignDriver = async (req, res) => {
         order.status = 'shipping'; // Update status to shipping
         await order.save();
 
-        // Email Notification for Driver Assignment
-        if (order.User && order.User.email) {
-            sendDriverAssigned(order, order.User).catch(e => console.error("Email Error:", e.message));
+        // Email & Push Notification for Driver Assignment
+        if (order.User) {
+            if (order.User.email) {
+                sendDriverAssigned(order, order.User).catch(e => console.error("Email Error:", e.message));
+            }
+            
+            notificationService.sendToUser(order.User, {
+                title: "🛵 Livreur en route !",
+                body: `Un livreur a été assigné à votre commande #${order.id}.`,
+                data: { orderId: order.id.toString(), type: 'driver_assigned' }
+            }).catch(err => console.error('Driver Assigned Push Notification error:', err.message));
         }
 
         res.json({ message: 'Driver assigned successfully', order });

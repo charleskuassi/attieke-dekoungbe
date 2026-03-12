@@ -312,3 +312,27 @@ exports.getMe = async (req, res) => {
         res.status(500).json({ message: 'Erreur serveur' });
     }
 };
+
+exports.updateFcmToken = async (req, res) => {
+    try {
+        const { fcmToken } = req.body;
+        const userId = req.user.id;
+
+        if (!fcmToken) {
+            return res.status(400).json({ message: 'Token FCM manquant' });
+        }
+
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'Utilisateur introuvable' });
+        }
+
+        user.fcmToken = fcmToken;
+        await user.save();
+
+        res.json({ success: true, message: 'Token FCM mis à jour' });
+    } catch (err) {
+        console.error("Erreur mise à jour Token FCM:", err);
+        res.status(500).json({ message: 'Erreur serveur' });
+    }
+};

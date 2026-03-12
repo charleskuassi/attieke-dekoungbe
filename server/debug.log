@@ -8862,3 +8862,17 @@
   "phone": "0164647730",
   "address": "+229 41816669\n+229 64647730"
 }
+[2026-03-10T19:53:13.681Z] createOrder called. User: {
+  "id": 3,
+  "role": "admin",
+  "iat": 1773171587,
+  "exp": 1773257987
+}
+[2026-03-10T19:53:16.350Z] ✅ Commande créée avec succès ID: 25
+[2026-03-10T20:09:03.630Z] createOrder called. User: {
+  "id": 12,
+  "role": "customer",
+  "iat": 1773173282,
+  "exp": 1773259682
+}
+[2026-03-10T20:09:06.926Z] ✅ Commande créée avec succès ID: 26
