@@ -11,6 +11,7 @@ try {
     // On vérifie si le fichier existe avant de tenter l'initialisation
     const fs = require('fs');
     if (fs.existsSync(serviceAccountPath)) {
+        console.log("🔍 Tentative d'initialisation Firebase avec le fichier JSON...");
         const serviceAccount = require(serviceAccountPath);
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount)
@@ -18,10 +19,10 @@ try {
         isFirebaseInitialized = true;
         console.log("✅ Firebase Admin initialisé avec succès.");
     } else {
-        console.warn("⚠️ Fichier firebase-service-account.json manquant. Les notifications Push sont désactivées.");
+        console.warn("⚠️ Fichier firebase-service-account.json MANQUANT à l'emplacement:", serviceAccountPath);
     }
 } catch (error) {
-    console.error("❌ Erreur lors de l'initialisation de Firebase Admin:", error.message);
+    console.error("❌ ERREUR FATALE initialisation Firebase:", error.message);
 }
 
 /**
@@ -49,7 +50,6 @@ const NotificationService = {
         let pushSent = false;
 
         // 1. Tenter l'envoi Push via FCM
-        if (isFirebaseInitialized && user.fcmToken) {
             try {
                 const message = {
                     notification: {
@@ -59,6 +59,7 @@ const NotificationService = {
                     data: payload.data || {},
                     token: user.fcmToken,
                 };
+                console.log(`📡 Envoi FCM vers le token de ${user.email}...`);
                 await admin.messaging().send(message);
                 console.log(`📱 Push envoyé avec succès à ${user.name}`);
                 pushSent = true;
