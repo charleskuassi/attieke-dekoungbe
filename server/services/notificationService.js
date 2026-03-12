@@ -50,6 +50,7 @@ const NotificationService = {
         let pushSent = false;
 
         // 1. Tenter l'envoi Push via FCM
+        if (isFirebaseInitialized && user.fcmToken) {
             try {
                 const message = {
                     notification: {
