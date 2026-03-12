@@ -73,6 +73,9 @@ const sendEmail = async (to, subject, htmlContent) => {
     }
 };
 
+exports.sendEmail = sendEmail;
+
+
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || process.env.SMTP_USER || 'admin@attieke-dekoungbe.com';
 
 // --- CLIENT NOTIFICATIONS ---
