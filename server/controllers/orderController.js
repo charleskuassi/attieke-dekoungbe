@@ -52,7 +52,7 @@ exports.createOrder = async (req, res) => {
                         transactionId: transaction_id
                     }, {
                         headers: {
-                            'x-api-key': process.env.KKIAPAY_PUBLIC_KEY || "eb11d9d0d01d11f09d79fd5b587b7fd7",
+                            'x-api-key': process.env.KKIAPAY_SECRET_KEY || "sk_715d6be84cbdea12741311eea8535dbe1e08e8470685be196cd88ea9035365ce",
                             'Content-Type': 'application/json'
                         }
                     });

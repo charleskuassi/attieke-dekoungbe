@@ -13,8 +13,11 @@ const Register = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [registrationDisabled] = useState(false); // Constant to disable registration
     const { loginWithData } = useAuth();
     const navigate = useNavigate();
+
+    // if (registrationDisabled) removed as per request to re-enable registration
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });

@@ -9,9 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_key';
 
 exports.register = async (req, res) => {
     try {
-        log('Register called:', req.body);
-        console.log("Register body:", req.body);
-        let { name, email, password, phone, address, role } = req.body;
+        let { email, password, name, phone, address, role } = req.body;
 
         // Sanitize
         email = email?.trim().toLowerCase();
@@ -60,8 +58,7 @@ exports.register = async (req, res) => {
                 userId: user.id
             });
         } catch (emailError) {
-
-            console.error("Erreur SMTP (Ignorée en local):", emailError);
+            console.error("Erreur SMTP :", emailError);
             
             // SECURITY: Only return the code in Development mode
             const responseData = {
