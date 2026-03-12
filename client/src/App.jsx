@@ -24,6 +24,7 @@ import NetworkAlert from './components/NetworkAlert';
 
 import Reviews from './pages/Reviews';
 import { useAuth } from './context/AuthContext';
+import { onMessageListener } from './firebase';
 
 function App() {
     const { user, logout } = useAuth();
@@ -47,6 +48,25 @@ function App() {
 
         return () => clearTimeout(timer);
     }, [loading]);
+
+    // Écouteur de notifications Push (FCM) au premier plan
+    useEffect(() => {
+        const unsubscribe = onMessageListener()
+            .then((payload) => {
+                const { title, body } = payload.notification;
+                // On peut utiliser window.alert ou un toast plus élégant
+                // Pour l'instant, alert() pour être sûr de ne pas le rater
+                alert(`🔔 ${title}\n\n${body}`);
+                
+                // On relance l'écouteur après chaque message
+                window.location.reload(); // Optionnel : à améliorer avec un rafraîchissement d'état
+            })
+            .catch((err) => console.log('FCM listener error:', err));
+            
+        return () => {
+            // Unsubscribe logic if needed
+        };
+    }, []);
 
 
 
