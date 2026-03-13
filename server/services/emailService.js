@@ -150,17 +150,33 @@ exports.sendStatusUpdateEmail = async (order, user, status) => {
     await sendEmail(user.email, subject, html);
 };
 
-exports.sendDriverAssigned = async (order, user) => {
+exports.sendDriverAssigned = async (order, user, driverName = "Notre livreur", driverPhone = "") => {
+    const dashboardUrl = `${process.env.FRONTEND_URL || 'https://attieke-dekoungbe.onrender.com'}/dashboard`;
+    
     const html = `
-        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-            <h2 style="color: #ea580c;">🛵 Votre livreur est en route !</h2>
-            <p>Bonjour ${user.name},</p>
-            <p>Votre commande <strong>#${order.id}</strong> a été récupérée par notre livreur.</p>
-            <p>Il se dirige vers : <strong>${order.address}</strong>.</p>
-            <p>Préparez-vous à déguster !</p>
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #ea580c; text-align: center;">🛵 Votre livreur est en route !</h2>
+            <p>Bonjour <strong>${user.name}</strong>,</p>
+            <p>Bonne nouvelle ! Votre commande <strong>#${order.id}</strong> a été récupérée par <strong>${driverName}</strong>.</p>
+            
+            ${driverPhone ? `
+            <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0; font-weight: bold;">Contact de votre livreur :</p>
+                <p style="margin: 5px 0; color: #ea580c; font-size: 1.2em;">📞 ${driverPhone}</p>
+            </div>
+            ` : ''}
+
+            <p>Il se dirige actuellement vers votre adresse : <br/><em>${order.address}</em></p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="${dashboardUrl}" style="background-color: #ea580c; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Voir sur mon Dashboard</a>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            <p style="font-size: 0.9em; color: #666; text-align: center;">Attièkè Dèkoungbé - Le goût authentique livré chez vous.</p>
         </div>
     `;
-    await sendEmail(user.email, `🛵 Votre livreur arrive (Commande #${order.id})`, html);
+    await sendEmail(user.email, `🛵 Votre livreur est en route (Commande #${order.id})`, html);
 };
 
 exports.sendReservationReceived = async (reservation, userEmail) => {

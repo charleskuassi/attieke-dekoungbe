@@ -304,15 +304,21 @@ exports.assignDriver = async (req, res) => {
         order.status = 'shipping'; // Update status to shipping
         await order.save();
 
+        // Récupérer les infos du livreur pour l'e-mail
+        const { DeliveryDriver } = require('../models');
+        const driver = await DeliveryDriver.findByPk(driverId);
+        const driverName = driver ? driver.name : "Notre livreur";
+        const driverPhone = driver ? driver.phone : "";
+
         // Email & Push Notification for Driver Assignment
         if (order.User) {
             if (order.User.email) {
-                sendDriverAssigned(order, order.User).catch(e => console.error("Email Error:", e.message));
+                sendDriverAssigned(order, order.User, driverName, driverPhone).catch(e => console.error("Email Error:", e.message));
             }
             
             notificationService.sendToUser(order.User, {
                 title: "🛵 Livreur en route !",
-                body: `Un livreur a été assigné à votre commande #${order.id}.`,
+                body: `${driverName} a récupéré votre commande #${order.id}. Contact : ${driverPhone}`,
                 data: { orderId: order.id.toString(), type: 'driver_assigned' }
             }).catch(err => console.error('Driver Assigned Push Notification error:', err.message));
         }
