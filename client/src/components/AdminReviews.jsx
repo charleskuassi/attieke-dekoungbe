@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
-import { Star, AlertTriangle, CheckCircle, MessageSquare, Phone } from 'lucide-react';
+import { Star, AlertTriangle, CheckCircle, MessageSquare, Phone, Trash2 } from 'lucide-react';
 
 const AdminReviews = () => {
     const [reviews, setReviews] = useState([]);
@@ -24,11 +24,22 @@ const AdminReviews = () => {
     const handleMarkAsRead = async (id) => {
         try {
             await api.put(`/api/reviews/${id}/read`);
-            // Update local state
             setReviews(reviews.map(r => r.id === id ? { ...r, status: 'read' } : r));
         } catch (error) {
             console.error("Error marking as read:", error);
             alert("Erreur lors de la mise à jour");
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("❗ Supprimer définitivement cet avis/plainte ?")) return;
+        try {
+            await api.delete(`/api/reviews/${id}`);
+            setReviews(reviews.filter(r => r.id !== id));
+            alert("Supprimé.");
+        } catch (error) {
+            console.error("Delete review error:", error);
+            alert("Erreur lors de la suppression.");
         }
     };
 
@@ -77,6 +88,13 @@ const AdminReviews = () => {
                                         ) : (
                                             <span className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm rounded font-medium">Traité</span>
                                         )}
+                                        <button
+                                            onClick={() => handleDelete(review.id)}
+                                            className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
+                                            title="Supprimer la plainte"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -103,14 +121,23 @@ const AdminReviews = () => {
                                 <span className="text-xs text-gray-400 dark:text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</span>
                             </div>
                             <p className="text-gray-600 dark:text-gray-300 italic">"{review.message}"</p>
-                            {review.status === 'new' && (
+                            <div className="mt-3 flex justify-between items-center">
+                                {review.status === 'new' ? (
+                                    <button
+                                        onClick={() => handleMarkAsRead(review.id)}
+                                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                                    >
+                                        Marquer comme lu
+                                    </button>
+                                ) : <span />}
                                 <button
-                                    onClick={() => handleMarkAsRead(review.id)}
-                                    className="mt-3 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                                    onClick={() => handleDelete(review.id)}
+                                    className="p-1 px-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
+                                    title="Supprimer l'avis"
                                 >
-                                    Marquer comme lu
+                                    <Trash2 size={14} />
                                 </button>
-                            )}
+                            </div>
                         </div>
                     ))}
                 </div>

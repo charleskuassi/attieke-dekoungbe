@@ -15,5 +15,6 @@ router.get('/admin', protect, orderController.getAllOrders);
 router.get('/notifications-counts', protect, adminController.getNotificationCounts);
 router.patch('/admin/:id', protect, orderController.updateOrderStatus);
 router.patch('/admin/:id/assign', protect, orderController.assignDriver);
+router.delete('/admin/:id', protect, orderController.deleteOrder);
 
 module.exports = router;

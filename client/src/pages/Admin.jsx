@@ -175,6 +175,18 @@ const Admin = () => {
 
     };
 
+    const handleDeleteOrder = async (orderId) => {
+        if (!window.confirm("❗ Êtes-vous sûr de vouloir supprimer DÉFINITIVEMENT cette commande ? Cette action est irréversible.")) return;
+        try {
+            await api.delete(`/api/orders/admin/${orderId}`);
+            setOrders(orders.filter(o => o.id !== orderId));
+            alert("Commande supprimée.");
+        } catch (error) {
+            console.error("Delete order error:", error);
+            alert("Erreur lors de la suppression de la commande.");
+        }
+    };
+
     const handleLogout = () => {
         localStorage.removeItem('token');
         navigate('/login');
@@ -213,7 +225,22 @@ const Admin = () => {
 
     const generateReport = (period, type = 'pdf') => {
         try {
-            alert(`Génération du rapport ${period} en cours...`);
+            const periodTrans = {
+                day: 'Journée',
+                week: 'Semaine',
+                month: 'Mois',
+                year: 'Année'
+            };
+
+            const statusTrans = {
+                pending: 'En attente',
+                paid: 'Payé',
+                preparing: 'En préparation',
+                completed: 'Livré / Terminé',
+                cancelled: 'Annulé'
+            };
+
+            alert(`Génération du rapport ${periodTrans[period] || period} en cours...`);
             const filtered = filterOrdersByPeriod(orders, period);
 
             if (filtered.length === 0) {
@@ -221,23 +248,21 @@ const Admin = () => {
                 return;
             }
 
-            const fileName = `Rapport_${period}_${new Date().toISOString().split('T')[0]}`;
+            const fileName = `Rapport_${periodTrans[period] || period}_${new Date().toISOString().split('T')[0]}`;
 
             if (type === 'pdf') {
                 const doc = new jsPDF();
 
                 // Header
                 doc.setFontSize(20);
-                doc.text(`Rapport des Ventes - ${period.toUpperCase()}`, 14, 22);
+                doc.text(`Rapport des Ventes - ${(periodTrans[period] || period).toUpperCase()}`, 14, 22);
                 doc.setFontSize(11);
-                doc.text(`Généré le: ${new Date().toLocaleString()}`, 14, 30);
+                doc.text(`Généré le: ${new Date().toLocaleString('fr-FR')}`, 14, 30);
 
                 // Stats Summary
                 const totalSales = filtered.reduce((sum, order) => sum + parseInt(order.total_price || 0), 0);
                 const totalOrders = filtered.length;
 
-                // Fix: toLocaleString can introduce non-breaking spaces (U+202F) that jsPDF doesn't like. 
-                // We replace them with regular spaces.
                 const formattedSales = totalSales.toLocaleString('fr-FR').replace(/\u202F/g, ' ').replace(/\u00A0/g, ' ');
 
                 doc.setFillColor(240, 240, 240);
@@ -247,13 +272,13 @@ const Admin = () => {
                 doc.text(`Nombre de Commandes: ${totalOrders}`, 20, 56);
 
                 // Table of Orders
-                const tableColumn = ["Ref", "Quittance", "Client", "Date", "Statut", "Montant"];
+                const tableColumn = ["Réf", "Quittance", "Client", "Date", "Statut", "Montant"];
                 const tableRows = filtered.map(order => [
-                    order.id, // Ref interne
-                    order.transaction_id || '-', // Quittance / Transaction
+                    order.id,
+                    order.transaction_id || '-',
                     order.customer_name,
-                    new Date(order.createdAt).toLocaleDateString(),
-                    order.status,
+                    new Date(order.createdAt).toLocaleDateString('fr-FR'),
+                    statusTrans[order.status] || order.status,
                     `${order.total_price} FCFA`
                 ]);
 
@@ -261,25 +286,27 @@ const Admin = () => {
                     startY: 65,
                     head: [tableColumn],
                     body: tableRows,
+                    styles: { fontSize: 9 },
+                    headStyles: { fillColor: [234, 88, 12] } // Orange Dèkoungbé
                 });
 
                 doc.save(`${fileName}.pdf`);
-                alert("PDF généré !");
+                alert("PDF généré avec succès !");
             } else if (type === 'excel') {
                 const worksheet = XLSX.utils.json_to_sheet(filtered.map(o => ({
                     ID: o.id,
                     Quittance: o.transaction_id || '-',
                     Client: o.customer_name,
-                    Telephone: o.phone,
-                    Date: new Date(o.createdAt).toLocaleString(),
-                    Status: o.status,
+                    Téléphone: o.phone,
+                    Date: new Date(o.createdAt).toLocaleString('fr-FR'),
+                    Statut: statusTrans[o.status] || o.status,
                     Montant: o.total_price,
                     Articles: o.Products ? o.Products.map(p => `${p.OrderItem.quantity}x ${p.name}`).join(', ') : ''
                 })));
                 const workbook = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(workbook, worksheet, "Rapport");
                 XLSX.writeFile(workbook, `${fileName}.xlsx`);
-                alert("Excel généré !");
+                alert("Excel généré avec succès !");
             }
         } catch (error) {
             console.error("Erreur génération rapport:", error);
@@ -448,7 +475,7 @@ const Admin = () => {
     if (loading) return <div className="flex justify-center items-center h-screen">Chargement...</div>;
 
     return (
-        <div className="flex h-[calc(100vh-6rem)] bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 overflow-hidden">
+        <div className="flex h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 overflow-hidden">
             {/* Mobile Overlay */}
             {isSidebarOpen && (
                 <div
@@ -463,7 +490,7 @@ const Admin = () => {
                 fixed inset-y-0 left-0 z-50 transform
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                 md:translate-x-0
-                md:sticky md:top-20 md:h-[calc(100vh-5rem)] md:bottom-auto md:z-40 md:shadow-none
+                md:sticky md:top-0 md:h-screen md:bottom-auto md:z-40 md:shadow-none
                 flex flex-col border-r border-gray-200 dark:border-gray-700 flex-shrink-0
             `}>
                 <div className="p-6 flex justify-between items-center bg-white dark:bg-gray-800 z-10">
@@ -842,18 +869,27 @@ const Admin = () => {
                                                         {new Date(order.createdAt).toLocaleDateString()} {new Date(order.createdAt).toLocaleTimeString()}
                                                     </td>
                                                     <td className="p-4">
-                                                        <select
-                                                            value={order.status}
-                                                            onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
-                                                            className="border dark:border-gray-600 rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 dark:text-white"
-                                                        >
-                                                            <option value="pending">En attente</option>
-                                                            <option value="paid">Payé</option>
-                                                            <option value="preparing">En cuisine</option>
-                                                            <option value="shipping">En livraison</option>
-                                                            <option value="completed">Livré</option>
-                                                            <option value="cancelled">Annulé</option>
-                                                        </select>
+                                                        <div className="flex items-center gap-2">
+                                                            <select
+                                                                value={order.status}
+                                                                onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
+                                                                className="border dark:border-gray-600 rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 dark:text-white"
+                                                            >
+                                                                <option value="pending">En attente</option>
+                                                                <option value="paid">Payé</option>
+                                                                <option value="preparing">En cuisine</option>
+                                                                <option value="shipping">En livraison</option>
+                                                                <option value="completed">Livré</option>
+                                                                <option value="cancelled">Annulé</option>
+                                                            </select>
+                                                            <button 
+                                                                onClick={() => handleDeleteOrder(order.id)}
+                                                                className="p-1 px-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-md transition-all"
+                                                                title="Supprimer la commande"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             ))

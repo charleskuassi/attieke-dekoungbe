@@ -70,6 +70,8 @@ function App() {
 
 
 
+    const isAdminRoute = location.pathname.startsWith('/admin');
+
     return (
         <div className="min-h-screen bg-background dark:bg-gray-900 dark:text-white transition-colors duration-300 flex flex-col">
             <AnimatePresence mode="wait">
@@ -78,9 +80,9 @@ function App() {
 
             {!loading && (
                 <>
-                    <AnnouncementBar />
-                    <Header />
-                    <main className="flex-grow">
+                    {!isAdminRoute && <AnnouncementBar />}
+                    {!isAdminRoute && <Header />}
+                    <main className={isAdminRoute ? "h-screen w-full" : "flex-grow"}>
                         <Routes>
                             <Route path="/" element={<Home />} />
                             <Route path="/menu" element={<Menu />} />

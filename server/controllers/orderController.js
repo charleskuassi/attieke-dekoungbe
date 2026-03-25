@@ -329,3 +329,19 @@ exports.assignDriver = async (req, res) => {
         res.status(500).json({ message: 'Server Error' });
     }
 };
+
+exports.deleteOrder = async (req, res) => {
+    try {
+        const order = await Order.findByPk(req.params.id);
+        if (!order) return res.status(404).json({ message: 'Order not found' });
+        
+        // Supprimer les OrderItems associés (normalement cascades si configuré, mais plus sûr ici)
+        await OrderItem.destroy({ where: { OrderId: order.id } });
+        await order.destroy();
+        
+        res.json({ message: 'Order deleted successfully' });
+    } catch (err) {
+        console.error("Delete Order Error:", err);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};

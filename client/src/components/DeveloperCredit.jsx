@@ -9,8 +9,8 @@ const DeveloperCredit = () => {
         {
             id: 1,
             name: "Mr TCHOGBE Légérol", 
-            role: "Chef de Projet & Stratège",
-            description: "Expert en coordination et pilotage de projets digitaux complexes. Garant de la vision produit.",
+            role: "Développeur Web Fullstack",
+            description: "Expert en solutions web performantes et évolutives. Passionné par l'innovation technologique.",
             email: "legerolt@gmail.com",
             phone: "+22957004681",
             color: "from-blue-500 to-indigo-600"
@@ -18,7 +18,7 @@ const DeveloperCredit = () => {
         {
             id: 2,
             name: "Mr LOKOSSOU Mahougnon Marcellin",
-            role: "Fullstack Lead Developer",
+            role: "Développeur Web Fullstack",
             description: "Spécialiste en architecture logicielle et technologies web modernes (React, Node.js, Firebase).",
             email: "lokossoumahougnon281@gmail.com",
             phone: "+22958952058",
@@ -62,14 +62,14 @@ const DeveloperCredit = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 backdrop-blur-xl bg-black/80"
+                        className="fixed inset-0 z-[9999] flex justify-center items-start p-4 md:p-8 backdrop-blur-xl bg-black/80 overflow-y-auto"
                         onClick={() => setIsOpen(false)}
                     >
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9, rotateX: 20 }}
                             animate={{ opacity: 1, scale: 1, rotateX: 0 }}
                             exit={{ opacity: 0, scale: 0.9, rotateX: 20 }}
-                            className="bg-[#111827] w-full max-w-4xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl relative"
+                            className="bg-[#111827] w-full max-w-4xl border border-white/10 rounded-[2.5rem] shadow-2xl relative my-auto"
                             onClick={(e) => e.stopPropagation()}
                         >
                             {/* Éléments de décoration */}

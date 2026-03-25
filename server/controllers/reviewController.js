@@ -76,3 +76,16 @@ exports.markAsRead = async (req, res) => {
         res.status(500).json({ message: 'Server Error' });
     }
 };
+
+exports.deleteReview = async (req, res) => {
+    try {
+        const review = await Review.findByPk(req.params.id);
+        if (!review) return res.status(404).json({ message: 'Review not found' });
+        
+        await review.destroy();
+        res.json({ message: 'Review deleted successfully' });
+    } catch (err) {
+        console.error("Delete Review Error:", err);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
