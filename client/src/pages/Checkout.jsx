@@ -128,11 +128,6 @@ const Checkout = () => {
             return;
         }
 
-        if (zones.length > 0 && !deliveryInfo.zoneName) {
-            alert("Veuillez sélectionner votre zone de livraison.");
-            return;
-        }
-
         // VALIDATION TÉLÉPHONE (Strictement 10 chiffres)
         const phoneRegex = /^\d{10}$/;
         if (!phoneRegex.test(deliveryInfo.phone)) {
@@ -179,35 +174,9 @@ const Checkout = () => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1 dark:text-gray-300">Téléphone</label>
+                            <label className="block text-sm font-medium mb-1 dark:text-gray-300">Numéro à appeler</label>
                             <input type="tel" value={deliveryInfo.phone} onChange={(e) => setDeliveryInfo({ ...deliveryInfo, phone: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Votre numéro" />
                         </div>
-
-                        {/* Sélecteur de Zone */}
-                        {zones.length > 0 && (
-                            <div>
-                                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Zone de Livraison <span className="text-red-500">*</span></label>
-                                <select
-                                    value={deliveryInfo.zoneName}
-                                    onChange={(e) => {
-                                        const selectedZone = zones.find(z => z.name === e.target.value);
-                                        setDeliveryInfo({
-                                            ...deliveryInfo,
-                                            zoneName: e.target.value,
-                                            zonePrice: selectedZone ? selectedZone.price : 0
-                                        });
-                                    }}
-                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                >
-                                    <option value="">-- Choisir une zone --</option>
-                                    {zones.map(zone => (
-                                        <option key={zone.id} value={zone.name}>
-                                            {zone.name} (+{zone.price} F)
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        )}
 
                         <div>
                             <label className="block text-sm font-medium mb-1 dark:text-gray-300">Précision Adresse <span className="text-red-500">*</span></label>
@@ -298,10 +267,10 @@ const Checkout = () => {
                         <div className="mt-6">
     
 
-                            {(!deliveryInfo.name || !deliveryInfo.phone || !deliveryInfo.address || (zones.length > 0 && !deliveryInfo.zoneName)) ? (
+                            {(!deliveryInfo.name || !deliveryInfo.phone || !deliveryInfo.address) ? (
                                 <div className="bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 p-3 rounded-lg flex items-center gap-2 text-sm border border-yellow-200 dark:border-yellow-800">
                                     <AlertCircle size={16} />
-                                    <p>Remplissez la zone et l'adresse pour commander.</p>
+                                    <p>Remplissez l'adresse pour commander.</p>
                                 </div>
                             ) : (
                                 <button

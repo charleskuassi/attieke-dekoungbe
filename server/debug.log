@@ -8876,3 +8876,15 @@
   "exp": 1773259682
 }
 [2026-03-10T20:09:06.926Z] ✅ Commande créée avec succès ID: 26
+[2026-03-28T22:00:17.575Z] Update Profile called: {
+  "name": "Charles KUASSI",
+  "phone": "0167160088",
+  "address": "+229 41816669\n+229 64647730"
+}
+[2026-03-28T22:01:00.626Z] createOrder called. User: {
+  "id": 12,
+  "role": "customer",
+  "iat": 1774734887,
+  "exp": 1774821287
+}
+[2026-03-28T22:01:03.210Z] ✅ Commande créée avec succès ID: 44
