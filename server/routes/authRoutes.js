@@ -2,25 +2,64 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
-
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
-
 const validate = require('../middleware/validate');
 const { registerSchema, loginSchema } = require('../utils/validationSchemas');
+
+// Base prefix: /api/auth
 
 router.get('/test', (req, res) => {
     res.send('Auth Routes Working');
 });
 
-router.post('/register', validate(registerSchema), authController.register);
-router.post('/login', validate(loginSchema), authController.login);
-router.post('/verify-email', authController.verifyEmail);
-router.post('/forgot-password', authController.forgotPassword);
-router.put('/reset-password/:token', authController.resetPassword);
-router.put('/profile', protect, authController.updateProfile);
-router.put('/fcm-token', protect, authController.updateFcmToken);
-router.get('/me', protect, authController.getMe);
+// Registration
+router.post('/register', validate(registerSchema), (req, res, next) => {
+    if (typeof authController.register !== 'function') return res.status(500).json({ error: 'Auth registration not loaded' });
+    authController.register(req, res, next);
+});
+
+// Login
+router.post('/login', validate(loginSchema), (req, res, next) => {
+    if (typeof authController.login !== 'function') return res.status(500).json({ error: 'Auth login not loaded' });
+    authController.login(req, res, next);
+});
+
+// Verify Email
+router.post('/verify-email', (req, res, next) => {
+    if (typeof authController.verifyEmail !== 'function') return res.status(500).json({ error: 'Auth verification not loaded' });
+    authController.verifyEmail(req, res, next);
+});
+
+// Forgot Password
+router.post('/forgot-password', (req, res, next) => {
+    if (typeof authController.forgotPassword !== 'function') return res.status(500).json({ error: 'Auth forgot-password not loaded' });
+    authController.forgotPassword(req, res, next);
+});
+
+// Reset Password
+router.put('/reset-password/:token', (req, res, next) => {
+    if (typeof authController.resetPassword !== 'function') return res.status(500).json({ error: 'Auth reset-password not loaded' });
+    authController.resetPassword(req, res, next);
+});
+
+// Profile Management
+router.put('/profile', protect, (req, res, next) => {
+    if (typeof authController.updateProfile !== 'function') return res.status(500).json({ error: 'Auth profile update not loaded' });
+    authController.updateProfile(req, res, next);
+});
+
+// FCM Token Update
+router.put('/fcm-token', protect, (req, res, next) => {
+    if (typeof authController.updateFcmToken !== 'function') return res.status(500).json({ error: 'Auth FCM-token not loaded' });
+    authController.updateFcmToken(req, res, next);
+});
+
+// Get Me
+router.get('/me', protect, (req, res, next) => {
+    if (typeof authController.getMe !== 'function') return res.status(500).json({ error: 'Auth get-me not loaded' });
+    authController.getMe(req, res, next);
+});
 
 // Google Auth Routes
 if (process.env.GOOGLE_CLIENT_ID) {
@@ -31,61 +70,20 @@ if (process.env.GOOGLE_CLIENT_ID) {
 
     router.get('/google/callback', (req, res, next) => {
         passport.authenticate('google', { session: false }, (err, user, info) => {
-            if (err) {
-                console.error("GOOGLE AUTH ERROR:", err);
-                return res.redirect('/login?error=auth_error');
+            if (err || !user) {
+                console.error("GOOGLE AUTH ERROR:", err || "No user");
+                return res.redirect(`${process.env.FRONTEND_URL || ''}/login?error=google_failed`);
             }
-            if (!user) {
-                console.error("GOOGLE AUTH FAILED: No user returned", info);
-                return res.redirect('/login?error=google_failed');
-            }
-
-            // Success: User found
             req.user = user;
-            console.log("GOOGLE CALLBACK SUCCESS - User:", user.email);
-            
-            // PARSE STATE with Fallback
-            let returnUrl = process.env.FRONTEND_URL || '/';
-            let isMobile = false;
-
-            try {
-                const rawState = req.query.state;
-                if (rawState) {
-                    if (rawState === 'mobile') {
-                        isMobile = true;
-                    } else if (rawState === 'web') {
-                        // Keep default returnUrl
-                    } else {
-                        // Try Base64 Decode
-                        const decoded = Buffer.from(rawState, 'base64').toString('utf-8');
-                        // Simple check to avoid JSON.parse on random strings
-                        if (decoded.trim().startsWith('{')) {
-                            const data = JSON.parse(decoded);
-                            if (data.platform === 'mobile') isMobile = true;
-                            if (data.returnUrl) returnUrl = data.returnUrl;
-                        }
-                    }
-                }
-            } catch (e) {
-                console.log("State parsing failed, using default:", e.message);
-            }
-
             try {
                 const token = jwt.sign(
                     { id: user.id, role: user.role },
                     process.env.JWT_SECRET || 'your_super_secret_key',
                     { expiresIn: '1d' }
                 );
-
-                // Web Redirect
-                // Ensure we don't double slash
-                const cleanUrl = returnUrl.replace(/\/$/, '');
-                // Redirect to the hash router path
-                console.log(`Redirecting to Web Frontend: ${cleanUrl}/#/google-callback`);
-                return res.redirect(`${cleanUrl}/#/google-callback?token=${token}`);
+                return res.redirect(`${process.env.FRONTEND_URL || ''}/#/google-callback?token=${token}`);
             } catch (error) {
-                console.error("Token Generation Error:", error);
-                return res.redirect('/login?error=token_error');
+                return res.redirect(`${process.env.FRONTEND_URL || ''}/login?error=token_error`);
             }
         })(req, res, next);
     });

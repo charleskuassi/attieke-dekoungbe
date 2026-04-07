@@ -14,12 +14,28 @@ const PORT = process.env.PORT || 5000;
 
 // --- SECURITY MIDDLEWARES ---
 // 1. CORS FIRST (Critical for Vercel/Render communication)
+// 1. CORS FIRST (Critical for Communication between LWS and Render)
+const allowedOrigins = [
+    process.env.CLIENT_URL,
+    process.env.FRONTEND_URL,
+    'https://attiekedekoungbe.com',
+    'https://www.attiekedekoungbe.com',
+    'http://localhost:5173'
+];
+
 app.use(cors({
-    origin: process.env.CLIENT_URL || true, // In PROD, set CLIENT_URL in .env to restrict access
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            return callback(new Error('CORS Policy: Origin not allowed'), false);
+        }
+        return callback(null, true);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 }));
+
 
 // 2. Helmet (Security Headers)
 app.use(helmet({
