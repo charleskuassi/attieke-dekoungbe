@@ -15,10 +15,8 @@ const GoogleCallback = () => {
             // 1. Store Token immediately
             localStorage.setItem('token', token);
             
-            // 2. Force HARD RELOAD to root immediately
-            // We skip fetching /me here because AuthContext will do it on app init
-            // This avoids race conditions and double-fetching issues
-            window.location.href = '/'; 
+            // 2. Use React Router navigation to return home
+            navigate('/');
         } else {
             console.error("No token found in callback URL");
             navigate('/login?error=no_token');
