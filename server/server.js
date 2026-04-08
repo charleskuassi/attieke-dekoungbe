@@ -105,19 +105,22 @@ app.get('*', (req, res) => {
 
 // --- SERVER START ---
 async function startServer() {
+    // 1. On démarre le serveur IMMEDIATEMENT pour satisfaire Render
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT} (Waking up...)`);
+    });
+
+    // 2. On lance la connexion DB en parallèle
     try {
         if (process.env.SKIP_DB_SYNC === 'true') {
-            console.log('⏩ Skipping DB sync (SKIP_DB_SYNC=true)');
+            console.log('⏩ Skipping DB sync');
         } else {
-            // ALTER: true est la clé pour ne pas effacer les données
+            console.log('🚀 Connexion à PostgreSQL (Neon)...');
             await sequelize.sync({ alter: true });
-            console.log("✅ Base de données synchronisée (Données conservées)");
+            console.log("✅ Base de données synchronisée !");
         }
-        app.listen(PORT, () => {
-            console.log(`🚀 Server running on port ${PORT}`);
-        });
     } catch (err) {
-        console.error('❌ Unable to connect/sync database:', err);
+        console.error('❌ Database connection error (will retry on next request):', err);
     }
 }
 
