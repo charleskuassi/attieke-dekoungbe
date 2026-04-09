@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Trash, AlertTriangle, CheckCircle, Shield, Archive } from 'lucide-react';
 
-const MaintenancePanel = () => {
+const MaintenancePanel = ({ refreshData }) => {
     const [days, setDays] = useState(30);
     const [targets, setTargets] = useState({
         orders: true,
@@ -36,6 +36,11 @@ const MaintenancePanel = () => {
             });
             setResult(res.data);
             setShowConfirm(false);
+            
+            // On appelle le rafraîchissement global des données de l'Admin
+            if (refreshData) {
+                refreshData();
+            }
         } catch (error) {
             console.error("Cleanup error:", error);
             alert("Erreur lors du nettoyage : " + (error.response?.data?.message || error.message));

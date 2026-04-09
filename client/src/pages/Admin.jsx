@@ -1072,7 +1072,7 @@ const Admin = () => {
                 {activeTab === 'drivers' && <DriversPanel drivers={drivers} setDrivers={setDrivers} />}
                 {activeTab === 'announcement' && <AdminAnnouncement />}
                 {activeTab === 'library' && <ImageLibrary />}
-                {activeTab === 'maintenance' && <MaintenancePanel />}
+                {activeTab === 'maintenance' && <MaintenancePanel refreshData={fetchData} />}
 
             </main>
 

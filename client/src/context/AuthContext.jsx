@@ -82,14 +82,30 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('user');
         localStorage.removeItem('cart'); // Clear cart on logout
         setUser(null);
-        setUser(null);
-        // Navigate or simple state update is enough usually 
-        window.location.href = '/login';
+        // For HashRouters on servers like LWS, we must include the # in redirects
+        window.location.href = '/#/login';
     };
 
     const updateUser = (userData) => {
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
+    };
+
+    const loginWithToken = async (token) => {
+        localStorage.setItem('token', token);
+        // Force Axios to use the new token
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        try {
+            const res = await api.get('/api/auth/me');
+            setUser(res.data);
+            localStorage.setItem('user', JSON.stringify(res.data));
+            syncFcmToken();
+            return { success: true };
+        } catch (err) {
+            console.error("Token login failed", err);
+            localStorage.removeItem('token');
+            return { success: false };
+        }
     };
 
     const loginWithData = (token, userData) => {
@@ -99,7 +115,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, loginWithData, logout, updateUser, loading }}>
+        <AuthContext.Provider value={{ user, login, loginWithToken, loginWithData, logout, updateUser, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     );

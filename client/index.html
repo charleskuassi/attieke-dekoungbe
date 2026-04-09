@@ -13,15 +13,16 @@
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://attieke-dekoungbe.art/" />
+  <meta property="og:url" content="https://attiekedekoungbe.com/" />
   <meta property="og:title" content="Attièkè Dèkoungbé - Le Goût Authentique Ivoirien" />
   <meta property="og:description" content="Le meilleur de l'attiéké et des saveurs ivoiriennes. Commande en ligne et livraison rapide." />
-  <meta property="og:image" content="/images/og-image.jpg" />
+  <meta property="og:image" content="https://attiekedekoungbe.com/images/delivery_packaging.jpg" />
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image" />
   <meta property="twitter:title" content="Attièkè Dèkoungbé - Fast-food Ivoirien" />
   <meta property="twitter:description" content="Plats ivoiriens authentiques livrés chez vous." />
+  <meta property="twitter:image" content="https://attiekedekoungbe.com/images/delivery_packaging.jpg" />
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,8 +34,18 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
-          .then(reg => console.log('SW registred!', reg.scope))
+          .then(reg => {
+            console.log('SW registered!', reg.scope);
+            // Force unrefresh du service worker à chaque chargement
+            reg.update();
+          })
           .catch(err => console.log('SW failed', err));
+
+        // Écoute les changements de SW pour recharger la page si besoin
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          console.log('Nouvelle version détectée, rechargement...');
+          window.location.reload();
+        });
       });
     }
   </script>

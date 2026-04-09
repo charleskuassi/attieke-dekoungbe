@@ -1,4 +1,4 @@
-const CACHE_NAME = 'attieke-v1';
+const CACHE_NAME = 'attieke-v2';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -6,7 +6,9 @@ const urlsToCache = [
     '/manifest.json'
 ];
 
+// Installation - skipWaiting permet au nouveau SW de prendre le relais immédiatement
 self.addEventListener('install', (event) => {
+    self.skipWaiting(); // Force le nouveau SW à prendre la main immédiatement
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
@@ -15,23 +17,31 @@ self.addEventListener('install', (event) => {
     );
 });
 
+// Stratégie : Network First avec fallback cache
 self.addEventListener('fetch', (event) => {
-    // For API requests, we don't cache (Network Online)
+    // API requests - network only
     if (event.request.url.includes('/api/')) {
         return;
     }
 
     event.respondWith(
-        caches.match(event.request)
+        fetch(event.request)
             .then((response) => {
-                if (response) {
-                    return response;
-                }
-                return fetch(event.request);
+                // Si le réseau fonctionne, on met à jour le cache en background
+                const responseClone = response.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(event.request, responseClone);
+                });
+                return response;
+            })
+            .catch(() => {
+                // Si le réseau échoue, on sert le cache
+                return caches.match(event.request);
             })
     );
 });
 
+// Activation - nettoie les anciens caches et prend le contrôle immédiatement
 self.addEventListener('activate', (event) => {
     const cacheWhitelist = [CACHE_NAME];
     event.waitUntil(
@@ -43,6 +53,8 @@ self.addEventListener('activate', (event) => {
                     }
                 })
             );
+        }).then(() => {
+            return self.clients.claim(); // Prend le contrôle de tous les clients immédiatement
         })
     );
 });

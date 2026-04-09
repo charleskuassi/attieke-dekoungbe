@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
+const { authLimiter, sanitizeInput } = require('../middleware/security');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const validate = require('../middleware/validate');
@@ -9,18 +10,21 @@ const { registerSchema, loginSchema } = require('../utils/validationSchemas');
 
 // Base prefix: /api/auth
 
+// Sanitize all inputs on auth routes
+router.use(sanitizeInput);
+
 router.get('/test', (req, res) => {
     res.send('Auth Routes Working');
 });
 
 // Registration
-router.post('/register', validate(registerSchema), (req, res, next) => {
+router.post('/register', authLimiter, validate(registerSchema), (req, res, next) => {
     if (typeof authController.register !== 'function') return res.status(500).json({ error: 'Auth registration not loaded' });
     authController.register(req, res, next);
 });
 
 // Login
-router.post('/login', validate(loginSchema), (req, res, next) => {
+router.post('/login', authLimiter, validate(loginSchema), (req, res, next) => {
     if (typeof authController.login !== 'function') return res.status(500).json({ error: 'Auth login not loaded' });
     authController.login(req, res, next);
 });

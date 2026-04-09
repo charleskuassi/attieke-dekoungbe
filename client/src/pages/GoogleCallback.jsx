@@ -4,24 +4,40 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
 const GoogleCallback = () => {
+    const { loginWithToken } = useAuth();
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const { updateUser } = useAuth();
 
     useEffect(() => {
         const token = searchParams.get('token');
         if (token) {
-            console.log("Token received in callback, saving and reloading...");
-            // 1. Store Token immediately
-            localStorage.setItem('token', token);
+            console.log("Nouveau jeton Google reçu... Nettoyage et connexion.");
             
-            // 2. Use React Router navigation to return home
-            navigate('/');
+            const handleTokenLogin = async () => {
+                // 1. On nettoie tout avant de mettre le nouveau compte
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+
+                try {
+                    const res = await loginWithToken(token);
+                    if (res.success) {
+                        // 2. Redirection fluide vers l'accueil
+                        navigate('/', { replace: true });
+                    } else {
+                        navigate('/login?error=auth_failed');
+                    }
+                } catch (err) {
+                    console.error("Erreur Callback:", err);
+                    navigate('/login?error=system_error');
+                }
+            };
+            
+            handleTokenLogin();
         } else {
-            console.error("No token found in callback URL");
-            navigate('/login?error=no_token');
+            console.error("Aucun jeton trouvé dans l'URL");
+            navigate('/login');
         }
-    }, [searchParams, navigate]);
+    }, [searchParams, navigate, loginWithToken]);
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-orange-50 dark:bg-gray-900 transition-colors duration-300">

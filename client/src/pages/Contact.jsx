@@ -38,8 +38,8 @@ const Contact = () => {
                             <div>
                                 <h3 className="font-bold text-lg text-gray-800">Téléphone</h3>
                                 <p className="text-gray-600">
-                                    <a href="tel:+22991042162" className="hover:text-primary transition">
-                                        +229 91 04 21 62
+                                    <a href="tel:+2290146464690" className="hover:text-primary transition">
+                                        +229 01 46 46 46 90
                                     </a>
                                 </p>
                             </div>
@@ -52,8 +52,8 @@ const Contact = () => {
                             <div>
                                 <h3 className="font-bold text-lg text-gray-800">Email</h3>
                                 <p className="text-gray-600">
-                                    <a href="mailto:infos@attieke-dekoungbe.com" className="hover:text-primary transition">
-                                        infos@attieke-dekoungbe.com
+                                    <a href="mailto:attiekedekoungbe01@gmail.com" className="hover:text-primary transition">
+                                        attiekedekoungbe01@gmail.com
                                     </a>
                                 </p>
                             </div>
@@ -164,8 +164,8 @@ const ContactMap = () => {
                             <div>
                                 <h3 className="font-bold text-lg text-gray-800 dark:text-white">Téléphone</h3>
                                 <p className="text-gray-600 dark:text-gray-300">
-                                    <a href="tel:+22991042162" className="hover:text-primary transition">
-                                        +229 91 04 21 62
+                                    <a href="tel:+2290146464690" className="hover:text-primary transition">
+                                        +229 01 46 46 46 90
                                     </a>
                                 </p>
                             </div>
@@ -178,8 +178,8 @@ const ContactMap = () => {
                             <div>
                                 <h3 className="font-bold text-lg text-gray-800 dark:text-white">Email</h3>
                                 <p className="text-gray-600 dark:text-gray-300">
-                                    <a href="mailto:infos@attieke-dekoungbe.com" className="hover:text-primary transition">
-                                        infos@attieke-dekoungbe.com
+                                    <a href="mailto:attiekedekoungbe01@gmail.com" className="hover:text-primary transition">
+                                        attiekedekoungbe01@gmail.com
                                     </a>
                                 </p>
                             </div>

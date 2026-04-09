@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 const hpp = require('hpp');
 const { sequelize } = require('./models');
+const { sanitizeInput, authLimiter } = require('./middleware/security');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
@@ -39,8 +40,57 @@ app.use(cors({
 
 // 2. Helmet (Security Headers)
 app.use(helmet({
-    contentSecurityPolicy: false, // Disable default strict CSP to allow Google Maps & external images
-    crossOriginResourcePolicy: { policy: "cross-origin" } // Allow cross-origin resources
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin resources
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: [
+                "'self'",
+                "'unsafe-inline'", // Required for React
+                'https://cdn.kkiapay.me', // KKiaPay payment widget
+                'https://www.google.com',
+                'https://www.gstatic.com',
+                'https://maps.googleapis.com',
+                'https://firebasemessaging.googleapis.com', // Firebase
+            ],
+            styleSrc: [
+                "'self'",
+                "'unsafe-inline'", // Required for React/Tailwind
+                'https://fonts.googleapis.com',
+            ],
+            fontSrc: [
+                "'self'",
+                'https://fonts.gstatic.com',
+            ],
+            imgSrc: [
+                "'self'",
+                'data:', // Base64 images
+                'blob:',
+                'https://res.cloudinary.com', // Cloudinary images
+                'https://maps.googleapis.com',
+                'https://maps.gstatic.com',
+                'https://*.googleapis.com',
+                'https://*.firebaseio.com',
+            ],
+            connectSrc: [
+                "'self'",
+                'https://api.attiekedekoungbe.com',
+                'https://*.kkiapay.me', // KKiaPay API
+                'https://identitytoolkit.googleapis.com', // Firebase Auth
+                'https://firestore.googleapis.com', // Firebase Firestore
+                'https://fcm.googleapis.com', // Firebase Cloud Messaging
+                'https://maps.googleapis.com',
+            ],
+            frameSrc: [
+                'https://www.google.com',
+                'https://maps.google.com',
+                'https://player.vimeo.com',
+            ],
+            workerSrc: ["'self'", 'blob:'],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: [], // Force HTTPS
+        },
+    },
 }));
 app.use(hpp()); // Parameter Pollution Protection
 
@@ -89,6 +139,17 @@ app.use('/api/admin/notifications', require('./routes/notificationRoutes'));
 
 // Legacy Image Controller
 app.get('/api/images', require('./controllers/imageController').getImages);
+
+// --- HEALTH CHECK (No Rate Limiting - for cron-job.org) ---
+// Cette route est utilisée pour garder le serveur éveillé sur Render
+app.get('/api/health', (req, res) => {
+    res.status(200).json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        memory: process.memoryUsage()
+    });
+});
 
 // --- FRONTEND SERVING (PRODUCTION) ---
 // Serve static files from the 'public' directory (where we copied the React build)

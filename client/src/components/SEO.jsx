@@ -2,15 +2,23 @@ import React, { useEffect } from 'react';
 
 const SEO = ({ title, description, schemaType = 'Restaurant' }) => {
   useEffect(() => {
+    const siteUrl = "https://attiekedekoungbe.com";
+    const defaultImage = `${siteUrl}/images/delivery_packaging.jpg`;
+
     if (title) {
       document.title = `${title} | Attièkè Dèkoungbé`;
+      document.querySelector('meta[property="og:title"]')?.setAttribute('content', title);
     }
+    
     if (description) {
-      const metaDescription = document.querySelector('meta[name="description"]');
-      if (metaDescription) {
-        metaDescription.setAttribute('content', description);
-      }
+      document.querySelector('meta[name="description"]')?.setAttribute('content', description);
+      document.querySelector('meta[property="og:description"]')?.setAttribute('content', description);
     }
+
+    // Image d'aperçu pour WhatsApp/Réseaux
+    document.querySelector('meta[property="og:image"]')?.setAttribute('content', defaultImage);
+    document.querySelector('meta[property="og:url"]')?.setAttribute('content', window.location.href);
+
   }, [title, description]);
 
   const jsonLd = {
@@ -18,20 +26,21 @@ const SEO = ({ title, description, schemaType = 'Restaurant' }) => {
     "@type": schemaType,
     "name": "Attièkè Dèkoungbé",
     "image": "https://attieke-dekoungbe.art/images/hero-home.jpg",
-    "url": "https://attieke-dekoungbe.art",
-    "telephone": "+2250101010101",
+    "url": "https://attiekedekoungbe.com",
+    "telephone": "+22900000000",
     "priceRange": "$$",
     "servesCuisine": "Ivoirienne, West African",
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "Quartier Dèkoungbé",
-      "addressLocality": "Abidjan",
-      "addressCountry": "CI"
+      "addressLocality": "Abomey-Calavi",
+      "addressCountry": "BJ"
     },
+    // ... geo stays same ...
     "geo": {
       "@type": "GeoCoordinates",
-      "latitude": 5.3484,
-      "longitude": -4.0305
+      "latitude": 6.3667,
+      "longitude": 2.4333
     },
     "openingHoursSpecification": [
       {
@@ -41,13 +50,13 @@ const SEO = ({ title, description, schemaType = 'Restaurant' }) => {
         "closes": "22:00"
       }
     ],
-    "menu": "https://attieke-dekoungbe.art/menu",
+    "menu": "https://attiekedekoungbe.com/menu",
     "acceptsReservations": "False",
     "potentialAction": {
       "@type": "OrderAction",
       "target": {
         "@type": "EntryPoint",
-        "urlTemplate": "https://attieke-dekoungbe.art/menu",
+        "urlTemplate": "https://attiekedekoungbe.com/menu",
         "inLanguage": "fr",
         "actionPlatform": [
           "http://schema.org/DesktopWebPlatform",
