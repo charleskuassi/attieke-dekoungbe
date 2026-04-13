@@ -21,6 +21,7 @@ import Contact from './pages/Contact';
 import FloatingContact from './components/FloatingContact';
 import DeveloperCredit from './components/DeveloperCredit';
 import NetworkAlert from './components/NetworkAlert';
+import Breadcrumb from './components/Breadcrumb';
 
 import Reviews from './pages/Reviews';
 import { useAuth } from './context/AuthContext';
@@ -82,6 +83,7 @@ function App() {
                 <>
                     {!isAdminRoute && <AnnouncementBar />}
                     {!isAdminRoute && <Header />}
+                    {!isAdminRoute && <Breadcrumb />}
                     <main className={isAdminRoute ? "h-screen w-full" : "flex-grow"}>
                         <Routes>
                             <Route path="/" element={<Home />} />

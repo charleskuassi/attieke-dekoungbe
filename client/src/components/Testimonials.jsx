@@ -38,10 +38,11 @@ const Testimonials = () => {
                         <div key={t.id} className="bg-white dark:bg-gray-700 p-6 rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 relative">
                             <Quote className="absolute top-4 right-4 text-orange-100 dark:text-gray-600 rotate-180" size={48} />
                             <div className="flex items-center gap-4 mb-4">
-                                <img 
-                                    src="/images/default-avatar.svg" 
-                                    alt={t.name} 
-                                    className="w-14 h-14 rounded-full object-cover border-2 border-primary shadow-sm grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" 
+                                <img
+                                    src="/images/default-avatar.svg"
+                                    alt={`Avis client - ${t.name}, restaurant Attièkè Dèkoungbé`}
+                                    loading="lazy"
+                                    className="w-14 h-14 rounded-full object-cover border-2 border-primary shadow-sm grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
                                 />
                                 <div>
                                     <h4 className="font-bold text-lg dark:text-white">{t.name}</h4>

@@ -1,0 +1,20 @@
+# Robots.txt pour Attièkè Dèkoungbé
+# https://attiekedekoungbe.com
+
+User-agent: *
+Allow: /
+
+# Pages admin à ne pas indexer
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /settings/
+
+# Fichiers système
+Disallow: /firebase-messaging-sw.js
+Disallow: /sw.js
+
+# Sitemap
+Sitemap: https://attiekedekoungbe.com/sitemap.xml
+
+# Crawl-delay pour éviter de surcharger le serveur
+Crawl-delay: 1

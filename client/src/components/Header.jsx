@@ -36,7 +36,7 @@ const Header = () => {
             <div className="container mx-auto px-4 py-4 flex justify-between items-center">
                 {/* Logo */}
                 <Link to="/" className="flex items-center gap-2 text-2xl font-serif font-bold text-primary">
-                    <img src="/images/logo.png" alt="Logo" className="h-16 w-auto object-contain" />
+                    <img src="/images/logo.png" alt="Attièkè Dèkoungbé - Restaurant Ivoirien à Abomey-Calavi" className="h-16 w-auto object-contain" fetchpriority="high" />
                     <span>Attièkè Dèkoungbé</span>
                 </Link>
 

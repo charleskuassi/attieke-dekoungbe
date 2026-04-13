@@ -87,7 +87,8 @@ const Reservation = () => {
             <div className="md:hidden w-full h-56 relative">
                 <img
                     src="/images/restaurant_interior.jpg"
-                    alt="Ambiance Restaurant"
+                    alt="Intérieur du restaurant Attièkè Dèkoungbé - Salle de dining"
+                    loading="lazy"
                     className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-black/20"></div>

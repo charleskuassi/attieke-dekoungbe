@@ -801,8 +801,9 @@ const Admin = () => {
                                                                 {p.image_url ? (
                                                                     <img
                                                                         src={getImageUrl(p.image_url)}
-                                                                        alt={p.name}
+                                                                        alt={`Produit ${p.name} - Attièkè Dèkoungbé`}
                                                                         onClick={() => setPreviewImage(getImageUrl(p.image_url))}
+                                                                        loading="lazy"
                                                                         className="w-10 h-10 rounded-md object-cover border border-gray-200 cursor-pointer hover:scale-105 transition-transform"
                                                                         title="Zoomer"
                                                                     />

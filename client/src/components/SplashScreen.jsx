@@ -39,7 +39,9 @@ const SplashScreen = ({ onComplete }) => {
             >
                 <img
                     src="https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=600&auto=format&fit=crop"
-                    alt="Restaurant Ambiance"
+                    alt="Attièkè Dèkoungbé - Cuisine ivoirienne authentique"
+                    loading="eager"
+                    fetchpriority="high"
                     className="w-48 h-48 object-cover rounded-full shadow-2xl border-4 border-white dark:border-gray-700"
                 />
                 <motion.div
