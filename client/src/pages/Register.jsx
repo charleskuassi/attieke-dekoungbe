@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { CheckCircle } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const Register = () => {
     const [step, setStep] = useState('register'); // 'register' or 'verify'
@@ -108,7 +109,13 @@ const Register = () => {
     }
 
     return (
-        <div className="min-h-[80vh] flex items-center justify-center bg-orange-50 dark:bg-gray-900 px-4 py-12 transition-colors duration-300">
+        <>
+            <SEO
+                title="Créer un compte"
+                description="Inscrivez-vous chez Attièkè Dèkoungbé pour commander vos plats ivoiriens préférés. Création de compte rapide et simple."
+                keywords="inscription, créer compte, Attièkè Dèkoungbé, restaurant Bénin"
+            />
+            <div className="min-h-[80vh] flex items-center justify-center bg-orange-50 dark:bg-gray-900 px-4 py-12 transition-colors duration-300">
             <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-md transition-colors">
                 <h1 className="text-3xl font-serif font-bold text-center mb-6 text-primary dark:text-orange-500">
                     {step === 'register' ? 'Créer un compte' : 'Vérifiez votre email'}
@@ -172,6 +179,7 @@ const Register = () => {
                 </div>
             </div>
         </div>
+        </>
     );
 };
 
