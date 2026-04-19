@@ -4,7 +4,7 @@ require('dotenv').config();
 let sequelize;
 
 if (process.env.DATABASE_URL) {
-  // --- MODE PRODUCTION (Ligne) ---
+  // --- MODE PRODUCTION (PostgreSQL Neon) ---
   console.log("🚀 Connexion à PostgreSQL (Neon)...");
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
@@ -13,16 +13,16 @@ if (process.env.DATABASE_URL) {
     dialectOptions: {
       ssl: {
         require: true,
-        rejectUnauthorized: false // Nécessaire pour Neon/Render
+        rejectUnauthorized: false
       }
     }
   });
 } else {
   // --- MODE DÉVELOPPEMENT (Local) ---
-  console.log("🛠️ Connexion à SQLite (Local)...");
+  console.warn("⚠️ DATABASE_URL non trouvée. Utilisation de SQLite pour le développement local.");
   sequelize = new Sequelize({
     dialect: 'sqlite',
-    storage: './database.sqlite', // Le fichier local
+    storage: './database.sqlite',
     logging: false
   });
 }
