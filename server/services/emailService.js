@@ -71,6 +71,7 @@ exports.sendEmail = sendEmail;
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || process.env.SMTP_USER || 'admin@attieke-dekoungbe.com';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://attieke-dekoungbe.onrender.com';
+const ADMIN_PANEL_URL = '#admin'; // Anchor for admin panel on frontend
 
 // --- STYLES RÉUTILISABLES ---
 const emailHeader = `
@@ -263,33 +264,95 @@ exports.sendReservationReceived = async (reservation, userEmail) => {
 // --- ADMIN NOTIFICATIONS (TO ADMIN) ---
 
 exports.sendAdminNewOrder = async (order) => {
+    // Récupérer les détails des produits commandés
+    const orderItemsDetails = order.Products && order.Products.length > 0 ? order.Products.map(p => {
+        const quantity = p.OrderItem ? p.OrderItem.quantity : 'N/A';
+        const price = p.OrderItem ? p.OrderItem.price_at_order : p.price;
+        const subtotal = quantity !== 'N/A' ? quantity * price : 0;
+        return `
+            <tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 12px 8px; font-size: 14px;">${p.name}</td>
+                <td style="padding: 12px 8px; text-align: center; font-size: 14px; font-weight: bold;">${quantity}</td>
+                <td style="padding: 12px 8px; text-align: right; font-size: 14px;">${price} FCFA</td>
+                <td style="padding: 12px 8px; text-align: right; font-size: 14px; font-weight: bold;">${subtotal} FCFA</td>
+            </tr>
+        `;
+    }).join('') : '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #6b7280;">Détails de la commande non disponibles</td></tr>';
+
     const html = `
-        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 2px solid #ea580c; padding: 10px; border-radius: 15px;">
+        <div style="font-family: Arial, sans-serif; color: #333; max-width: 650px; margin: 0 auto; border: 2px solid #ea580c; padding: 10px; border-radius: 15px;">
             <div style="background-color: #ea580c; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
                 <h1 style="color: white; margin: 0;">💰 NOUVELLE COMMANDE</h1>
-                <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0;">Réception immédiate - #${order.id}</p>
+                <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0;">Réception immédiate - Commande #${order.id}</p>
             </div>
             <div style="padding: 30px;">
-                <table style="width: 100%; border-spacing: 0;">
+                <!-- Infos Client -->
+                <table style="width: 100%; border-spacing: 0; margin-bottom: 25px;">
                     <tr>
-                        <td style="padding-bottom: 20px;">
+                        <td style="padding-bottom: 15px;">
                             <span style="color: #6b7280; text-transform: uppercase; font-size: 11px;">Client</span><br/>
                             <strong style="font-size: 18px;">${order.customer_name}</strong>
                         </td>
-                        <td style="padding-bottom: 20px; text-align: right;">
-                            <span style="color: #6b7280; text-transform: uppercase; font-size: 11px;">Montant</span><br/>
+                        <td style="padding-bottom: 15px; text-align: right;">
+                            <span style="color: #6b7280; text-transform: uppercase; font-size: 11px;">Montant Total</span><br/>
                             <strong style="font-size: 18px; color: #166534;">${order.total_price} FCFA</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span style="color: #6b7280; text-transform: uppercase; font-size: 11px;">Téléphone</span><br/>
+                            <strong style="font-size: 14px;">${order.phone}</strong>
+                        </td>
+                        <td style="text-align: right;">
+                            <span style="color: #6b7280; text-transform: uppercase; font-size: 11px;">Zone de livraison</span><br/>
+                            <strong style="font-size: 14px;">${order.delivery_zone || 'N/A'}</strong>
                         </td>
                     </tr>
                 </table>
 
-                <div style="margin: 20px 0; padding: 20px; background-color: #f3f4f6; border-radius: 10px;">
-                    <p style="margin: 0;"><strong>📞 Tél :</strong> ${order.phone}</p>
-                    <p style="margin: 10px 0 0;"><strong>📍 Adresse :</strong> ${order.address}</p>
+                <!-- Adresse de livraison -->
+                <div style="margin: 20px 0; padding: 15px; background-color: #fff7ed; border-left: 4px solid #ea580c; border-radius: 4px;">
+                    <p style="margin: 0; font-size: 13px; color: #6b7280; text-transform: uppercase;">📍 Adresse de livraison</p>
+                    <p style="margin: 8px 0 0 0; font-size: 15px; font-weight: bold;">${order.address}</p>
                 </div>
 
+                <!-- Détail des plats commandés -->
+                <div style="margin: 25px 0;">
+                    <h3 style="color: #111827; margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; border-bottom: 2px solid #ea580c; padding-bottom: 10px;">
+                        🍽️ Plats Commandés
+                    </h3>
+                    <table style="width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; overflow: hidden;">
+                        <thead style="background-color: #f3f4f6;">
+                            <tr>
+                                <th style="padding: 12px 8px; text-align: left; font-size: 12px; text-transform: uppercase; color: #6b7280;">Plat</th>
+                                <th style="padding: 12px 8px; text-align: center; font-size: 12px; text-transform: uppercase; color: #6b7280;">Qté</th>
+                                <th style="padding: 12px 8px; text-align: right; font-size: 12px; text-transform: uppercase; color: #6b7280;">Prix unit.</th>
+                                <th style="padding: 12px 8px; text-align: right; font-size: 12px; text-transform: uppercase; color: #6b7280;">Sous-total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${orderItemsDetails}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Frais de livraison -->
+                ${order.delivery_cost > 0 ? `
+                <div style="margin: 15px 0; padding: 12px; background-color: #f9fafb; border-radius: 6px; text-align: right;">
+                    <span style="font-size: 14px; color: #6b7280;">Frais de livraison : </span>
+                    <strong style="font-size: 16px; color: #ea580c;">${order.delivery_cost} FCFA</strong>
+                </div>
+                ` : ''}
+
+                <!-- Mode de paiement -->
+                <div style="margin: 15px 0; padding: 12px; background-color: #f0fdf4; border-radius: 6px; text-align: right;">
+                    <span style="font-size: 14px; color: #6b7280;">Mode de paiement : </span>
+                    <strong style="font-size: 16px; color: #166534; text-transform: uppercase;">${order.payment_method === 'cash' ? 'Espèces' : order.payment_method === 'kkiapay' ? 'KKiaPay' : order.payment_method}</strong>
+                </div>
+
+                <!-- Bouton d'action -->
                 <div style="text-align: center; margin-top: 30px;">
-                    <a href="${FRONTEND_URL}/admin" style="background-color: #111827; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Gérer la commande</a>
+                    <a href="${FRONTEND_URL}${ADMIN_PANEL_URL}" style="background-color: #111827; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;">Gérer la commande</a>
                 </div>
             </div>
         </div>
