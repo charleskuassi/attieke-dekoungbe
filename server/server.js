@@ -24,8 +24,8 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
     process.env.CLIENT_URL,
     process.env.FRONTEND_URL,
-    'https://attiekedekoungbe.com',
-    'https://www.attiekedekoungbe.com',
+    'https://attieke-dekoungbe.com',
+    'https://www.attieke-dekoungbe.com',
     'https://skyblue-yak-798569.hostingersite.com',
     'http://localhost:5173'
 ];

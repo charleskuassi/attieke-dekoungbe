@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 
 const SEO = ({ title, description, schemaType = 'Restaurant' }) => {
   useEffect(() => {
-    const siteUrl = "https://attiekedekoungbe.com";
+    const siteUrl = "https://attieke-dekoungbe.com";
     const defaultImage = `${siteUrl}/images/delivery_packaging.jpg`;
 
     if (title) {
@@ -26,7 +26,7 @@ const SEO = ({ title, description, schemaType = 'Restaurant' }) => {
     "@type": schemaType,
     "name": "Attièkè Dèkoungbé",
     "image": "https://attieke-dekoungbe.art/images/hero-home.jpg",
-    "url": "https://attiekedekoungbe.com",
+    "url": "https://attieke-dekoungbe.com",
     "telephone": "+22900000000",
     "priceRange": "$$",
     "servesCuisine": "Ivoirienne, West African",
@@ -50,13 +50,13 @@ const SEO = ({ title, description, schemaType = 'Restaurant' }) => {
         "closes": "22:00"
       }
     ],
-    "menu": "https://attiekedekoungbe.com/menu",
+    "menu": "https://attieke-dekoungbe.com/menu",
     "acceptsReservations": "False",
     "potentialAction": {
       "@type": "OrderAction",
       "target": {
         "@type": "EntryPoint",
-        "urlTemplate": "https://attiekedekoungbe.com/menu",
+        "urlTemplate": "https://attieke-dekoungbe.com/menu",
         "inLanguage": "fr",
         "actionPlatform": [
           "http://schema.org/DesktopWebPlatform",
