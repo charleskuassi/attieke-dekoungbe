@@ -1,4 +1,8 @@
 // Build timestamp: 2026-03-13 00:58
+// ⚠️ Désactiver la vérification SSL - requis pour Neon sur Hostinger Node.js 22
+if (process.env.NODE_ENV !== 'test') {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
