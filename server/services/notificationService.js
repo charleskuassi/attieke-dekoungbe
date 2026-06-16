@@ -37,7 +37,11 @@ try {
     if (serviceAccount) {
         // Robustesse : remplacer les retours à la ligne échappés par de vrais retours à la ligne PEM
         if (serviceAccount.private_key && typeof serviceAccount.private_key === 'string') {
+            console.log("🔑 [DEBUG KEY] Longueur brute:", serviceAccount.private_key.length);
+            console.log("🔑 [DEBUG KEY] Nombre de \\n textuels:", (serviceAccount.private_key.match(/\\n/g) || []).length);
+            console.log("🔑 [DEBUG KEY] Nombre de retours à la ligne réels:", (serviceAccount.private_key.match(/\n/g) || []).length);
             serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+            console.log("🔑 [DEBUG KEY] Après nettoyage - Nombre de retours à la ligne réels:", (serviceAccount.private_key.match(/\n/g) || []).length);
         }
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount)
