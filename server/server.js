@@ -22,6 +22,7 @@ const allowedOrigins = [
     process.env.FRONTEND_URL,
     'https://attiekedekoungbe.com',
     'https://www.attiekedekoungbe.com',
+    'https://skyblue-yak-798569.hostingersite.com',
     'http://localhost:5173'
 ];
 
