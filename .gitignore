@@ -1,0 +1,66 @@
+# ===========================
+# DÉPENDANCES
+# ===========================
+node_modules/
+.pnp
+.pnp.js
+
+# ===========================
+# FICHIERS SECRETS (NE JAMAIS COMMITER)
+# ===========================
+.env
+.env.local
+.env.production
+.env.production.local
+.env.development.local
+.env.test.local
+firebase-service-account.json
+*.pem
+*.key
+
+# ===========================
+# BUILD / DIST (généré automatiquement)
+# ===========================
+dist/
+build/
+client/dist/
+
+# ===========================
+# LOGS
+# ===========================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+
+# ===========================
+# BASE DE DONNÉES LOCALE
+# ===========================
+*.sqlite
+*.db
+
+# ===========================
+# FICHIERS TEMPORAIRES / OUTILS
+# ===========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/
+
+# ===========================
+# FICHIERS INUTILES POUR LE DÉPLOIEMENT
+# ===========================
+server.zip
+*.zip
+tp c/
+local_mapping.json
+project_report.md
+
+# ===========================
+# SCRIPTS DE DIAGNOSTIC (optionnel : à garder ou non)
+# ===========================
+server/test_db_conn.js
+server/test_systems.js
+server/generate_firebase_env.js

@@ -1,0 +1,21 @@
+PORT=5000
+JWT_SECRET=votre_super_secret_jwt
+# FedaPay (Legacy/Backup)
+FEDAPAY_SECRET_KEY=sk_sandbox_REMPLACER_PAR_VOTRE_CLE_ICI
+# KKiaPay
+KKIAPAY_PUBLIC_KEY=eb11d9d0d01d11f09d79fd5b587b7fd7
+KKIAPAY_PRIVATE_KEY=tpk_eb124f00d01d11f09d79fd5b587b7fd7
+KKIAPAY_SECRET=tsk_eb124f01d01d11f09d79fd5b587b7fd7
+KKIAPAY_SANDBOX=true
+
+# Google OAuth
+GOOGLE_CLIENT_ID=1055180960577-vjc5jre8f7gton9ohngmh8uin4oc23u2.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
+GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
+
+# SMTP Configuration (Emails)
+# Pour Gmail : utilisez "smtp.gmail.com", port 587, et un "Mot de passe d'application" (pas votre mot de passe normal).
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_USER=legerolt@gmail.com
+SMTP_PASS=nuev wxca cqjz zpbo

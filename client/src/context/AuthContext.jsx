@@ -1,0 +1,122 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../utils/api';
+import { requestFcmToken } from '../firebase';
+
+const AuthContext = createContext();
+
+export const useAuth = () => useContext(AuthContext);
+
+export const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    const syncFcmToken = async () => {
+        try {
+            const token = await requestFcmToken();
+            if (token) {
+                await api.put('/api/auth/fcm-token', { fcmToken: token });
+                console.log("FCM Token synchronisé avec le serveur");
+            }
+        } catch (err) {
+            console.error("Erreur sync FCM Token:", err);
+        }
+    };
+
+    useEffect(() => {
+        const initAuth = async () => {
+            const token = localStorage.getItem('token');
+            const storedUser = localStorage.getItem('user');
+            
+            if (token) {
+                // Ensure Axios has the token
+                api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+                if (storedUser) {
+                    try {
+                        setUser(JSON.parse(storedUser));
+                        syncFcmToken(); // Sync token for existing session
+                    } catch (e) {
+                        console.error("Stored user parse error", e);
+                        localStorage.removeItem('user');
+                    }
+                } else {
+                    // Token exists but no user data (e.g. fresh Google Login)
+                    // We must fetch the user profile
+                    try {
+                        const res = await api.get('/api/auth/me');
+                        setUser(res.data);
+                        localStorage.setItem('user', JSON.stringify(res.data));
+                        console.log("User profile fetched via token on init");
+                        syncFcmToken(); // Sync token on init if user is logged in
+                    } catch (err) {
+                        console.error("Failed to fetch user with stored token", err);
+                        // If token is invalid, clear it
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                    }
+                }
+            }
+            setLoading(false);
+        };
+        initAuth();
+    }, []);
+
+    const login = async (email, password) => {
+        try {
+            const res = await api.post('/api/auth/login', { email, password });
+            const { token, user } = res.data;
+
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
+            setUser(user);
+            syncFcmToken(); // Sync token after login
+            return { success: true };
+        } catch (err) {
+            console.error(err);
+            return { success: false, message: err.response?.data?.message || 'Login failed' };
+        }
+    };
+
+    const logout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('cart'); // Clear cart on logout
+        setUser(null);
+        // For HashRouters on servers like LWS, we must include the # in redirects
+        window.location.href = '/#/login';
+    };
+
+    const updateUser = (userData) => {
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+    };
+
+    const loginWithToken = async (token) => {
+        localStorage.setItem('token', token);
+        // Force Axios to use the new token
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        try {
+            const res = await api.get('/api/auth/me');
+            setUser(res.data);
+            localStorage.setItem('user', JSON.stringify(res.data));
+            syncFcmToken();
+            return { success: true };
+        } catch (err) {
+            console.error("Token login failed", err);
+            localStorage.removeItem('token');
+            return { success: false };
+        }
+    };
+
+    const loginWithData = (token, userData) => {
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+    };
+
+    return (
+        <AuthContext.Provider value={{ user, login, loginWithToken, loginWithData, logout, updateUser, loading }}>
+            {!loading && children}
+        </AuthContext.Provider>
+    );
+};

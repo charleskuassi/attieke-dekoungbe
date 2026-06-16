@@ -1,0 +1,77 @@
+services:
+  - type: web
+    name: attieke-api
+    env: node
+    rootDir: server
+    region: frankfurt
+    plan: starter  # Version payante pour éviter la mise en veille (7$/mois)
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        fromService:
+          type: static
+          name: attieke-frontend
+          property: url
+      
+      # Base de données (Neon)
+      - key: DATABASE_URL
+        sync: false # Sera demandé lors du déploiement sur Render
+
+      # Paiement (KKiaPay)
+      - key: KKIAPAY_PUBLIC_KEY
+        sync: false
+      - key: KKIAPAY_SECRET_KEY
+        sync: false
+      - key: KKIAPAY_SANDBOX
+        value: "False"
+
+      # Images (Cloudinary)
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+      # Emails (SMTP Brevo)
+      - key: SMTP_HOST
+        value: smtp-relay.brevo.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+
+      # Auth Google
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        sync: false
+
+  - type: web
+    name: attieke-frontend
+    env: static
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    plan: free # Le frontend statique reste gratuit sur Render
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: attieke-api
+          property: url
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
