@@ -1,4 +1,8 @@
 // Build timestamp: 2026-03-13 00:58
+// ⚠️ Désactiver la vérification SSL - requis pour Neon sur Hostinger Node.js 22
+if (process.env.NODE_ENV !== 'test') {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -7,7 +11,8 @@ const path = require('path');
 const hpp = require('hpp');
 const { sequelize } = require('./models');
 const { sanitizeInput, authLimiter } = require('./middleware/security');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+// override: false → les variables déjà définies par Hostinger hPanel ne sont PAS écrasées par .env
+require('dotenv').config({ path: path.join(__dirname, '.env'), override: false });
 
 const app = express();
 app.set('trust proxy', 1); // Trust Render Proxy for HTTPS
@@ -21,14 +26,19 @@ const allowedOrigins = [
     process.env.FRONTEND_URL,
     'https://attiekedekoungbe.com',
     'https://www.attiekedekoungbe.com',
+    'https://skyblue-yak-798569.hostingersite.com',
     'http://localhost:5173'
 ];
 
 app.use(cors({
     origin: function (origin, callback) {
+        // Allow requests with no origin (e.g., from Supertest or curl)
         if (!origin) return callback(null, true);
+        // Allow all Hostinger preview subdomains (*.hostingersite.com)
+        if (origin.endsWith('.hostingersite.com')) return callback(null, true);
         if (allowedOrigins.indexOf(origin) === -1) {
-            return callback(new Error('CORS Policy: Origin not allowed'), false);
+            console.error(`CORS Blocked Origin: ${origin}`);
+            return callback(new Error(`CORS Policy: Origin ${origin} not allowed`), false);
         }
         return callback(null, true);
     },
@@ -141,14 +151,95 @@ app.use('/api/admin/notifications', require('./routes/notificationRoutes'));
 app.get('/api/images', require('./controllers/imageController').getImages);
 
 // --- HEALTH CHECK (No Rate Limiting - for cron-job.org) ---
-// Cette route est utilisée pour garder le serveur éveillé sur Render
+// Cette route est utilisée pour garder le serveur éveillé sur Render et diagnostiquer les variables d'environnement
 app.get('/api/health', (req, res) => {
+    const rawDbUrl = process.env.DATABASE_URL || 'NOT_FOUND';
+    let dbUrlStatus = 'NOT_FOUND';
+    
+    if (rawDbUrl !== 'NOT_FOUND') {
+        // Masquer le mot de passe pour la sécurité
+        const masked = rawDbUrl.replace(/:([^:@]+)@/, ':***@');
+        const hasQuotes = (rawDbUrl.startsWith("'") && rawDbUrl.endsWith("'")) || 
+                          (rawDbUrl.startsWith('"') && rawDbUrl.endsWith('"'));
+        dbUrlStatus = {
+            value: masked,
+            length: rawDbUrl.length,
+            hasQuotes: hasQuotes,
+            startsWithPostgres: rawDbUrl.trim().startsWith('postgresql://') || rawDbUrl.trim().startsWith('postgres://')
+        };
+    }
+
     res.status(200).json({
         status: 'ok',
+        databaseUrlDiagnostic: dbUrlStatus,
+        nodeEnv: process.env.NODE_ENV,
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         memory: process.memoryUsage()
     });
+});
+
+// --- DIAGNOSTIC ROUTE (For SSL & Network testing) ---
+app.get('/api/diag', async (req, res) => {
+    const results = {};
+    const url = process.env.DATABASE_URL;
+    const pg = require('pg');
+    const https = require('https');
+
+    // Test 1: Network to Neon HTTPS
+    try {
+        await new Promise((resolve) => {
+            https.get('https://ep-still-tree-ag7tcryf.c-2.eu-central-1.aws.neon.tech', (response) => {
+                results.httpsTest = `Success (Status Code: ${response.statusCode})`;
+                resolve();
+            }).on('error', (err) => {
+                results.httpsTest = `Failed: ${err.message}`;
+                resolve();
+            });
+        });
+    } catch (e) {
+        results.httpsTest = `Error: ${e.message}`;
+    }
+
+    // Test 2: Raw pg connection with rejectUnauthorized: false
+    if (url) {
+        try {
+            const client = new pg.Client({
+                connectionString: url,
+                ssl: { rejectUnauthorized: false }
+            });
+            await client.connect();
+            await client.end();
+            results.rawPgFalse = "Success";
+        } catch (err) {
+            results.rawPgFalse = `Failed: ${err.message}`;
+        }
+
+        // Test 3: Raw pg connection with rejectUnauthorized: true
+        try {
+            const client = new pg.Client({
+                connectionString: url,
+                ssl: { rejectUnauthorized: true }
+            });
+            await client.connect();
+            await client.end();
+            results.rawPgTrue = "Success";
+        } catch (err) {
+            results.rawPgTrue = `Failed: ${err.message}`;
+        }
+    } else {
+        results.databaseUrl = "MISSING";
+    }
+
+    // System info
+    results.system = {
+        nodeVersion: process.version,
+        opensslVersion: process.versions.openssl,
+        dbUrlLength: url ? url.length : 0,
+        dbUrlMasked: url ? url.replace(/:([^:@]+)@/, ':***@') : 'NONE'
+    };
+
+    res.json(results);
 });
 
 // --- FRONTEND SERVING (PRODUCTION) ---

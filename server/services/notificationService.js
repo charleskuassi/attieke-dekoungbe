@@ -1,5 +1,6 @@
 const admin = require('firebase-admin');
 const path = require('path');
+const fs = require('fs');
 const emailService = require('./emailService');
 const { User } = require('../models');
 
@@ -7,22 +8,47 @@ const { User } = require('../models');
 let isFirebaseInitialized = false;
 
 try {
-    const serviceAccountPath = path.join(__dirname, '../firebase-service-account.json');
-    // On vérifie si le fichier existe avant de tenter l'initialisation
-    const fs = require('fs');
-    if (fs.existsSync(serviceAccountPath)) {
-        console.log("🔍 Tentative d'initialisation Firebase avec le fichier JSON...");
-        const serviceAccount = require(serviceAccountPath);
+    let serviceAccount = null;
+
+    // ✅ MÉTHODE 1 : Depuis la variable d'environnement (recommandé pour Hostinger)
+    // Stocker le contenu du JSON en base64 dans FIREBASE_SERVICE_ACCOUNT_BASE64
+    if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+        console.log("🔍 Initialisation Firebase depuis la variable d'env (base64)...");
+        const decoded = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8');
+        serviceAccount = JSON.parse(decoded);
+
+    // ✅ MÉTHODE 2 : Depuis la variable d'environnement (JSON brut)
+    } else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        console.log("🔍 Initialisation Firebase depuis la variable d'env (JSON)...");
+        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
+    // ✅ MÉTHODE 3 : Depuis le fichier JSON (développement local)
+    } else {
+        const serviceAccountPath = path.join(__dirname, '../firebase-service-account.json');
+        if (fs.existsSync(serviceAccountPath)) {
+            console.log("🔍 Initialisation Firebase depuis le fichier JSON local...");
+            serviceAccount = require(serviceAccountPath);
+        } else {
+            console.warn("⚠️ Firebase non configuré : ni variable d'env FIREBASE_SERVICE_ACCOUNT_BASE64 ni fichier firebase-service-account.json trouvé.");
+            console.warn("   → Les notifications push seront désactivées. Les emails fonctionneront normalement.");
+        }
+    }
+
+    if (serviceAccount) {
+        // Robustesse : remplacer les retours à la ligne échappés par de vrais retours à la ligne PEM
+        if (serviceAccount.private_key && typeof serviceAccount.private_key === 'string') {
+            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+        }
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount)
         });
         isFirebaseInitialized = true;
         console.log("✅ Firebase Admin initialisé avec succès.");
-    } else {
-        console.warn("⚠️ Fichier firebase-service-account.json MANQUANT à l'emplacement:", serviceAccountPath);
     }
+
 } catch (error) {
-    console.error("❌ ERREUR FATALE initialisation Firebase:", error.message);
+    console.error("❌ Erreur initialisation Firebase:", error.message);
+    console.warn("   → Les notifications push seront désactivées.");
 }
 
 /**

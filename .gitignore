@@ -1,33 +1,65 @@
-# Dependencies
-node_modules
+# ===========================
+# DÉPENDANCES
+# ===========================
+node_modules/
 .pnp
 .pnp.js
 
-# Testing
-coverage
-
-# Production
-dist
-build
-
-# Misc
-.DS_Store
+# ===========================
+# FICHIERS SECRETS (NE JAMAIS COMMITER)
+# ===========================
 .env
 .env.local
+.env.production
+.env.production.local
 .env.development.local
 .env.test.local
-.env.production.local
 firebase-service-account.json
+*.pem
+*.key
 
-# Logs
+# ===========================
+# BUILD / DIST (généré automatiquement)
+# ===========================
+dist/
+build/
+client/dist/
+
+# ===========================
+# UPLOADS & IMAGES LOCALES (gérés par Cloudinary en production)
+# ===========================
+server/uploads/
+server/public/images/
+
+# ===========================
+# LOGS
+# ===========================
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+logs/
 
-# SQLite
+# ===========================
+# BASE DE DONNÉES LOCALE
+# ===========================
 *.sqlite
 *.db
 
-# Editor
-.vscode
-.idea
+# ===========================
+# FICHIERS TEMPORAIRES / OUTILS
+# ===========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/
+
+# ===========================
+# FICHIERS INUTILES POUR LE DÉPLOIEMENT
+# ===========================
+server.zip
+*.zip
+tp c/
+local_mapping.json
+project_report.md

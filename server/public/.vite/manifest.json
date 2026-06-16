@@ -1,0 +1,54 @@
+{
+  "index.html": {
+    "file": "assets/index-DFtg6Z_z.js",
+    "name": "index",
+    "src": "index.html",
+    "isEntry": true,
+    "dynamicImports": [
+      "node_modules/kkiapay-react/dist/k.es-e1b6b1c3.js",
+      "node_modules/html2canvas/dist/html2canvas.esm.js",
+      "node_modules/dompurify/dist/purify.es.mjs",
+      "node_modules/canvg/lib/index.es.js",
+      "node_modules/@capacitor/network/dist/esm/web.js"
+    ],
+    "css": [
+      "assets/index-NucEGSD1.css"
+    ]
+  },
+  "node_modules/@capacitor/network/dist/esm/web.js": {
+    "file": "assets/web-DmJzQsbC.js",
+    "name": "web",
+    "src": "node_modules/@capacitor/network/dist/esm/web.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html"
+    ]
+  },
+  "node_modules/canvg/lib/index.es.js": {
+    "file": "assets/index.es-C5l1SCu9.js",
+    "name": "index.es",
+    "src": "node_modules/canvg/lib/index.es.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html"
+    ]
+  },
+  "node_modules/dompurify/dist/purify.es.mjs": {
+    "file": "assets/purify.es-B9ZVCkUG.js",
+    "name": "purify.es",
+    "src": "node_modules/dompurify/dist/purify.es.mjs",
+    "isDynamicEntry": true
+  },
+  "node_modules/html2canvas/dist/html2canvas.esm.js": {
+    "file": "assets/html2canvas.esm-CBrSDip1.js",
+    "name": "html2canvas.esm",
+    "src": "node_modules/html2canvas/dist/html2canvas.esm.js",
+    "isDynamicEntry": true
+  },
+  "node_modules/kkiapay-react/dist/k.es-e1b6b1c3.js": {
+    "file": "assets/k.es-e1b6b1c3-BsxRiSI0.js",
+    "name": "k.es-e1b6b1c3",
+    "src": "node_modules/kkiapay-react/dist/k.es-e1b6b1c3.js",
+    "isDynamicEntry": true
+  }
+}
