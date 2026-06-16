@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "postinstall": "cd server && npm install --production",
     "clean": "rimraf server/check_testimonials_data.js server/fix_testimonial_paths.js",
     "install-all": "npm install && cd client && npm install && cd ../server && npm install",
     "server": "cd server && npm run dev",
