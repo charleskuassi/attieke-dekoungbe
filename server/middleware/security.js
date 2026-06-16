@@ -28,6 +28,7 @@ const authLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     skipSuccessfulRequests: true, // Ne compte que les échecs
+    skip: () => process.env.NODE_ENV === 'test',
 });
 
 /**
