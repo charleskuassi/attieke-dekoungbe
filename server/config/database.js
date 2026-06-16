@@ -23,7 +23,11 @@ if (databaseUrl) {
   // Déterminer le mode SSL selon la variable d'env
   // Sur Hostinger, rejectUnauthorized: false est souvent nécessaire
   const isHostinger = process.env.HOSTING_PROVIDER === 'hostinger';
-  const rejectUnauthorized = process.env.SSL_REJECT_UNAUTHORIZED !== 'false';
+  // Par défaut, désactiver le rejet SSL non autorisé en production (requis pour Neon sur Hostinger)
+  let rejectUnauthorized = false;
+  if (process.env.SSL_REJECT_UNAUTHORIZED === 'true') {
+    rejectUnauthorized = true;
+  }
 
   sequelize = new Sequelize(databaseUrl, {
     dialect: 'postgres',
