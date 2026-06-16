@@ -10,19 +10,39 @@ let isFirebaseInitialized = false;
 try {
     let serviceAccount = null;
 
-    // ✅ MÉTHODE 1 : Depuis la variable d'environnement (recommandé pour Hostinger)
-    // Stocker le contenu du JSON en base64 dans FIREBASE_SERVICE_ACCOUNT_BASE64
-    if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+    // ✅ MÉTHODE 1 : Variables d'env individuelles (le plus robuste sur Hostinger)
+    // Ajouter dans hPanel: FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY
+    if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+        console.log("🔍 Initialisation Firebase depuis les variables d'env individuelles...");
+        // La clé privée peut avoir des \\n ou des \n selon l'hébergeur
+        let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+        // Si la clé n'a pas de vrais sauts de ligne, les ajouter
+        if (!privateKey.includes('\n')) {
+            privateKey = privateKey.replace(/\\n/g, '\n');
+        }
+        serviceAccount = {
+            type: "service_account",
+            project_id: process.env.FIREBASE_PROJECT_ID,
+            client_email: process.env.FIREBASE_CLIENT_EMAIL,
+            private_key: privateKey,
+        };
+
+    // ✅ MÉTHODE 2 : Depuis la variable d'environnement (base64)
+    } else if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
         console.log("🔍 Initialisation Firebase depuis la variable d'env (base64)...");
         const decoded = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8');
         serviceAccount = JSON.parse(decoded);
+        // Normaliser la clé privée
+        if (serviceAccount.private_key && !serviceAccount.private_key.includes('\n')) {
+            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+        }
 
-    // ✅ MÉTHODE 2 : Depuis la variable d'environnement (JSON brut)
+    // ✅ MÉTHODE 3 : Depuis la variable d'environnement (JSON brut)
     } else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
         console.log("🔍 Initialisation Firebase depuis la variable d'env (JSON)...");
         serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
-    // ✅ MÉTHODE 3 : Depuis le fichier JSON (développement local)
+    // ✅ MÉTHODE 4 : Depuis le fichier JSON (développement local)
     } else {
         const serviceAccountPath = path.join(__dirname, '../firebase-service-account.json');
         if (fs.existsSync(serviceAccountPath)) {
@@ -35,10 +55,6 @@ try {
     }
 
     if (serviceAccount) {
-        // Robustesse : remplacer les retours à la ligne échappés par de vrais retours à la ligne PEM
-        if (serviceAccount.private_key && typeof serviceAccount.private_key === 'string') {
-            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
-        }
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount)
         });
