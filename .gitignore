@@ -26,6 +26,12 @@ build/
 client/dist/
 
 # ===========================
+# UPLOADS & IMAGES LOCALES (gérés par Cloudinary en production)
+# ===========================
+server/uploads/
+server/public/images/
+
+# ===========================
 # LOGS
 # ===========================
 *.log
@@ -57,10 +63,3 @@ server.zip
 tp c/
 local_mapping.json
 project_report.md
-
-# ===========================
-# SCRIPTS DE DIAGNOSTIC (optionnel : à garder ou non)
-# ===========================
-server/test_db_conn.js
-server/test_systems.js
-server/generate_firebase_env.js
