@@ -20,15 +20,8 @@ if (databaseUrl) {
   // --- MODE PRODUCTION (PostgreSQL Neon) ---
   console.log("🚀 Connexion à PostgreSQL (Neon)...");
 
-  // Déterminer le mode SSL selon la variable d'env
-  // Sur Hostinger, rejectUnauthorized: false est souvent nécessaire
-  const isHostinger = process.env.HOSTING_PROVIDER === 'hostinger';
-  // Par défaut, désactiver le rejet SSL non autorisé en production (requis pour Neon sur Hostinger)
-  let rejectUnauthorized = false;
-  if (process.env.SSL_REJECT_UNAUTHORIZED === 'true') {
-    rejectUnauthorized = true;
-  }
-
+  // IMPORTANT: Sur Hostinger avec Node.js 22, rejectUnauthorized DOIT être false
+  // pour les connexions vers Neon (le certificat de Neon n'est pas reconnu par le store Node.js par défaut)
   sequelize = new Sequelize(databaseUrl, {
     dialect: 'postgres',
     protocol: 'postgres',
@@ -42,8 +35,7 @@ if (databaseUrl) {
     dialectOptions: {
       ssl: {
         require: true,
-        rejectUnauthorized: rejectUnauthorized, // Mettre SSL_REJECT_UNAUTHORIZED=false dans .env si erreur SSL
-        // Timeout de connexion étendu pour les hébergeurs partagés
+        rejectUnauthorized: false,  // TOUJOURS false pour Neon sur Hostinger Node 22
         connectTimeout: 10000
       }
     }
@@ -64,7 +56,7 @@ sequelize.authenticate()
   .catch(err => {
     console.error('❌ Erreur de connexion BDD:', err.message || err);
     if (err.message && err.message.includes('SSL')) {
-      console.error('💡 CONSEIL SSL: Ajoutez SSL_REJECT_UNAUTHORIZED=false dans vos variables d\'environnement Hostinger');
+      console.error('💡 CONSEIL SSL: Erreur de certificat SSL avec Neon sur Hostinger Node 22');
     }
     if (err.message && err.message.includes('timeout')) {
       console.error('💡 CONSEIL TIMEOUT: Le port 5432 est peut-être bloqué par votre hébergeur. Vérifiez les règles de pare-feu.');
