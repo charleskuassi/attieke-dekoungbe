@@ -54,7 +54,7 @@ const Breadcrumb = () => {
       "@type": "ListItem",
       "position": index + 1,
       "name": crumb.name,
-      "item": `https://attiekedekoungbe.com${crumb.path}`
+      "item": `https://attieke-dekoungbe.com${crumb.path}`
     }))
   };
 

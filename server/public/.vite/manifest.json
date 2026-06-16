@@ -1,6 +1,6 @@
 {
   "index.html": {
-    "file": "assets/index-DumRxFOV.js",
+    "file": "assets/index-ChnNa7wr.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -16,7 +16,7 @@
     ]
   },
   "node_modules/@capacitor/network/dist/esm/web.js": {
-    "file": "assets/web-B6zC7kMu.js",
+    "file": "assets/web-Becanbya.js",
     "name": "web",
     "src": "node_modules/@capacitor/network/dist/esm/web.js",
     "isDynamicEntry": true,
@@ -25,7 +25,7 @@
     ]
   },
   "node_modules/canvg/lib/index.es.js": {
-    "file": "assets/index.es-DEtBISSP.js",
+    "file": "assets/index.es-Z8H-KspH.js",
     "name": "index.es",
     "src": "node_modules/canvg/lib/index.es.js",
     "isDynamicEntry": true,

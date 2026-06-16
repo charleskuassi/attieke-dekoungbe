@@ -1,5 +1,5 @@
 # Robots.txt pour Attièkè Dèkoungbé
-# https://attiekedekoungbe.com
+# https://attieke-dekoungbe.com
 
 User-agent: *
 Allow: /
@@ -14,7 +14,7 @@ Disallow: /firebase-messaging-sw.js
 Disallow: /sw.js
 
 # Sitemap
-Sitemap: https://attiekedekoungbe.com/sitemap.xml
+Sitemap: https://attieke-dekoungbe.com/sitemap.xml
 
 # Crawl-delay pour éviter de surcharger le serveur
 Crawl-delay: 1
