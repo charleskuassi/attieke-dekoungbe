@@ -35,6 +35,10 @@ try {
     }
 
     if (serviceAccount) {
+        // Robustesse : remplacer les retours à la ligne échappés par de vrais retours à la ligne PEM
+        if (serviceAccount.private_key && typeof serviceAccount.private_key === 'string') {
+            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+        }
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount)
         });
