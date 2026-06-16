@@ -17,7 +17,9 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "testMatch": ["**/tests/**/*.test.js"],
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
     "globalSetup": "./tests/setup/globalSetup.js",
     "globalTeardown": "./tests/setup/globalTeardown.js",
     "setupFilesAfterFramework": [],
@@ -25,6 +27,7 @@
     "verbose": true
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^1.41.3",
@@ -46,7 +49,8 @@
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.35.2",
     "sharp": "^0.32.6",
-    "sqlite3": "^5.1.6"
+    "sqlite3": "^5.1.6",
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@jest/globals": "^30.4.1",
