@@ -264,8 +264,10 @@ async function startServer() {
 
     // 2. On lance la connexion DB en parallèle
     try {
-        if (process.env.SKIP_DB_SYNC === 'true') {
-            console.log('⏩ Skipping DB sync');
+        if (process.env.SKIP_DB_SYNC === 'true' || process.env.NODE_ENV === 'production' || process.env.HOSTING_PROVIDER === 'hostinger') {
+            console.log('⏩ Skipping DB sync (production or explicitly skipped)');
+            await sequelize.authenticate();
+            console.log("✅ Base de données connectée avec succès.");
         } else {
             console.log('🚀 Connexion à PostgreSQL (Neon)...');
             await sequelize.sync({ alter: true });
