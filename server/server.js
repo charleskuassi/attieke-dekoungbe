@@ -84,7 +84,7 @@ app.use(helmet({
             ],
             connectSrc: [
                 "'self'",
-                'https://api.attiekedekoungbe.com',
+                'https://api.attieke-dekoungbe.com',
                 'https://*.kkiapay.me', // KKiaPay API
                 'https://identitytoolkit.googleapis.com', // Firebase Auth
                 'https://firestore.googleapis.com', // Firebase Firestore
